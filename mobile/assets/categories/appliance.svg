@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <rect width="128" height="128" rx="28" fill="#FFF7ED"/>
+  <!-- fridge -->
+  <rect x="14" y="28" width="34" height="72" rx="6" fill="#F97316"/>
+  <rect x="18" y="32" width="26" height="22" rx="3" fill="#FFEDD5"/>
+  <rect x="18" y="58" width="26" height="36" rx="3" fill="#FFEDD5"/>
+  <rect x="40" y="40" width="4" height="10" rx="1" fill="#C2410C"/>
+  <rect x="40" y="72" width="4" height="12" rx="1" fill="#C2410C"/>
+  <!-- washing machine -->
+  <rect x="54" y="48" width="36" height="52" rx="7" fill="#EA580C"/>
+  <circle cx="72" cy="76" r="13" fill="#FFEDD5"/>
+  <circle cx="72" cy="76" r="8" fill="#FDBA74"/>
+  <circle cx="61" cy="58" r="2.5" fill="#FFEDD5"/>
+  <circle cx="68" cy="58" r="2.5" fill="#FFEDD5"/>
+  <!-- TV -->
+  <rect x="96" y="36" width="20" height="16" rx="3" fill="#9A3412"/>
+  <rect x="98" y="38" width="16" height="12" rx="2" fill="#FED7AA"/>
+  <rect x="103" y="52" width="6" height="3" fill="#9A3412"/>
+  <rect x="99" y="55" width="14" height="2" rx="1" fill="#C2410C"/>
+  <!-- microwave -->
+  <rect x="96" y="68" width="20" height="16" rx="3" fill="#F97316"/>
+  <rect x="98" y="71" width="11" height="10" rx="2" fill="#FFEDD5"/>
+  <rect x="111" y="72" width="3" height="3" rx="1" fill="#FFEDD5"/>
+  <rect x="111" y="77" width="3" height="3" rx="1" fill="#FFEDD5"/>
+</svg>

@@ -1,0 +1,9 @@
+export { electricianVertical } from "./electrician";
+export { plumberVertical } from "./plumber";
+export { acRepairVertical } from "./ac";
+export { cleaningVertical } from "./cleaning";
+export { jobConsultancyVertical } from "./jobs";
+export { beauticianVertical } from "./beautician";
+export { paintingVertical } from "./painting";
+export { carpenterVertical } from "./carpenter";
+export { applianceVertical } from "./appliance";

@@ -1,0 +1,305 @@
+import { publicBrowsePath } from "@/shared/lib/public-paths";
+
+export type PriceUnit = { value: string; label: string };
+
+export type VendorServiceField =
+  | { kind: "text" | "tel" | "number" | "textarea"; name: string; label: string; required?: boolean; placeholder?: string; wide?: boolean }
+  | { kind: "select"; name: string; label: string; required?: boolean; options: string[] }
+  | { kind: "price"; name: string; label: string; units: PriceUnit[] }
+  | { kind: "photos"; name: string; label: string };
+
+export type VendorServiceSpec = {
+  id: string;
+  title: string;
+  navLabel: string;
+  browseHref: string;
+  fields: VendorServiceField[];
+};
+
+export const VENDOR_SERVICE_SPECS: Record<string, VendorServiceSpec> = {
+  cabs: {
+    id: "cabs",
+    title: "Cabs",
+    navLabel: "Cabs",
+    browseHref: publicBrowsePath("cabs"),
+    fields: [
+      { kind: "text", name: "driverName", label: "Driver Name", required: true, placeholder: "Ravi Kumar", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "cabType", label: "Cab Type", required: true, options: ["Hatchback", "Sedan", "SUV", "Innova / MPV", "Tempo traveller"] },
+      { kind: "text", name: "vehicleModel", label: "Vehicle Model", placeholder: "Dzire / Innova" },
+      { kind: "text", name: "vehicleNumber", label: "Vehicle Number", placeholder: "AP05 AB 1234" },
+      { kind: "select", name: "bookingType", label: "Booking Type", required: true, options: ["Local", "Outstation", "Airport"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_KM", label: "Per KM" },
+        { value: "PER_DAY", label: "Per Day" },
+        { value: "PER_TRIP", label: "Per Trip" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Cab Photos" },
+    ],
+  },
+  beautician: {
+    id: "beautician",
+    title: "Beauty",
+    navLabel: "Beauty",
+    browseHref: publicBrowsePath("beautician"),
+    fields: [
+      { kind: "text", name: "beauticianName", label: "Beautician Name", required: true, placeholder: "Ananya", wide: true },
+      { kind: "text", name: "shopName", label: "Beautician shop Name", placeholder: "Glow Studio" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "serviceFor", label: "Service For", required: true, options: ["Gents", "Women", "Kids", "All"] },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["Makeup", "Hair", "Facial", "Mehndi"] },
+      { kind: "text", name: "specialization", label: "Specialization", placeholder: "Bridal makeup", wide: true },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_SERVICE", label: "Per Service" },
+        { value: "PER_DAY", label: "Per Day" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Service Photos" },
+    ],
+  },
+  electrician: {
+    id: "electrician",
+    title: "Electrician",
+    navLabel: "Electrician",
+    browseHref: publicBrowsePath("electrician"),
+    fields: [
+      { kind: "text", name: "electricianName", label: "Business / Electrician Name", required: true, placeholder: "Enter name", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "10-digit mobile" },
+      { kind: "select", name: "experienceYears", label: "Experience", required: true, options: ["0-1 year", "1-3 years", "3-5 years", "5-10 years", "10+ years"] },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  plumber: {
+    id: "plumber",
+    title: "Plumber",
+    navLabel: "Plumber",
+    browseHref: publicBrowsePath("plumber"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop Name", placeholder: "QuickFlow" },
+      { kind: "text", name: "plumberName", label: "Plumber Name", required: true, placeholder: "Ramesh" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["Home", "Commercial"] },
+      { kind: "select", name: "workType", label: "Work Type", required: true, options: ["Repair", "Installation", "Pipeline"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_VISIT", label: "Per Visit" },
+        { value: "PER_HOUR", label: "Per Hour" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  cleaning: {
+    id: "cleaning",
+    title: "Cleaning",
+    navLabel: "Cleaning",
+    browseHref: publicBrowsePath("cleaning"),
+    fields: [
+      { kind: "text", name: "serviceName", label: "Service Name", placeholder: "Sparkle Crew" },
+      { kind: "text", name: "cleanerName", label: "Cleaner Name", required: true, placeholder: "Lakshmi" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "gender", label: "Gender", required: true, options: ["Male", "Female"] },
+      { kind: "select", name: "cleaningType", label: "Cleaning Type", required: true, options: ["Bathroom", "Kitchen", "Water Tank", "House", "Sofa", "All type"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_HOUR", label: "Per Hour" },
+        { value: "PER_DAY", label: "Per Day" },
+        { value: "PER_SERVICE", label: "Per Service" },
+        { value: "MONTHLY", label: "Monthly" },
+      ] },
+      { kind: "photos", name: "photos", label: "Service Photos" },
+    ],
+  },
+  ac: {
+    id: "ac",
+    title: "AC",
+    navLabel: "AC",
+    browseHref: publicBrowsePath("ac"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop / Service Name", placeholder: "CoolAir Hyd" },
+      { kind: "text", name: "technicianName", label: "Technician Name", required: true, placeholder: "Suresh" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "acType", label: "AC Type", required: true, options: ["Split", "Window", "Cassette", "Tower"] },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["Repair", "Installation", "Service", "Gas Filling", "Cleaning", "Maintenance", "AMC", "Uninstallation", "Replacement", "General Checkup"] },
+      { kind: "text", name: "brand", label: "Brand", placeholder: "Voltas / LG / Daikin" },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_VISIT", label: "Per Visit" },
+        { value: "PER_SERVICE", label: "Per Service" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  carpenter: {
+    id: "carpenter",
+    title: "Carpenter",
+    navLabel: "Carpenter",
+    browseHref: publicBrowsePath("carpenter"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop / Service Name", placeholder: "WoodRight" },
+      { kind: "text", name: "carpenterName", label: "Carpenter Name", required: true, placeholder: "Ravi" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "workType", label: "Work Type", required: true, options: ["Furniture", "Door", "Window", "Modular Kitchen", "Interior", "Repair", "All type"] },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["New Work", "Repair", "Installation", "Modification", "All type"] },
+      { kind: "select", name: "material", label: "Material", options: ["Wood", "Plywood", "MDF", "PVC", "All type"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_WORK", label: "Per Work" },
+        { value: "PER_DAY", label: "Per Day" },
+        { value: "PER_HOUR", label: "Per Hour" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  painting: {
+    id: "painting",
+    title: "Painting",
+    navLabel: "Painting",
+    browseHref: publicBrowsePath("painting"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop / Service Name", placeholder: "ColorWorks" },
+      { kind: "text", name: "painterName", label: "Painter Name", required: true, placeholder: "Naresh" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "paintingType", label: "Painting Type", required: true, options: ["Interior", "Exterior", "Commercial", "All type"] },
+      { kind: "select", name: "workType", label: "Work Type", required: true, options: ["Wall", "Ceiling", "Full House", "Office", "All type"] },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["New Painting", "Repainting", "Touch-up", "All type"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_SQFT", label: "Per Sq.Ft" },
+        { value: "PER_DAY", label: "Per Day" },
+        { value: "PER_WORK", label: "Per Work" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  jobs: {
+    id: "jobs",
+    title: "Jobs",
+    navLabel: "Jobs",
+    browseHref: publicBrowsePath("jobs"),
+    fields: [
+      { kind: "text", name: "companyName", label: "Company Name", required: true, placeholder: "Company name", wide: true },
+      { kind: "photos", name: "companyLogo", label: "Company Logo" },
+      { kind: "textarea", name: "companyDescription", label: "Company Description", required: true, placeholder: "Tell candidates about your company", wide: true },
+      { kind: "text", name: "industry", label: "Industry", required: true, placeholder: "IT, Hospitality, Retail" },
+      { kind: "text", name: "companyWebsite", label: "Company Website", placeholder: "https://example.com" },
+      { kind: "select", name: "companySize", label: "Company Size (optional)", options: ["1-10", "11-50", "51-200", "201-500", "500+"] },
+      { kind: "number", name: "establishedYear", label: "Established Year (optional)", placeholder: "2015" },
+      { kind: "text", name: "jobTitle", label: "Job Title", required: true, placeholder: "Front Office Executive", wide: true },
+      { kind: "text", name: "department", label: "Department", required: true, placeholder: "Front Office" },
+      { kind: "select", name: "jobType", label: "Job Type", required: true, options: ["Full-time", "Part-time", "Contract"] },
+      { kind: "select", name: "experienceRequired", label: "Experience Required", required: true, options: ["Fresher", "1-3 Years", "3-5 Years", "5+ Years"] },
+      { kind: "text", name: "qualification", label: "Qualification", required: true, placeholder: "Any Degree / BHM etc." },
+      { kind: "number", name: "numberOfVacancies", label: "Number of Vacancies", required: true, placeholder: "2" },
+      { kind: "text", name: "salaryRange", label: "Salary / Salary Range", required: true, placeholder: "₹20,000 - ₹30,000" },
+      { kind: "text", name: "workLocation", label: "Work Location", required: true, placeholder: "Hyderabad" },
+      { kind: "select", name: "workMode", label: "Work Mode", required: true, options: ["On-site", "Hybrid", "Remote"] },
+      { kind: "select", name: "shift", label: "Shift", required: true, options: ["Day", "Night", "Rotational"] },
+      { kind: "textarea", name: "jobDescription", label: "Job Description", required: true, placeholder: "Describe the role", wide: true },
+      { kind: "textarea", name: "responsibilities", label: "Responsibilities", required: true, placeholder: "List key responsibilities", wide: true },
+      { kind: "textarea", name: "requiredSkills", label: "Required Skills", required: true, placeholder: "Communication, MS Office", wide: true },
+      { kind: "textarea", name: "preferredSkills", label: "Preferred Skills", placeholder: "Prior hotel experience", wide: true },
+      { kind: "text", name: "lastDateToApply", label: "Last Date to Apply", required: true, placeholder: "DD-MM-YYYY" },
+      { kind: "select", name: "howToApply", label: "How to Apply", required: true, options: ["Apply Button", "Email", "External Link"] },
+      { kind: "text", name: "applicationEmail", label: "Application Email / External Application Link", required: true, placeholder: "hr@example.com or https://...", wide: true },
+      { kind: "text", name: "contactPerson", label: "Contact Person (optional)", placeholder: "HR contact" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+    ],
+  },
+  appliance: {
+    id: "appliance",
+    title: "Appliance",
+    navLabel: "Appliance",
+    browseHref: publicBrowsePath("appliance"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop / Service Name", placeholder: "FixIt Home" },
+      { kind: "text", name: "technicianName", label: "Technician Name", required: true, placeholder: "Kiran" },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "applianceType", label: "Appliance Type", required: true, options: ["TV", "Fridge", "Washing Machine", "Microwave", "Cooler", "Other"] },
+      { kind: "select", name: "serviceType", label: "Service Type", required: true, options: ["Repair", "Installation", "Maintenance", "Cleaning", "All type"] },
+      { kind: "text", name: "brand", label: "Brand", placeholder: "Samsung / LG / Whirlpool" },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_VISIT", label: "Per Visit" },
+        { value: "PER_SERVICE", label: "Per Service" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Work Photos" },
+    ],
+  },
+  "public-transport": {
+    id: "public-transport",
+    title: "Public Transport",
+    navLabel: "Public Transport",
+    browseHref: publicBrowsePath("public-transport"),
+    fields: [
+      { kind: "text", name: "operatorName", label: "Operator / service name", required: true, placeholder: "City Auto Hub", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "vehicleType", label: "Vehicle type", required: true, options: ["Auto", "Share cab", "Mini bus", "Bus", "Tempo"] },
+      { kind: "select", name: "routeType", label: "Route type", required: true, options: ["City", "Intercity", "Airport", "All"] },
+      { kind: "number", name: "seats", label: "Seats", placeholder: "4" },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_SEAT", label: "Per Seat" },
+        { value: "PER_TRIP", label: "Per Trip" },
+        { value: "PER_DAY", label: "Per Day" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Vehicle photos" },
+    ],
+  },
+  "goods-transport": {
+    id: "goods-transport",
+    title: "Goods Transport",
+    navLabel: "Goods Transport",
+    browseHref: publicBrowsePath("goods-transport"),
+    fields: [
+      { kind: "text", name: "operatorName", label: "Operator / service name", required: true, placeholder: "Hyd Freight", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "vehicleType", label: "Vehicle type", required: true, options: ["Mini truck", "Pickup", "Tempo", "Lorry", "Container"] },
+      { kind: "select", name: "loadType", label: "Load type", required: true, options: ["Household", "Commercial", "All"] },
+      { kind: "text", name: "capacity", label: "Capacity", placeholder: "1.5 ton / 8 ft" },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_KM", label: "Per KM" },
+        { value: "PER_TRIP", label: "Per Trip" },
+        { value: "PER_DAY", label: "Per Day" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Vehicle photos" },
+    ],
+  },
+  "packers-movers": {
+    id: "packers-movers",
+    title: "Packers & Movers",
+    navLabel: "Packers & Movers",
+    browseHref: publicBrowsePath("packers-movers"),
+    fields: [
+      { kind: "text", name: "companyName", label: "Company name", required: true, placeholder: "SafeShift Hyd", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "moveType", label: "Move type", required: true, options: ["Local", "Domestic", "Office", "Vehicle", "All"] },
+      { kind: "select", name: "serviceType", label: "Service type", required: true, options: ["Packing", "Moving", "Packing & Moving", "Storage"] },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_SERVICE", label: "Per Service" },
+        { value: "PER_KM", label: "Per KM" },
+        { value: "PER_SHIFT", label: "Per Shift" },
+      ] },
+      { kind: "number", name: "entryPrice", label: "Entry Price", placeholder: "Optional" },
+      { kind: "photos", name: "photos", label: "Crew / truck photos" },
+    ],
+  },
+  "cloud-kitchen": {
+    id: "cloud-kitchen",
+    title: "Cloud Kitchen",
+    navLabel: "Cloud Kitchen",
+    browseHref: publicBrowsePath("cloud-kitchen"),
+    fields: [
+      { kind: "text", name: "kitchenName", label: "Cloud Kitchen Name", required: true, placeholder: "Spice Cloud", wide: true },
+      { kind: "text", name: "ownerName", label: "Owner / Contact Person Name", required: true, placeholder: "Ravi Kumar", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "text", name: "cuisineType", label: "Food types", required: true, placeholder: "Meals, Fast Food", wide: true },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_ORDER", label: "Per Order" },
+        { value: "PER_TRAY", label: "Per Tray" },
+        { value: "PER_DAY", label: "Per Day" },
+      ] },
+      { kind: "photos", name: "photos", label: "Kitchen / food photos" },
+    ],
+  },
+};

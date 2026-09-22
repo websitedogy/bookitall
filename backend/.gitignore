@@ -1,0 +1,15 @@
+# compiled output
+/dist
+/node_modules
+/coverage
+
+# env
+.env
+.env.local
+.vapid-local.json
+
+# uploads
+/uploads
+
+# logs
+*.log
