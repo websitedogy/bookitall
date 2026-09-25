@@ -35,6 +35,13 @@ function safeNext(path: string | null) {
 const fieldClass =
   "w-full border-0 border-b border-[var(--auth-line)] bg-transparent px-0 py-3 text-[15px] text-[var(--auth-ink)] outline-none placeholder:text-[var(--studio-muted)] focus:border-[var(--primary)]";
 
+function isLocalAuthBypass() {
+  if (process.env.NODE_ENV === "production") return false;
+  if (process.env.NEXT_PUBLIC_LOCAL_AUTH_BYPASS === "true") return true;
+  if (typeof window === "undefined") return false;
+  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,7 +53,7 @@ export function LoginForm() {
   const [resendIn, setResendIn] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [onLocalhost, setOnLocalhost] = useState(false);
+  const [onLocalhost] = useState(() => isLocalAuthBypass());
   const confirmationRef = useRef<ConfirmationResult | null>(null);
 
   useEffect(() => {
@@ -56,8 +63,6 @@ export function LoginForm() {
   }, [resendIn]);
 
   useEffect(() => {
-    const host = window.location.hostname;
-    setOnLocalhost(host === "localhost" || host === "127.0.0.1");
     return () => clearRecaptcha();
   }, []);
 
@@ -88,9 +93,7 @@ export function LoginForm() {
     setError("");
     setBusy(true);
     try {
-      const localHost =
-        typeof window !== "undefined" &&
-        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      const localHost = isLocalAuthBypass();
       if (localHost) {
         confirmationRef.current = null;
         setPhone(digits);
@@ -123,9 +126,7 @@ export function LoginForm() {
     setError("");
     setBusy(true);
     try {
-      const localHost =
-        typeof window !== "undefined" &&
-        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      const localHost = isLocalAuthBypass();
       if (localHost && code === "123456") {
         await finishSignIn(name, digits, { otp: code });
         return;

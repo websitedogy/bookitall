@@ -131,7 +131,7 @@ export function InstallAppPrompt() {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold leading-tight md:text-sm">Install Book It All</p>
           <p className="mt-0.5 truncate text-[11px] leading-tight text-white/70 md:text-xs">
-            {iosHint ? "Share → Add to Home Screen" : "Book hotels, tours, cabs and home services"}
+            {iosHint ? "Tap Share, then Add to Home Screen" : "Book hotels, tours, cabs and home services"}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 md:gap-3">

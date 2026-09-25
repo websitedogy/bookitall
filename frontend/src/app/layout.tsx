@@ -58,12 +58,13 @@ export const metadata: Metadata = {
     title: "Book It All",
     statusBarStyle: "default",
   },
+  manifest: "/manifest.webmanifest",
   formatDetection: {
     telephone: false,
   },
   icons: {
     icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icons/icon.svg" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: "Book Hotels, Tours, Cabs & Home Services | Book It All",

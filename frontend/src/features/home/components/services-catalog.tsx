@@ -13,16 +13,13 @@ export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { he
           <h1 className="text-[17px] font-semibold tracking-tight">{heading}</h1>
         </header>
 
-        <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start overflow-y-auto">
+        <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 overflow-y-auto bg-slate-50 p-3">
           {items.map((service, index) => (
-            <li
-              key={service.id}
-              className="border-b border-r border-[var(--border)] [&:nth-child(2n)]:border-r-0"
-            >
+            <li key={service.id}>
               <Link
                 href={service.href}
                 prefetch
-                className="flex min-h-[7.25rem] flex-col items-center justify-center gap-2 px-2 py-3 text-center active:bg-[var(--background-blue)]"
+                className="group flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-[18px] border border-slate-200/80 bg-white px-2 py-3 text-center shadow-[0_6px_20px_-16px_rgba(15,23,42,0.7)] transition duration-200 active:scale-[0.98] active:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
               >
                 <CategoryArt
                   id={service.id}
@@ -30,7 +27,7 @@ export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { he
                   priority={index < 4}
                   className="h-14 w-14 shrink-0 object-contain"
                 />
-                <span className="text-[13px] font-medium leading-snug text-[var(--text)]">
+                <span className="text-[13px] font-semibold leading-tight tracking-[-0.01em] text-[var(--text)]">
                   {service.name}
                 </span>
               </Link>
@@ -43,14 +40,17 @@ export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { he
         <header className="flex h-11 items-center border-b border-[var(--border)] pl-12 pr-3">
           <h1 className="text-[17px] font-semibold tracking-tight">{heading}</h1>
         </header>
-        <ul className="mt-6 grid grid-cols-4 gap-x-3 gap-y-6 px-4 pb-8 lg:grid-cols-6">
+        <ul className="mt-6 grid grid-cols-4 gap-3.5 px-4 pb-8 lg:grid-cols-6">
           {items.map((service, index) => (
-            <li key={service.id}>
-              <Link href={service.href} className="flex flex-col items-center gap-2 text-center">
-                <span className="inline-flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.15rem]">
-                  <CategoryArt id={service.id} size={120} priority={index < 6} className="h-full w-full object-contain" />
+            <li key={service.id} className="min-w-0">
+              <Link
+                href={service.href}
+                className="group flex min-h-32 flex-col items-center justify-center gap-2 rounded-[20px] border border-slate-200/80 bg-white px-2 py-3.5 text-center shadow-[0_6px_20px_-16px_rgba(15,23,42,0.7)] transition duration-200 hover:-translate-y-1 hover:border-teal-200 hover:shadow-[0_14px_28px_-16px_rgba(15,118,110,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+              >
+                <CategoryArt id={service.id} size={72} priority={index < 6} className="h-16 w-16 object-contain" />
+                <span className="w-full text-sm font-semibold leading-tight tracking-[-0.01em] text-[var(--text)]">
+                  {service.name}
                 </span>
-                <span className="text-sm font-medium text-[var(--text)]">{service.name}</span>
               </Link>
             </li>
           ))}
