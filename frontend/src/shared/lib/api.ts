@@ -9,7 +9,14 @@ export const API_URL = (() => {
   return configured || "/api/v1";
 })();
 export { SITE_URL } from "@/shared/lib/site-url";
-export const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:4000/realtime";
+export const WS_URL = (() => {
+  const configured = process.env.NEXT_PUBLIC_WS_URL?.trim();
+  if (configured) return configured;
+  if (typeof window === "undefined") return "http://127.0.0.1:4000/realtime";
+  const host = window.location.hostname;
+  if (host === "localhost" || host === "127.0.0.1") return "http://127.0.0.1:4000/realtime";
+  return `${window.location.origin}/realtime`;
+})();
 
 export type ApiEnvelope<T> = {
   success: boolean;
