@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${form?.title ?? "Place Register"} | Book It All`,
     description: form?.subtitle || "Submit a vendor listing on Book It All for admin review.",
     path: `/vendors/services/${category}`,
+    index: false,
   });
 }
 

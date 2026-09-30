@@ -1,4 +1,4 @@
-const PRODUCTION_ORIGIN = "https://bookitall.com";
+const PRODUCTION_ORIGIN = "https://bookitall.in";
 
 function normalizeOrigin(value: string) {
   return value.trim().replace(/\/$/, "");

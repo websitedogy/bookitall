@@ -150,6 +150,7 @@ export function LiveLocation() {
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-label="Search location"
+          suppressHydrationWarning
           className="min-w-0 flex-1 bg-transparent text-[12px] font-medium text-[#2563eb] outline-none placeholder:font-normal placeholder:text-[#93c5fd] md:text-[13px]"
         />
         <button
@@ -158,6 +159,7 @@ export function LiveLocation() {
           aria-label={open ? "Close location options" : "Open location options"}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => setOpen((value) => !value)}
+          suppressHydrationWarning
         >
           <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
         </button>
@@ -167,7 +169,7 @@ export function LiveLocation() {
         <div
           role="listbox"
           aria-label="Choose location"
-          className="absolute right-0 z-50 mt-1.5 max-h-[22rem] w-[min(20.5rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e5e7eb] bg-white py-1 shadow-[0_16px_40px_-18px_rgba(21,32,43,0.38)]"
+          className="absolute right-0 z-50 mt-1.5 max-h-[22rem] w-[min(20.5rem,calc(100%-1.5rem))] overflow-y-auto rounded-2xl border border-[#e5e7eb] bg-white py-1 shadow-[0_16px_40px_-18px_rgba(21,32,43,0.38)]"
         >
           <button
             type="button"

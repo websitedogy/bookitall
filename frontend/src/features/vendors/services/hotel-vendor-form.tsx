@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ImagePlus, X } from "lucide-react";
 import { FormBackButton } from "./form-back-button";
+import { ServiceSubmitButton } from "./service-submit-button";
 import { useAuth } from "@/features/auth/store";
 import { CategoryArt } from "@/features/home/components/category-art";
 import { API_URL, ApiError } from "@/shared/lib/api";
@@ -138,9 +139,9 @@ export function HotelVendorForm() {
       <div className="mx-auto max-w-lg px-4 py-8 md:max-w-xl md:py-4">
         <div className="rounded-[1.75rem] bg-white px-6 py-8 text-center ring-1 ring-[var(--border)] md:px-10 md:py-12 md:shadow-[var(--shadow-soft)]">
           <CheckCircle2 className="mx-auto h-12 w-12 text-[var(--primary)]" aria-hidden />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight">Hotel saved</h1>
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight">Submitted</h1>
           <p className="mt-2 text-sm text-[var(--text-muted)]">
-            <span className="font-medium text-[var(--text)]">{savedName}</span> now shows in Posts with photos and location.
+            <span className="font-medium text-[var(--text)]">{savedName}</span> is saved. Open My Services to see it.
           </p>
           <div className="mt-6 grid gap-2">
             <Link
@@ -265,13 +266,11 @@ export function HotelVendorForm() {
 
         {error ? <p className="mt-4 text-sm text-[var(--error)]">{error}</p> : null}
 
-        <button
+        <ServiceSubmitButton
+          saving={saving}
           type="submit"
-          disabled={saving}
-          className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,118,110,0.85)] hover:bg-[var(--primary-hover)] disabled:opacity-60"
-        >
-          {saving ? "Saving…" : "Submit hotel listing"}
-        </button>
+          className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] text-sm font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,118,110,0.85)] hover:bg-[var(--primary-hover)] disabled:opacity-70"
+        />
       </form>
     </div>
   );

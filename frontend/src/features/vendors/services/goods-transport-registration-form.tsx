@@ -203,9 +203,9 @@ export function GoodsTransportRegistrationForm({
       <div className="mx-auto max-w-lg px-4 py-12">
         <div className="rounded-[1.75rem] bg-white px-6 py-10 text-center ring-1 ring-[var(--border)]">
           <CheckCircle2 className="mx-auto h-14 w-14 text-[var(--primary)]" />
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Submitted for verification</p>
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Submitted</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">{savedName}</h1>
-          <p className="mt-3 text-sm text-[var(--text-muted)]">{typeLabel} listing is pending admin review.</p>
+          <p className="mt-3 text-sm text-[var(--text-muted)]">Submitted. Open My Services to see it.</p>
           <div className="mt-7 grid gap-2">
             <Link href="/vendors/posts" className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">
               View My Services
@@ -341,7 +341,6 @@ export function GoodsTransportRegistrationForm({
           step={step}
           lastStep={3}
           saving={saving}
-          submitLabel="Submit for Verification"
           onBack={() => goToStep(step - 1)}
           onNext={next}
           onSubmit={() => void submit()}

@@ -12,24 +12,6 @@ export const BUSINESS_CONTACT = {
   state: "Telangana",
 };
 
-export const SITE_KEYWORDS = [
-  "Book It All",
-  "Book hotels in Bhadrachalam",
-  "Book cabs in Bhadrachalam",
-  "Book tours in Bhadrachalam",
-  "Home services in Bhadrachalam",
-  "Bhadrachalam service marketplace",
-  "Hotel booking Bhadrachalam",
-  "Cab booking Bhadrachalam",
-  "Electrician in Bhadrachalam",
-  "Plumber in Bhadrachalam",
-  "AC repair in Bhadrachalam",
-  "House cleaning in Bhadrachalam",
-  "Beautician at home Bhadrachalam",
-  "Moving and packers in Bhadrachalam",
-  "Book It All contact",
-];
-
 export const NOINDEX: Pick<Metadata, "robots"> = {
   robots: { index: false, follow: false },
 };
@@ -45,7 +27,7 @@ export function publicPageMeta({
   path,
   index = true,
   ogImage = OG_IMAGE,
-  keywords = SITE_KEYWORDS,
+  keywords,
 }: {
   title: string;
   description: string;
@@ -58,7 +40,7 @@ export function publicPageMeta({
   return {
     title: { absolute: title },
     description,
-    keywords,
+    ...(keywords?.length ? { keywords } : {}),
     alternates: { canonical: url },
     robots: index ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {

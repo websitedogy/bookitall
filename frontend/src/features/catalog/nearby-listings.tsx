@@ -7,6 +7,7 @@ import { API_URL } from "@/shared/lib/api";
 import { ListingThumb } from "@/shared/ui/listing-thumb";
 import { PriceLabel } from "@/shared/ui/price-label";
 import { getExactPosition, readSavedLocation } from "@/shared/lib/geo";
+import { WishlistButton } from "@/features/saved/wishlist-button";
 
 import type { PublicListingPost } from "@/shared/lib/catalog-fetch";
 import { listingCanonicalPath } from "@/shared/lib/public-paths";
@@ -137,14 +138,29 @@ export function NearbyProfessionals({
                     </span>
                   ) : null}
                 </Link>
-                <span className="flex shrink-0 flex-col items-end gap-2">
-                  {ad.priceLabel ? <PriceLabel label={ad.priceLabel} /> : null}
-                  <Link
-                    href={book}
-                    className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--primary)] px-3 text-[11px] font-semibold text-white"
-                  >
-                    Book now
-                  </Link>
+                <span className="flex shrink-0 items-center gap-2">
+                  <WishlistButton
+                    labeled
+                    item={{
+                      id: ad.id,
+                      title: ad.title,
+                      href,
+                      image: ad.image,
+                      categoryId: ad.categoryId || category,
+                      category: ad.category,
+                      location: ad.location,
+                      priceLabel: ad.priceLabel,
+                    }}
+                  />
+                  <span className="flex flex-col items-end gap-2">
+                    {ad.priceLabel ? <PriceLabel label={ad.priceLabel} /> : null}
+                    <Link
+                      href={book}
+                      className="inline-flex h-8 items-center justify-center rounded-full bg-[var(--primary)] px-3 text-[11px] font-semibold text-white"
+                    >
+                      Book now
+                    </Link>
+                  </span>
                 </span>
               </div>
             </article>

@@ -166,7 +166,7 @@ export const SERVICES: ServiceItem[] = [
   },
   {
     id: "cloud-kitchen",
-    name: "Cloud Kitchen",
+    name: "Local Market",
     href: "/cloud-kitchen/hyderabad",
     image: art("cloud-kitchen"),
     features: ["Delivery kitchen", "Bulk / catering", "Multi-brand", "Takeaway trays"],

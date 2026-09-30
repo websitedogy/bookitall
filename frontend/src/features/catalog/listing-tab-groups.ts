@@ -86,7 +86,7 @@ function withDestinations(rest: Omit<Record<DetailTabId, string>, "destinations"
 
 export function detailTabNames(categoryId: string): Record<DetailTabId, string> {
   if (categoryId === "hotels" || categoryId === "homestay") {
-    return withDestinations({ location: "Location", basics: "Stay", prices: "Rates", extra: "Extra" });
+    return withDestinations({ location: "Location", basics: "Stay", prices: "Rooms", extra: "Extra" });
   }
   if (categoryId === "tours") {
     return withDestinations({ location: "Places", basics: "Package", prices: "Price", extra: "Extra" });

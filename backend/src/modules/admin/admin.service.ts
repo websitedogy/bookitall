@@ -859,21 +859,7 @@ export class AdminService {
       return qb.andWhere('user.status = :rejected', { rejected: UserStatus.INACTIVE });
     }
     if (bucket === 'pending') {
-      return qb.andWhere(
-        new Brackets((pendingQb) => {
-          pendingQb
-            .where('user.status = :pending', { pending: UserStatus.PENDING_VERIFICATION })
-            .orWhere(
-              `EXISTS (
-                SELECT 1
-                FROM vendor_listings pending_listing
-                WHERE pending_listing.user_id = "user"."id"
-                  AND pending_listing.status = 'PENDING'
-                  AND pending_listing.deleted_at IS NULL
-              )`,
-            );
-        }),
-      );
+      return qb.andWhere('user.status = :pending', { pending: UserStatus.PENDING_VERIFICATION });
     }
     if (bucket === 'active') {
       return qb.andWhere('user.status = :active', { active: UserStatus.ACTIVE });

@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 
 export function WizardStepBar({
@@ -49,7 +50,6 @@ export function WizardFooter({
   lastStep,
   saving,
   nextLabel,
-  submitLabel,
   onBack,
   onNext,
   onSubmit,
@@ -58,7 +58,6 @@ export function WizardFooter({
   lastStep: number;
   saving?: boolean;
   nextLabel?: string;
-  submitLabel: string;
   onBack: () => void;
   onNext: () => void;
   onSubmit: () => void;
@@ -84,9 +83,10 @@ export function WizardFooter({
             type="button"
             disabled={saving}
             onClick={onSubmit}
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-70"
           >
-            {saving ? "Saving…" : submitLabel}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+            {saving ? "Submitting" : "Submit"}
           </button>
         )}
       </div>

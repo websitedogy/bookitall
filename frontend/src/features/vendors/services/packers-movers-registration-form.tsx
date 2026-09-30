@@ -170,9 +170,9 @@ export function PackersMoversRegistrationForm() {
       <div className="mx-auto max-w-lg px-4 py-12">
         <div className="rounded-[1.75rem] bg-white px-6 py-10 text-center ring-1 ring-[var(--border)]">
           <CheckCircle2 className="mx-auto h-14 w-14 text-[var(--primary)]" />
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Registered</p>
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Submitted</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">{savedName}</h1>
-          <p className="mt-3 text-sm text-[var(--text-muted)]">Listing is pending admin review. Customers see it after it is accepted.</p>
+          <p className="mt-3 text-sm text-[var(--text-muted)]">Submitted. Open My Services to see it.</p>
           <div className="mt-7 grid gap-2">
             <Link href="/vendors/posts" className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">
               View My Services
@@ -337,7 +337,6 @@ export function PackersMoversRegistrationForm() {
           step={step}
           lastStep={2}
           saving={saving}
-          submitLabel="Register"
           onBack={() => goToStep(1)}
           onNext={next}
           onSubmit={() => void submit()}

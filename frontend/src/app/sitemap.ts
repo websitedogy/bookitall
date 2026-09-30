@@ -29,7 +29,6 @@ const STATIC_PATHS = [
   "/",
   HOME_SERVICES_PATH,
   ...CATEGORIES.map((id) => publicBrowsePath(id)),
-  "/hotels/hyderabad",
   "/about",
   "/contact",
   "/support",
@@ -40,7 +39,6 @@ const STATIC_PATHS = [
   "/cancellation",
   "/refunds",
   "/guides",
-  "/vendors/services",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -48,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const live = CATEGORIES.filter((id) => !catalog.length || isServiceEnabled(catalog, id));
   const now = new Date();
   const staticEntries = STATIC_PATHS.filter((path) => {
-    const category = CATEGORIES.find((id) => path === publicBrowsePath(id) || (path === "/hotels/hyderabad" && id === "hotels"));
+    const category = CATEGORIES.find((id) => path === publicBrowsePath(id));
     return !category || live.includes(category);
   }).map((path) => ({
     url: `${SITE_URL}${path}`,

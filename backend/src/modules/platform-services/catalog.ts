@@ -20,5 +20,5 @@ export const PLATFORM_SERVICE_CATALOG: ServiceSeed[] = [
   { slug: 'public-transport', name: 'Public Transport', icon: '/categories/public-transport.svg' },
   { slug: 'goods-transport', name: 'Goods Transport', icon: '/categories/goods-transport.svg' },
   { slug: 'packers-movers', name: 'Packers & Movers', icon: '/categories/packers-movers.svg' },
-  { slug: 'cloud-kitchen', name: 'Cloud Kitchen', icon: '/categories/cloud-kitchen.svg' },
+  { slug: 'cloud-kitchen', name: 'Local Market', icon: '/categories/cloud-kitchen.svg' },
 ];

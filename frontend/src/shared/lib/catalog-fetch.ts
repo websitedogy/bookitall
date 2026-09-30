@@ -27,6 +27,8 @@ export type PublicListingPost = {
   bookable?: boolean;
   description?: string;
   mobileNumber?: string | null;
+  price?: string;
+  details?: { key: string; label: string; value: string }[];
   vehicleType?: string;
   serviceType?: string;
   loadCapacity?: string;

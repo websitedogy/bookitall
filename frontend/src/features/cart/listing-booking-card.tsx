@@ -3,13 +3,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { LocateFixed, MapPin, X } from "lucide-react";
+import { Check, Loader2, LocateFixed, MapPin, X } from "lucide-react";
 import { useCart } from "@/features/cart/store";
 import { PickupMapPicker } from "@/features/cart/pickup-map-picker";
 import { defaultDate, defaultSlot, pad } from "@/features/cart/pricing";
 import { inr, priceUnitWord } from "@/shared/lib/format";
 import { getExactPosition, locateExactPlace, writeSavedLocation } from "@/shared/lib/geo";
 import { withBuildingDetails } from "@/shared/lib/format-address";
+
+export type BookableRoom = {
+  name: string;
+  rate: number;
+  guests: string;
+  available: string;
+};
 
 export type BookableListing = {
   id: string;
@@ -24,6 +31,7 @@ export type BookableListing = {
   priceUnit?: string;
   bookable?: boolean;
   status?: string;
+  rooms?: BookableRoom[];
 };
 
 function soonSlot() {
@@ -35,7 +43,10 @@ function soonSlot() {
 export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const router = useRouter();
   const addItem = useCart((s) => s.addItem);
-  const unitPrice = listing.unitPrice ?? (listing.price ? Number(listing.price) : 0);
+  const rooms = listing.rooms ?? [];
+  const [roomName, setRoomName] = useState(rooms[0]?.name ?? "");
+  const selectedRoom = rooms.find((room) => room.name === roomName) ?? rooms[0];
+  const unitPrice = selectedRoom?.rate || listing.unitPrice || (listing.price ? Number(listing.price) : 0);
   const canBook = Boolean(listing.bookable && unitPrice > 0);
   const isHotel = listing.categoryId === "hotels";
   const isTour = listing.categoryId === "tours";
@@ -53,6 +64,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState("");
   const [phase, setPhase] = useState<"idle" | "ask" | "locating" | "map" | "choose" | "schedule">("idle");
+  const [gpsState, setGpsState] = useState<"idle" | "detecting" | "detected">("idle");
   const [customerLat, setCustomerLat] = useState<number | null>(null);
   const [customerLng, setCustomerLng] = useState<number | null>(null);
   const [resolving, setResolving] = useState(false);
@@ -64,7 +76,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       return unitPrice * nights;
     }
     return unitPrice;
-  }, [isHotel, checkIn, checkOut, unitPrice]);
+  }, [isHotel, checkIn, checkOut, unitPrice, selectedRoom]);
 
   function exactAddress() {
     return withBuildingDetails(houseNumber, buildingName, isCab ? pickupAddress || address : address);
@@ -87,7 +99,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       quantity: 1,
       scheduledAt: isHotel ? undefined : when,
       address: isHotel ? extras?.address || exactAddress() : isTour ? undefined : exactAddress(),
-      notes,
+      notes: [selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} guests · ${selectedRoom.available} available` : "", notes].filter(Boolean).join("\n"),
       checkIn: isHotel ? checkIn : undefined,
       checkOut: isHotel ? checkOut : undefined,
       travelers: isTour ? 1 : undefined,
@@ -175,11 +187,13 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
 
   async function detectLocation() {
     setFormError("");
-    setPhase("locating");
+    setGpsState("detecting");
+    setPhase("ask");
     try {
       await captureLiveLocation();
-      setPhase("map");
+      setGpsState("detected");
     } catch {
+      setGpsState("idle");
       setFormError(isStay ? "Turn on location, or enter house / flat details below." : "Turn on location so we can send the vendor to you.");
       setPhase("ask");
     }
@@ -218,6 +232,28 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
     return (
       <div className="space-y-3">
         <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />
+        {isHotel && rooms.length ? (
+          <div className="space-y-2">
+            <p className="text-[12px] font-medium text-[#5b6e68]">Rooms</p>
+            {rooms.map((room) => {
+              const active = room.name === (selectedRoom?.name ?? "");
+              return (
+                <button
+                  key={room.name}
+                  type="button"
+                  onClick={() => setRoomName(room.name)}
+                  className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left ring-1 ${active ? "bg-white ring-[#0f3d38]" : "bg-[#fbf9f4] ring-[#efe6d4]"}`}
+                >
+                  <span>
+                    <span className="block text-sm font-semibold text-[#12241f]">{room.name}</span>
+                    <span className="mt-0.5 block text-[12px] text-[#7a6a52]">{room.guests} guests · {room.available} available</span>
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold text-[#0f3d38]">{inr(room.rate)}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         {isHotel ? (
           <div className="grid grid-cols-2 gap-2">
             <Field label="Check-in">
@@ -247,18 +283,23 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
         </button>
         {phase === "ask" || phase === "locating" ? (
           <LocationPopup
-            locating={phase === "locating"}
+            locating={gpsState === "detecting"}
+            detected={gpsState === "detected"}
             houseNumber={houseNumber}
             buildingName={buildingName}
             address={address}
             error={formError}
             title={isTour ? "Where should we pick you up?" : "Where are you staying?"}
             subtitle={isTour ? "Share your pickup area for this tour." : "Use GPS, or add your stay address."}
-            onClose={() => setPhase("idle")}
+            onClose={() => {
+              setGpsState("idle");
+              setPhase("idle");
+            }}
             onDetect={() => void detectLocation()}
             onHouse={setHouseNumber}
             onBuilding={setBuildingName}
             onAddress={(value) => {
+              setGpsState("idle");
               setAddress(value);
               setCustomerLat(null);
               setCustomerLng(null);
@@ -307,18 +348,23 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
 
       {phase === "ask" || phase === "locating" ? (
         <LocationPopup
-          locating={phase === "locating"}
+          locating={gpsState === "detecting"}
+          detected={gpsState === "detected"}
           houseNumber={houseNumber}
           buildingName={buildingName}
           address={isCab ? pickupAddress || address : address}
           error={formError}
           title="Where should the vendor come?"
           subtitle="Use GPS, or add house / flat details."
-          onClose={() => setPhase("idle")}
+          onClose={() => {
+            setGpsState("idle");
+            setPhase("idle");
+          }}
           onDetect={() => void detectLocation()}
           onHouse={setHouseNumber}
           onBuilding={setBuildingName}
           onAddress={(value) => {
+            setGpsState("idle");
             setAddress(value);
             if (isCab) setPickupAddress(value);
           }}
@@ -462,6 +508,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function LocationPopup({
   locating,
+  detected,
   houseNumber,
   buildingName,
   address,
@@ -476,6 +523,7 @@ function LocationPopup({
   onContinue,
 }: {
   locating: boolean;
+  detected: boolean;
   houseNumber: string;
   buildingName: string;
   address: string;
@@ -528,8 +576,14 @@ function LocationPopup({
           onClick={onDetect}
           className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#0f3d38] text-sm font-semibold text-white disabled:opacity-60"
         >
-          <LocateFixed className="h-4 w-4" strokeWidth={2.2} aria-hidden />
-          {locating ? "Detecting…" : "Use exact location"}
+          {locating ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : detected ? (
+            <Check className="h-4 w-4" strokeWidth={2.4} aria-hidden />
+          ) : (
+            <LocateFixed className="h-4 w-4" strokeWidth={2.2} aria-hidden />
+          )}
+          {locating ? "Detecting…" : detected ? "Detected" : "Use exact location"}
         </button>
 
         <div className="my-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#b3a48c]">

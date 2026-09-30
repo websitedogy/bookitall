@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { CircleUser, Headphones, LayoutDashboard, LogOut, MessageCircle, Phone, UserRound } from "lucide-react";
 import { useAuth, isPanelRole, type AuthUser } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
-import { isProfilePending } from "@/features/customers/lib/profile-completeness";
-import { ProfileStatusBadge } from "@/features/customers/components/profile-status-badge";
 import { mediaUrl } from "@/shared/lib/stable-image";
 import { cn } from "@/shared/lib/cn";
 
@@ -29,7 +27,6 @@ export function HeaderAccount({ compact = false }: { compact?: boolean }) {
   const logout = useAuth((s) => s.logout);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const pending = isProfilePending(user);
 
   useEffect(() => {
     if (!token) return;
@@ -96,7 +93,6 @@ export function HeaderAccount({ compact = false }: { compact?: boolean }) {
           ) : (
             initialsFor(user.fullName)
           )}
-          {pending ? <ProfileStatusBadge status="PENDING" className="absolute -right-0.5 -top-0.5" /> : null}
         </span>
       </button>
       {open ? (
@@ -116,7 +112,9 @@ export function HeaderAccount({ compact = false }: { compact?: boolean }) {
           >
             <UserRound className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />
             My Profile
-            <ProfileStatusBadge status={pending ? "PENDING" : "COMPLETE"} variant="label" className="ml-auto" />
+            <span className="ml-auto inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-emerald-700">
+              Active
+            </span>
           </Link>
           {isPanelRole(user.role) ? (
             <Link

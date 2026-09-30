@@ -127,7 +127,10 @@ export async function api<T>(
   const res = await authFetch(path, { ...init, headers });
   const json = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
   if (!res.ok) {
-    throw new ApiError(res.status === 401 ? "Your session expired. Please sign in again." : errorMessage(json), res.status);
+    const message = res.status === 401 && !path.startsWith("/auth/")
+      ? "Your session expired. Please sign in again."
+      : errorMessage(json);
+    throw new ApiError(message, res.status);
   }
   return json;
 }

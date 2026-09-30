@@ -7,6 +7,18 @@ import { useAuth } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/cn";
 import {
+  chipItems,
+  formatDetailValue,
+  inrAmount,
+  parsePricedItems,
+  parseRoomRates,
+  parseVehicleFares,
+  prepareDetailRows,
+  type FareRow,
+  type PricedRow,
+  type RoomRateRow,
+} from "./listing-detail-format";
+import {
   DETAIL_TAB_ORDER,
   detailTabNames,
   groupDetailRows,
@@ -48,7 +60,7 @@ export function ListingInfoTabs({
 }) {
   const names = detailTabNames(categoryId);
   const grouped = useMemo(() => {
-    const next = groupDetailRows(rows);
+    const next = groupDetailRows(prepareDetailRows(categoryId, rows));
     if (location?.trim() && !next.location.some((row) => row.value.trim().toLowerCase() === location.trim().toLowerCase())) {
       next.location.unshift({ key: "location", label: "Location", value: location.trim() });
     }
@@ -56,7 +68,7 @@ export function ListingInfoTabs({
       next.extra.unshift({ key: "description", label: "About", value: description.trim() });
     }
     return next;
-  }, [rows, location, description]);
+  }, [rows, location, description, categoryId]);
 
   const tabs = DETAIL_TAB_ORDER.filter((id) => grouped[id].length > 0);
   const [tab, setTab] = useState<DetailTabId>(tabs[0] ?? "basics");
@@ -218,15 +230,163 @@ function DetailRows({ rows }: { rows: ListingDetailRow[] }) {
   if (!rows.length) {
     return <p className="mt-4 text-sm text-[#7a6a52]">Nothing listed here yet.</p>;
   }
+
+  const blocks: ReactNode[] = [];
+  const plain: ListingDetailRow[] = [];
+
+  rows.forEach((row) => {
+    const rooms = row.key === "roomRates" ? parseRoomRates(row.value) : null;
+    if (rooms) {
+      blocks.push(<RoomRateTable key={row.key} rooms={rooms} />);
+      return;
+    }
+    const fares = row.key === "vehicleFares" ? parseVehicleFares(row.value) : null;
+    if (fares) {
+      blocks.push(<FareTable key={row.key} rows={fares} />);
+      return;
+    }
+    const priced = parsePricedItems(row.value);
+    if (priced && (row.key === "servicesOffered" || row.key === "servicePricing" || row.key === "packagePricing")) {
+      blocks.push(<PricedTable key={row.key} label={row.label} rows={priced} />);
+      return;
+    }
+    const chips = chipItems(row);
+    if (chips) {
+      blocks.push(<ChipList key={`${row.key}-${row.label}`} label={row.label} items={chips} />);
+      return;
+    }
+    plain.push(row);
+  });
+
   return (
-    <dl className="mt-3 divide-y divide-[#efe6d4]">
-      {rows.map((item) => (
-        <div key={`${item.key}-${item.label}`} className="flex justify-between gap-4 py-3 text-sm">
-          <dt className="shrink-0 text-[#7a6a52]">{item.label}</dt>
-          <dd className="max-w-[65%] whitespace-pre-wrap text-right font-medium text-[#12241f]">{item.value}</dd>
-        </div>
-      ))}
-    </dl>
+    <div className="mt-4 space-y-3">
+      {blocks}
+      {plain.length ? (
+        <dl className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe6d4]">
+          {plain.map((item) => (
+            <PlainFact key={`${item.key}-${item.label}`} item={item} />
+          ))}
+        </dl>
+      ) : null}
+    </div>
+  );
+}
+
+function PlainFact({ item }: { item: ListingDetailRow }) {
+  const value = formatDetailValue(item);
+  const stacked = value.length > 42 || value.includes("\n");
+  if (stacked) {
+    return (
+      <div className="border-b border-[#efe6d4] px-3.5 py-3 last:border-b-0">
+        <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">{item.label}</dt>
+        <dd className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#12241f]">{value}</dd>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-[#efe6d4] px-3.5 py-3 last:border-b-0">
+      <dt className="text-sm text-[#6d6254]">{item.label}</dt>
+      <dd className="text-right text-sm font-semibold text-[#12241f]">{value}</dd>
+    </div>
+  );
+}
+
+function RoomRateTable({ rooms }: { rooms: RoomRateRow[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe6d4]">
+      <div className="border-b border-[#efe6d4] bg-[#f7f3ea] px-3.5 py-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">Rooms</p>
+      </div>
+      <div className="max-w-full overflow-x-auto">
+        <table className="w-full border-collapse text-left text-[13px]">
+          <thead>
+            <tr className="text-[11px] font-semibold uppercase tracking-wide text-[#8a7b66]">
+              <th className="px-3.5 py-2 font-semibold">Room</th>
+              <th className="px-2 py-2 font-semibold">Rate</th>
+              <th className="px-2 py-2 font-semibold">Guests</th>
+              <th className="px-3.5 py-2 text-right font-semibold">Available</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rooms.map((room) => (
+              <tr key={room.name} className="border-t border-[#efe6d4]">
+                <td className="px-3.5 py-3 font-medium text-[#12241f]">{room.name}</td>
+                <td className="whitespace-nowrap px-2 py-3 font-semibold text-[#0f3d38]">{inrAmount(room.rate)}</td>
+                <td className="px-2 py-3 text-[#12241f]">{room.guests}</td>
+                <td className="px-3.5 py-3 text-right text-[#12241f]">{room.rooms}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function FareTable({ rows }: { rows: FareRow[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe6d4]">
+      <div className="border-b border-[#efe6d4] bg-[#f7f3ea] px-3.5 py-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">Fares</p>
+      </div>
+      <div className="max-w-full overflow-x-auto">
+        <table className="w-full border-collapse text-left text-[13px]">
+          <thead>
+            <tr className="text-[11px] font-semibold uppercase tracking-wide text-[#8a7b66]">
+              <th className="px-3.5 py-2 font-semibold">Vehicle</th>
+              <th className="px-2 py-2 font-semibold">Fare</th>
+              <th className="px-2 py-2 font-semibold">Seats</th>
+              <th className="px-3.5 py-2 text-right font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.name} className="border-t border-[#efe6d4]">
+                <td className="px-3.5 py-3 font-medium text-[#12241f]">{row.name}</td>
+                <td className="whitespace-nowrap px-2 py-3 font-semibold text-[#0f3d38]">{inrAmount(row.rate)}</td>
+                <td className="px-2 py-3 text-[#12241f]">{row.seats}</td>
+                <td className="px-3.5 py-3 text-right text-[#12241f]">{row.availability}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function PricedTable({ label, rows }: { label: string; rows: PricedRow[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe6d4]">
+      <div className="border-b border-[#efe6d4] bg-[#f7f3ea] px-3.5 py-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">{label}</p>
+      </div>
+      <table className="w-full border-collapse text-left text-[13px]">
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.name} className="border-t border-[#efe6d4] first:border-t-0">
+              <td className="px-3.5 py-3 font-medium text-[#12241f]">{row.name}</td>
+              <td className="px-3.5 py-3 text-right font-semibold text-[#0f3d38]">{inrAmount(row.price)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ChipList({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="rounded-2xl bg-[#fbf9f4] px-3.5 py-3 ring-1 ring-[#efe6d4]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">{label}</p>
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
+        {items.map((item) => (
+          <span key={item} className="rounded-full bg-white px-2.5 py-1 text-[12px] font-medium text-[#12241f] ring-1 ring-[#eadfcd]">
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

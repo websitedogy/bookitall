@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import { Check, MoreHorizontal, Plus, Share, X } from "lucide-react";
 
 type DeferredPrompt = Event & {
   prompt: () => Promise<void>;
@@ -29,10 +29,10 @@ function alreadyInstalled() {
   }
 }
 
-function isIosSafari() {
+function isIosDevice() {
   const ua = navigator.userAgent;
   const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  return ios && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  return ios;
 }
 
 export function InstallAppPrompt() {
@@ -77,7 +77,7 @@ export function InstallAppPrompt() {
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
-    if (!window.__biaDeferredPrompt && isIosSafari()) show(null);
+    if (!window.__biaDeferredPrompt && isIosDevice()) show(null);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
@@ -125,7 +125,7 @@ export function InstallAppPrompt() {
 
   return (
     <div className="sticky top-0 z-50 border-b border-[var(--primary)]/20 bg-[#0f4f4a] text-white">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2 md:gap-4 md:px-8 md:py-2.5">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-3 py-2 md:gap-4 md:px-8 md:py-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/icon.svg" alt="" className="h-10 w-10 shrink-0 rounded-lg md:h-11 md:w-11" />
         <div className="min-w-0 flex-1">
@@ -152,6 +152,19 @@ export function InstallAppPrompt() {
             <X className="h-4 w-4 md:hidden" strokeWidth={2} />
           </button>
         </div>
+        {iosHint ? (
+          <div className="basis-full rounded-xl bg-white/10 px-3 py-3 text-[12px] leading-relaxed text-white/90">
+            <p className="font-semibold text-white">Install on iPhone</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-3">
+              <span className="flex items-center gap-2"><Share className="h-4 w-4 shrink-0" /> Tap Share</span>
+              <span className="flex items-center gap-2"><MoreHorizontal className="h-4 w-4 shrink-0" /> Choose Add to Home Screen</span>
+              <span className="flex items-center gap-2"><Plus className="h-4 w-4 shrink-0" /> Tap Add</span>
+            </div>
+            <p className="mt-2 flex items-center gap-1.5 text-[11px] text-white/70">
+              <Check className="h-3.5 w-3.5" /> Book It All will appear on your Home Screen.
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

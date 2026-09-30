@@ -16,7 +16,7 @@ export const SERVICE_NAV = [
   { id: "public-transport", name: "Public Transport", href: publicBrowsePath("public-transport") },
   { id: "goods-transport", name: "Goods Transport", href: publicBrowsePath("goods-transport") },
   { id: "packers-movers", name: "Packers & Movers", href: publicBrowsePath("packers-movers") },
-  { id: "cloud-kitchen", name: "Cloud Kitchen", href: publicBrowsePath("cloud-kitchen") },
+  { id: "cloud-kitchen", name: "Local Market", href: publicBrowsePath("cloud-kitchen") },
 ] as const;
 
 export const ALL_SERVICES_HREF = HOME_SERVICES_PATH;

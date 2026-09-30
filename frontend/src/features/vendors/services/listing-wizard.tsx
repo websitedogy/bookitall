@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Camera, CheckCircle2, ImagePlus, LocateFixed, MapPin, X } from "lucide-react";
+import { ArrowLeft, Camera, CheckCircle2, ImagePlus, Loader2, LocateFixed, MapPin, X } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { CategoryArt } from "@/features/home/components/category-art";
 import { CITIES_BY_STATE, makeCityPlace, placeLabel, reverseGeocode, searchPlaces, type Place } from "@/shared/lib/india-places";
@@ -339,9 +339,10 @@ export function ListingWizard({ config }: { config: VendorFormConfig }) {
                   }
                   void submit(place);
                 }}
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white hover:bg-[var(--primary-hover)] disabled:opacity-60 md:h-12"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] text-sm font-semibold text-white hover:bg-[var(--primary-hover)] disabled:opacity-70 md:h-12"
               >
-                {saving ? "Saving…" : "Save listing"}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+                {saving ? "Submitting" : "Submit"}
               </button>
             )}
           </div>
@@ -696,10 +697,10 @@ function SuccessCard({ name, location, onPosts }: { name: string; location: stri
     <div className="mx-auto max-w-lg px-4 py-12 md:py-16">
       <div className="rounded-[1.75rem] bg-white px-6 py-10 text-center ring-1 ring-[var(--border)] md:px-10 md:shadow-[var(--shadow-soft)]">
         <CheckCircle2 className="mx-auto h-14 w-14 text-[var(--primary)]" />
-        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Pending review</p>
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Submitted</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{name}</h1>
         <p className="mt-3 text-sm leading-relaxed text-[var(--text-muted)]">
-          Saved{location ? ` in ${location}` : ""}. It appears in My Services as pending. Customers within 10 km see it after admin accepts.
+          Submitted{location ? ` in ${location}` : ""}. Open My Services to see it.
         </p>
         <div className="mt-7 grid gap-2">
           <button type="button" onClick={onPosts} className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">

@@ -168,6 +168,8 @@
 
 html {
   scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -176,6 +178,8 @@ body {
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: -0.011em;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 @media (min-width: 768px) {
@@ -187,6 +191,16 @@ body {
 .native-app body,
 html.native-app {
   overscroll-behavior: none;
+}
+
+.app-tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  z-index: 80;
 }
 
 .native-app a[href^="tel"],

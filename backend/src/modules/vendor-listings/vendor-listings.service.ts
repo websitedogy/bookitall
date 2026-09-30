@@ -355,6 +355,7 @@ export class VendorListingsService {
     }
 
     const title =
+      ((listing.category === 'hotels' || listing.category === 'homestay') && fields.hotelName) ||
       fields.shopName || fields.serviceName || fields.hotelName || fields.packageName || fields.driverName ||
       fields.businessName || fields.propertyName || fields.operatorName || fields.companyName || fields.kitchenName ||
       listing.title;
@@ -774,6 +775,19 @@ export class VendorListingsService {
     return raw;
   }
 
+  private fieldLabel(category: string, key: string) {
+    if (category === 'hotels' && (key === 'shopName' || key === 'hotelName')) return 'Hotel name';
+    if (category === 'homestay' && (key === 'shopName' || key === 'hotelName')) return 'Homestay name';
+    if (category === 'tours' && key === 'shopName') return 'Agency name';
+    if (category === 'cabs' && key === 'shopName') return 'Cab service name';
+    return FIELD_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+  }
+
+  private showField(category: string, key: string, fields: Record<string, string>) {
+    if ((category === 'hotels' || category === 'homestay') && key === 'shopName' && fields.hotelName) return false;
+    return true;
+  }
+
   private priceLabel(row: VendorListing) {
     const fields = row.fields ?? {};
     const amount = fields.price || fields.priceFrom || fields.feeFrom || fields.perKm || fields.entryPrice;
@@ -802,10 +816,10 @@ export class VendorListingsService {
     const fields = row.fields ?? {};
     const skip = new Set(['listedBy', 'latitude', 'longitude']);
     const details = Object.entries(fields)
-      .filter(([key, value]) => Boolean(value) && !skip.has(key))
+      .filter(([key, value]) => Boolean(value) && !skip.has(key) && this.showField(row.category, key, fields))
       .map(([key, value]) => ({
         key,
-        label: FIELD_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
+        label: this.fieldLabel(row.category, key),
         value,
       }));
     if (row.latitude != null && row.longitude != null) {
@@ -839,10 +853,10 @@ export class VendorListingsService {
       'serviceLocations',
     ]);
     const details = Object.entries(fields)
-      .filter(([key, value]) => value && !hidden.has(key))
+      .filter(([key, value]) => value && !hidden.has(key) && this.showField(row.category, key, fields))
       .map(([key, value]) => ({
         key,
-        label: FIELD_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
+        label: this.fieldLabel(row.category, key),
         value,
       }));
     return {

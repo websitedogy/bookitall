@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Building2, Plus } from "lucide-react";
 import { FormBackButton } from "./form-back-button";
+import { ServiceSubmitButton } from "./service-submit-button";
 import { StayCheckGrid, StayField, StaySection, stayInputClass } from "./stay-form-ui";
 import { useAuth } from "@/features/auth/store";
 import { ApiError, authFetch } from "@/shared/lib/api";
@@ -224,9 +225,9 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
     return (
       <div className={embedded ? "px-4 py-10 md:px-0" : "mx-auto max-w-lg px-4 py-12"}>
         <div className="rounded-[1.75rem] bg-white px-6 py-10 text-center ring-1 ring-[var(--border)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Pending review</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Submitted</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">{saved}</h1>
-          <p className="mt-3 text-sm text-[var(--text-muted)]">Submitted for admin approval. Customers see it after it is accepted.</p>
+          <p className="mt-3 text-sm text-[var(--text-muted)]">Submitted. Open My Services to see it.</p>
           <button type="button" onClick={() => router.push("/vendors/posts")} className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white">
             View My Services
           </button>
@@ -476,14 +477,11 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
           </StaySection>
 
           {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
-          <button
-            type="button"
-            disabled={saving}
+          <ServiceSubmitButton
+            saving={saving}
             onClick={() => void submit()}
-            className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-60"
-          >
-            {saving ? "Submitting…" : "Submit for Admin Approval"}
-          </button>
+            className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-70"
+          />
     </>
   );
 

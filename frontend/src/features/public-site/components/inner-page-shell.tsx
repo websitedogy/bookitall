@@ -41,15 +41,17 @@ export function InnerPageShell({
               {kicker}
             </p>
           ) : null}
-          <h1
-            className={
-              badge
-                ? "inline-flex max-w-full truncate rounded-full bg-[var(--primary-soft)] px-3 py-1 text-[12px] font-semibold tracking-wide text-[var(--primary)]"
-                : "truncate text-[18px] font-semibold tracking-[-0.03em] text-[var(--studio-ink)] md:mt-1 md:text-[28px]"
-            }
-          >
-            {title}
-          </h1>
+          {badge ? (
+            <p
+              className="inline-flex max-w-full truncate rounded-full bg-[var(--primary-soft)] px-3 py-1 text-[12px] font-semibold tracking-wide text-[var(--primary)]"
+            >
+              {title}
+            </p>
+          ) : (
+            <h1 className="truncate text-[18px] font-semibold tracking-[-0.03em] text-[var(--studio-ink)] md:mt-1 md:text-[28px]">
+              {title}
+            </h1>
+          )}
           {subtitle && !badge ? <p className="mt-1 hidden text-sm text-[var(--studio-muted)] md:block">{subtitle}</p> : null}
         </div>
       </header>

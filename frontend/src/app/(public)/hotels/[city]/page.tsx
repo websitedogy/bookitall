@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: "Hotels in Hyderabad | Book It All",
       description:
         "Book hotels and resorts in Hyderabad from accepted listings. Compare nearby stays and reserve in one checkout.",
-      path: "/hotels/hyderabad",
+      path: "/hotels",
     });
   }
   const listings = await getAcceptedListings("hotels");
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return publicPageMeta({
     title: `Hotels in ${label} | Book It All`,
     description: `Book hotels in ${label} on Book It All from accepted live listings.`,
-    path: `/hotels/${city}`,
+    path: "/hotels",
   });
 }
 

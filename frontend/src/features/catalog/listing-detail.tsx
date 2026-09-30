@@ -6,8 +6,10 @@ import { useAuth } from "@/features/auth/store";
 import { api, ApiError } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/cn";
 import { ListingBookingCard } from "@/features/cart/listing-booking-card";
+import { WishlistButton } from "@/features/saved/wishlist-button";
 import { listingSlides, PhotoCarousel } from "./photo-carousel";
 import { ListingInfoTabs } from "./listing-info-tabs";
+import { parseRoomRates } from "./listing-detail-format";
 import { trackViewItem } from "@/shared/lib/analytics";
 import { listingCanonicalPath, publicBrowsePath } from "@/shared/lib/public-paths";
 import { Breadcrumbs } from "@/shared/ui/breadcrumbs";
@@ -76,6 +78,19 @@ function statusCopy(status: string) {
   if (status === "HOLD") return { text: "Hold", hint: "This vendor is on hold.", className: "bg-[#5c4316] text-[#f6e7c2]" };
   if (status === "REJECTED") return { text: "Rejected", hint: "Admin rejected this listing.", className: "bg-[#5c1d1d] text-[#f8d0d0]" };
   return { text: "Pending", hint: "Waiting for admin review.", className: "bg-[#5c4316] text-[#f6e7c2]" };
+}
+
+function bookableRooms(listing: ListingDetail) {
+  if (listing.categoryId !== "hotels" && listing.categoryId !== "homestay") return [];
+  const raw = listing.details?.find((row) => row.key === "roomRates")?.value ?? "";
+  return (parseRoomRates(raw) ?? [])
+    .map((room) => ({
+      name: room.name,
+      rate: Number(room.rate),
+      guests: room.guests,
+      available: room.rooms,
+    }))
+    .filter((room) => Number.isFinite(room.rate) && room.rate > 0);
 }
 
 function serviceBadgeTitle(categoryId?: string, fallback?: string) {
@@ -197,14 +212,29 @@ export function ListingDetailView({ id, initial }: { id: string; initial?: Listi
 
       <aside
         id="book"
-        className="relative z-10 mx-3 mt-4 overflow-hidden rounded-[28px] bg-[#fffdf8] shadow-[0_18px_40px_-28px_rgba(7,22,20,0.35)] ring-1 ring-[#e6dcc8] md:mx-0 md:mt-5 lg:mt-0 lg:sticky lg:top-24"
+        className="relative z-10 mx-3 mt-4 overflow-x-clip rounded-[28px] bg-[#fffdf8] shadow-[0_18px_40px_-28px_rgba(7,22,20,0.35)] ring-1 ring-[#e6dcc8] md:mx-0 md:mt-5 lg:mt-0 lg:sticky lg:top-24"
       >
         <div className="px-5 pt-5 pb-2">
           <div className="flex items-start justify-between gap-3">
             <h1 className="min-w-0 text-left text-[22px] font-semibold tracking-[-0.03em] text-[#12241f] md:text-[26px]">{listing.title}</h1>
-            <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", badge.className)}>
-              {badge.text}
-            </span>
+            <div className="flex shrink-0 items-center gap-2">
+              <WishlistButton
+                labeled
+                item={{
+                  id: listing.id,
+                  title: listing.title,
+                  href: listingCanonicalPath(listing),
+                  image: listing.image,
+                  categoryId: listing.categoryId,
+                  category: listing.category,
+                  location: listing.location,
+                  priceLabel: listing.price,
+                }}
+              />
+              <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", badge.className)}>
+                {badge.text}
+              </span>
+            </div>
           </div>
         </div>
         <ListingInfoTabs
@@ -222,7 +252,7 @@ export function ListingDetailView({ id, initial }: { id: string; initial?: Listi
                 : "This is your post. Customers see it after admin accepts."}
             </p>
           ) : null}
-          <ListingBookingCard listing={listing} />
+          <ListingBookingCard listing={{ ...listing, rooms: bookableRooms(listing) }} />
         </ListingInfoTabs>
       </aside>
       </article>

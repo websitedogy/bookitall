@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { HomePage } from "@/features/home";
+import { categoryArtSrc } from "@/features/home/components/category-art";
+import { SERVICE_NAV } from "@/features/home/service-nav";
 import { publicPageMeta } from "@/shared/lib/seo";
 
 export const dynamic = "force-static";
@@ -12,5 +14,12 @@ export const metadata: Metadata = publicPageMeta({
 });
 
 export default function Page() {
-  return <HomePage />;
+  return (
+    <>
+      {SERVICE_NAV.map((service, index) => (
+        <link key={service.id} rel="preload" as="image" href={categoryArtSrc(service.id)} fetchPriority={index < 4 ? "high" : "low"} />
+      ))}
+      <HomePage />
+    </>
+  );
 }

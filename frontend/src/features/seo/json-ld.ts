@@ -8,7 +8,6 @@ const ADDRESS = {
   addressRegion: "Telangana",
   postalCode: "507111",
   addressCountry: "IN",
-  areaServed: ["Bhadrachalam", "Hyderabad", "Telangana"],
 };
 
 export function organizationGraph() {
@@ -32,11 +31,6 @@ export function organizationGraph() {
         name: "Book It All",
         description: "Book hotels, tours, cabs and home services with a single account in Hyderabad and nearby areas.",
         publisher: { "@id": `${SITE_URL}/#org` },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${SITE_URL}/?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
       },
     ],
   };
@@ -100,6 +94,56 @@ export function serviceJsonLd({
       priceCurrency: "INR",
       lowPrice: String(lowPrice),
       highPrice: String(highPrice),
+    };
+  }
+  return node;
+}
+
+export function listingJsonLd({
+  title,
+  description,
+  path,
+  image,
+  categoryId,
+  location,
+  price,
+}: {
+  title: string;
+  description?: string;
+  path: string;
+  image?: string;
+  categoryId: string;
+  location?: string;
+  price?: string | number | null;
+}) {
+  const url = `${SITE_URL}${path}`;
+  const stay = categoryId === "hotels" || categoryId === "homestay";
+  const photo = image
+    ? image.startsWith("http")
+      ? image
+      : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`
+    : undefined;
+  const amount = price == null ? NaN : Number(String(price).replace(/[^\d.]/g, ""));
+  const node: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": stay ? "LodgingBusiness" : "Service",
+    name: title,
+    url,
+    description: description?.trim() || `${title} on Book It All`,
+    provider: { "@id": `${SITE_URL}/#org` },
+    areaServed: { "@type": "AdministrativeArea", name: "Telangana" },
+  };
+  if (photo) node.image = photo;
+  if (location?.trim()) {
+    node.address = { "@type": "PostalAddress", streetAddress: location.trim(), addressCountry: "IN" };
+  }
+  if (Number.isFinite(amount) && amount > 0) {
+    node.offers = {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      price: String(amount),
+      availability: "https://schema.org/InStock",
+      url,
     };
   }
   return node;

@@ -17,7 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         "/register",
         "/saved",
         "/my-bookings",
-        "/vendors/my-orders",
+        "/vendors/",
         "/api/",
       ],
     },

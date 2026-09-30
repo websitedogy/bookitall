@@ -5,6 +5,8 @@ import { getVendorListing } from "@/shared/lib/catalog-fetch";
 import { listingCanonicalPath, listingIdFromSlug } from "@/shared/lib/public-paths";
 import { publicPageMeta } from "@/shared/lib/seo";
 import { categorySeo } from "@/features/seo/category-copy";
+import { listingJsonLd } from "@/features/seo/json-ld";
+import { JsonLd } from "@/shared/ui/json-ld";
 
 function asDetail(listing: NonNullable<Awaited<ReturnType<typeof getVendorListing>>>): ListingDetail {
   return {
@@ -19,6 +21,8 @@ function asDetail(listing: NonNullable<Awaited<ReturnType<typeof getVendorListin
     mobileNumber: listing.mobileNumber,
     photoUrls: listing.photoUrls,
     description: listing.description,
+    price: listing.price,
+    details: listing.details,
     unitPrice: listing.unitPrice,
     priceUnit: listing.priceUnit,
     bookable: listing.bookable,
@@ -53,7 +57,22 @@ export async function PublicListingPage({
   if (canonical !== currentPath) {
     permanentRedirect(canonical);
   }
-  return <ListingDetailView id={listing.id} initial={asDetail(listing)} />;
+  return (
+    <>
+      <JsonLd
+        data={listingJsonLd({
+          title: listing.title,
+          description: listing.description,
+          path: canonical,
+          image: listing.image,
+          categoryId: listing.categoryId,
+          location: listing.location,
+          price: listing.unitPrice ?? listing.price,
+        })}
+      />
+      <ListingDetailView id={listing.id} initial={asDetail(listing)} />
+    </>
+  );
 }
 
 export async function redirectListingById(id: string) {

@@ -42,15 +42,6 @@ export const metadata: Metadata = {
     default: "Book Hotels, Tours, Cabs & Home Services | Book It All",
     template: "%s | Book It All",
   },
-  keywords: [
-    "Book It All",
-    "Hyderabad hotel booking",
-    "Bhadrachalam local business",
-    "book hotels Hyderabad",
-    "cab booking Hyderabad",
-    "home services Hyderabad",
-    "tour packages Hyderabad",
-  ],
   description:
     "Book It All is a Bhadrachalam-based local marketplace for hotel booking, cabs, tours and home services in Hyderabad. Compare live listings, choose a slot, and pay securely.",
   appleWebApp: {
@@ -95,6 +86,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Script>
           </>
         ) : null}
+        <Script id="strip-extension-attrs" strategy="beforeInteractive">
+          {`(function(){
+            var busy = false;
+            function strip(){
+              if (busy) return;
+              busy = true;
+              var nodes = document.querySelectorAll("[fdprocessedid],[data-cursor-ref]");
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].removeAttribute("fdprocessedid");
+                nodes[i].removeAttribute("data-cursor-ref");
+              }
+              busy = false;
+            }
+            strip();
+            new MutationObserver(strip).observe(document.documentElement, {
+              subtree: true,
+              childList: true,
+              attributes: true,
+              attributeFilter: ["fdprocessedid", "data-cursor-ref"]
+            });
+          })();`}
+        </Script>
         <Script id="pwa-install-capture" strategy="beforeInteractive">
           {`(function(){
             window.addEventListener('beforeinstallprompt', function(e){
