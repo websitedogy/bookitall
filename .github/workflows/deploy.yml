@@ -16,18 +16,32 @@ jobs:
           AWS_USER: ${{ secrets.AWS_USER }}
           AWS_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
         run: |
+          set -e
+
           mkdir -p ~/.ssh
-          echo "$AWS_SSH_KEY" > ~/.ssh/bookitall_key
+
+          printf '%s\n' "$AWS_SSH_KEY" > ~/.ssh/bookitall_key
           chmod 600 ~/.ssh/bookitall_key
 
-          ssh-keyscan -H "$AWS_HOST" >> ~/.ssh/known_hosts
+          echo "=== Testing SSH connection ==="
 
-          ssh -i ~/.ssh/bookitall_key "$AWS_USER@$AWS_HOST" << 'EOF'
+          ssh -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              -i ~/.ssh/bookitall_key \
+              "$AWS_USER@$AWS_HOST" "echo SSH_CONNECTION_OK"
+
+          echo "=== Pulling latest code ==="
+
+          ssh -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              -i ~/.ssh/bookitall_key \
+              "$AWS_USER@$AWS_HOST" << 'EOF'
+
             set -e
 
             cd /home/ec2-user/bookitall
 
-            echo "=== Pulling latest code ==="
+            echo "=== Git Pull ==="
             git fetch origin
             git reset --hard origin/master
             git clean -fd
@@ -42,13 +56,16 @@ jobs:
             npm ci
             npm run build
 
-            echo "=== Restarting services ==="
+            echo "=== Restarting Backend ==="
             sudo systemctl restart bookitall-backend.service
+
+            echo "=== Restarting Frontend ==="
             sudo systemctl restart bookitall-frontend.service
 
-            echo "=== Checking services ==="
+            echo "=== Checking Services ==="
             sudo systemctl is-active --quiet bookitall-backend.service
             sudo systemctl is-active --quiet bookitall-frontend.service
 
             echo "=== Deployment successful ==="
+
           EOF
