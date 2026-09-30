@@ -1,0 +1,54 @@
+name: Deploy BookItAll to AWS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to AWS EC2
+        env:
+          AWS_HOST: ${{ secrets.AWS_HOST }}
+          AWS_USER: ${{ secrets.AWS_USER }}
+          AWS_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$AWS_SSH_KEY" > ~/.ssh/bookitall_key
+          chmod 600 ~/.ssh/bookitall_key
+
+          ssh-keyscan -H "$AWS_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/bookitall_key "$AWS_USER@$AWS_HOST" << 'EOF'
+            set -e
+
+            cd /home/ec2-user/bookitall
+
+            echo "=== Pulling latest code ==="
+            git fetch origin
+            git reset --hard origin/master
+            git clean -fd
+
+            echo "=== Backend ==="
+            cd /home/ec2-user/bookitall/backend
+            npm ci
+            npm run build
+
+            echo "=== Frontend ==="
+            cd /home/ec2-user/bookitall/frontend
+            npm ci
+            npm run build
+
+            echo "=== Restarting services ==="
+            sudo systemctl restart bookitall-backend.service
+            sudo systemctl restart bookitall-frontend.service
+
+            echo "=== Checking services ==="
+            sudo systemctl is-active --quiet bookitall-backend.service
+            sudo systemctl is-active --quiet bookitall-frontend.service
+
+            echo "=== Deployment successful ==="
+          EOF
