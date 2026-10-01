@@ -30,6 +30,7 @@ export type BookableListing = {
   unitPrice?: number | null;
   price?: string;
   priceUnit?: string;
+  extraGuestCharge?: number;
   bookable?: boolean;
   status?: string;
   rooms?: BookableRoom[];
@@ -56,8 +57,8 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const isStay = isHotel || isTour;
 
   const [scheduledAt, setScheduledAt] = useState(defaultSlot(1));
-  const [checkIn, setCheckIn] = useState(defaultDate(1));
-  const [checkOut, setCheckOut] = useState(defaultDate(2));
+  const [checkIn, setCheckIn] = useState(isHotel ? "" : defaultDate(1));
+  const [checkOut, setCheckOut] = useState(isHotel ? "" : defaultDate(2));
   const [address, setAddress] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [buildingName, setBuildingName] = useState("");
@@ -85,13 +86,19 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
     if (digits) setGuestPhone(digits);
   }, [user]);
 
-  const estimate = useMemo(() => {
-    if (isHotel) {
-      const nights = Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000));
-      return unitPrice * nights;
-    }
-    return unitPrice;
-  }, [isHotel, checkIn, checkOut, unitPrice, selectedRoom]);
+  const stayQuote = useMemo(() => {
+    if (!isHotel || !checkIn || !checkOut) return null;
+    const nights = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
+    if (!Number.isFinite(nights) || nights < 1) return null;
+    const included = Number(selectedRoom?.guests) || 1;
+    const guestCount = Math.max(1, Number(guests) || 1);
+    const extraGuests = Math.max(0, guestCount - included);
+    const extraRate = listing.extraGuestCharge || 0;
+    const roomTotal = unitPrice * nights;
+    const extraTotal = extraGuests * extraRate * nights;
+    return { nights, extraGuests, extraRate, roomTotal, extraTotal, total: roomTotal + extraTotal };
+  }, [isHotel, checkIn, checkOut, guests, selectedRoom, unitPrice, listing.extraGuestCharge]);
+  const estimate = stayQuote?.total ?? unitPrice;
 
   function exactAddress() {
     return withBuildingDetails(houseNumber, buildingName, isCab ? pickupAddress || address : address);
@@ -118,6 +125,9 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       guestName: isHotel ? guestName.trim() : undefined,
       guestPhone: isHotel ? guestPhone.replace(/\D/g, "").slice(-10) : undefined,
       guests: isHotel ? Math.max(1, Number(guests) || 1) : undefined,
+      roomName: isHotel ? selectedRoom?.name : undefined,
+      includedGuests: isHotel ? Number(selectedRoom?.guests) || undefined : undefined,
+      extraGuestCharge: isHotel ? listing.extraGuestCharge || 0 : undefined,
       checkIn: isHotel ? checkIn : undefined,
       checkOut: isHotel ? checkOut : undefined,
       travelers: isTour ? 1 : undefined,
@@ -185,6 +195,10 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
 
   function bookHotel() {
     setFormError("");
+    if (!checkIn || !checkOut || !stayQuote) {
+      setFormError("Choose check-in and check-out. The charge follows those dates.");
+      return;
+    }
     if (!guestName.trim()) {
       setFormError("Enter the guest name.");
       return;

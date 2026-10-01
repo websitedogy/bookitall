@@ -30,6 +30,9 @@ export type CartItem = {
   guestName?: string;
   guestPhone?: string;
   guests?: number;
+  roomName?: string;
+  includedGuests?: number;
+  extraGuestCharge?: number;
 };
 
 type CartState = {

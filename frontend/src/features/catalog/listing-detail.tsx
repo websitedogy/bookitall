@@ -80,6 +80,12 @@ function statusCopy(status: string) {
   return { text: "Pending", hint: "Waiting for admin review.", className: "bg-[#5c4316] text-[#f6e7c2]" };
 }
 
+function extraGuestAmount(listing: ListingDetail) {
+  const raw = listing.details?.find((row) => row.key === "extraGuestCharge")?.value ?? "";
+  const amount = Number(String(raw).replace(/[^\d.]/g, ""));
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
 function bookableRooms(listing: ListingDetail) {
   if (listing.categoryId !== "hotels" && listing.categoryId !== "homestay") return [];
   const raw = listing.details?.find((row) => row.key === "roomRates")?.value ?? "";
@@ -252,7 +258,7 @@ export function ListingDetailView({ id, initial }: { id: string; initial?: Listi
                 : "This is your post. Customers see it after admin accepts."}
             </p>
           ) : null}
-          <ListingBookingCard listing={{ ...listing, rooms: bookableRooms(listing) }} />
+          <ListingBookingCard listing={{ ...listing, rooms: bookableRooms(listing), extraGuestCharge: extraGuestAmount(listing) }} />
         </ListingInfoTabs>
       </aside>
       </article>

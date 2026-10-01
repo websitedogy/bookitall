@@ -17,7 +17,11 @@ export function nightsBetween(checkIn?: string, checkOut?: string) {
 
 export function lineSubtotal(item: CartItem) {
   if (item.categoryId === "hotels") {
-    return item.unitPrice * nightsBetween(item.checkIn, item.checkOut) * item.quantity;
+    const nights = nightsBetween(item.checkIn, item.checkOut);
+    const included = item.includedGuests ?? item.guests ?? 1;
+    const extraGuests = Math.max(0, (item.guests || 1) - included);
+    const extra = extraGuests * (item.extraGuestCharge || 0) * nights;
+    return item.unitPrice * nights * item.quantity + extra;
   }
   if (item.categoryId === "tours") {
     return item.unitPrice * (item.travelers || item.quantity);
