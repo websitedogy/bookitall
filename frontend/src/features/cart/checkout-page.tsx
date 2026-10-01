@@ -11,7 +11,7 @@ import { inr } from "@/shared/lib/format";
 import { readSavedLocation } from "@/shared/lib/geo";
 import { trackBeginCheckout } from "@/shared/lib/analytics";
 import { useCart } from "./store";
-import { cartTotals } from "./pricing";
+import { cartTotals, lineSubtotal, nightsBetween } from "./pricing";
 import { saveLastOrder, toCheckoutItems, type CheckoutResult } from "./checkout-payload";
 import {
   emptyPayment,
@@ -325,10 +325,19 @@ export function CheckoutPage() {
         <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
           {items.map((item) => (
             <li key={item.key} className="flex justify-between gap-3 py-2">
-              <span className="min-w-0 truncate">
-                {item.title} × {item.quantity}
+              <span className="min-w-0">
+                <span className="block truncate">{item.title}</span>
+                {item.categoryId === "hotels" && item.checkIn && item.checkOut ? (
+                  <span className="block text-xs text-[var(--text-muted)]">
+                    {item.roomName ? `${item.roomName} · ` : ""}
+                    {nightsBetween(item.checkIn, item.checkOut)} night{nightsBetween(item.checkIn, item.checkOut) === 1 ? "" : "s"}
+                    {item.guests ? ` · ${item.guests} guest${item.guests === 1 ? "" : "s"}` : ""}
+                  </span>
+                ) : (
+                  <span className="block text-xs text-[var(--text-muted)]">× {item.quantity}</span>
+                )}
               </span>
-              <span className="shrink-0 font-medium">{inr(item.unitPrice * item.quantity)}</span>
+              <span className="shrink-0 font-medium">{inr(lineSubtotal(item))}</span>
             </li>
           ))}
         </ul>

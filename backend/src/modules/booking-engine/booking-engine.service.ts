@@ -721,7 +721,13 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       const checkOut = String(details.checkOut ?? '');
       const nights = this.nightsBetween(checkIn, checkOut);
       const rooms = quantity;
-      const subtotal = unit * nights * rooms;
+      const room = this.hotelRoom(listing, details.roomName);
+      const nightly = room?.price ?? unit;
+      const guests = Math.max(1, Number(details.guests ?? room?.occupancy ?? 1));
+      const included = room?.occupancy ?? guests;
+      const extraRate = Number(String(listing.fields?.extraGuestCharge ?? '').replace(/[^\d.]/g, '')) || 0;
+      const extraGuests = Math.max(0, guests - included);
+      const subtotal = nightly * nights * rooms + extraGuests * extraRate * nights;
       return {
         partnerId: listing.userId,
         assigneeId: null as string | null,
@@ -729,7 +735,15 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         tax: this.taxAmount(BookingType.HOTEL, subtotal),
         scheduledAt: new Date(checkIn),
         lockKey: `${listing.id}:${checkIn}`,
-        details: { ...meta, hotelName: listing.title, nights, quantity: rooms },
+        details: {
+          ...meta,
+          hotelName: listing.title,
+          roomName: room?.name ?? details.roomName,
+          nights,
+          quantity: rooms,
+          guests,
+          extraGuests,
+        },
       };
     }
     if (dto.type === BookingType.TOUR) {
@@ -1040,6 +1054,27 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     if (used + want > capacity) {
       throw new ConflictException('Those dates are already booked. Pick other check-in / check-out dates.');
     }
+  }
+
+  private hotelRoom(listing: { fields?: Record<string, string> }, roomName: unknown) {
+    const wanted = String(roomName ?? '').trim().toLowerCase();
+    const rooms = String(listing.fields?.roomRates ?? '')
+      .split(';')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const [name, rest = ''] = part.split(':').map((item) => item.trim());
+        const bits = rest.split('/').map((item) => item.trim());
+        return {
+          name,
+          price: Number((bits[0] || '').replace(/[^\d.]/g, '')) || 0,
+          occupancy: Number((bits[1] || '').replace(/[^\d]/g, '')) || 1,
+        };
+      })
+      .filter((room) => room.name && room.price > 0);
+    if (!rooms.length) return null;
+    if (!wanted) return rooms[0];
+    return rooms.find((room) => room.name.toLowerCase() === wanted) ?? rooms[0];
   }
 
   private nightsBetween(checkIn: string, checkOut: string) {

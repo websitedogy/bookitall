@@ -285,21 +285,21 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   }
 
   if (isStay) {
-    const nights = Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000) || 1);
     return (
       <div className="space-y-3">
         {isHotel && hotelStep === "guest" ? (
           <div className="space-y-3">
             <button type="button" onClick={() => setHotelStep("rooms")} className="text-[12px] font-semibold text-[#0f766e]">
-              ← Room and dates
+              ← Rooms
             </button>
-            <div className="rounded-2xl bg-[#f6f1e8] px-3.5 py-3 ring-1 ring-[#eadfcd]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a6a52]">Your stay</p>
-              <p className="mt-1 text-sm font-semibold text-[#12241f]">{selectedRoom?.name || "Room"}</p>
-              <p className="mt-0.5 text-[13px] text-[#5b6e68]">
-                {checkIn} → {checkOut} · {nights} night{nights === 1 ? "" : "s"}
-              </p>
-              <p className="mt-1 text-sm font-semibold text-[#0f3d38]">{inr(estimate)}</p>
+            <p className="text-sm font-semibold text-[#12241f]">{selectedRoom?.name || "Room"} · {inr(unitPrice)} per night</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Check-in">
+                <input type="date" value={checkIn} min={defaultDate(0)} onChange={(e) => setCheckIn(e.target.value)} className={stayInput} />
+              </Field>
+              <Field label="Check-out">
+                <input type="date" value={checkOut} min={checkIn || defaultDate(0)} onChange={(e) => setCheckOut(e.target.value)} className={stayInput} />
+              </Field>
             </div>
             <Field label="Guest name">
               <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Name for the booking" className={stayInput} />
@@ -324,9 +324,26 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
             <Field label="Notes">
               <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
             </Field>
+            <div className="rounded-2xl bg-[#f6f1e8] px-3.5 py-3 ring-1 ring-[#eadfcd]">
+              {stayQuote ? (
+                <>
+                  <p className="text-[13px] text-[#5b6e68]">
+                    {stayQuote.nights} night{stayQuote.nights === 1 ? "" : "s"} × {inr(unitPrice)}
+                  </p>
+                  {stayQuote.extraGuests > 0 && stayQuote.extraRate > 0 ? (
+                    <p className="mt-1 text-[13px] text-[#5b6e68]">
+                      {stayQuote.extraGuests} extra guest{stayQuote.extraGuests === 1 ? "" : "s"} × {inr(stayQuote.extraRate)} × {stayQuote.nights} night{stayQuote.nights === 1 ? "" : "s"}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 text-sm font-semibold text-[#0f3d38]">Charge {inr(stayQuote.total)} before tax</p>
+                </>
+              ) : (
+                <p className="text-[13px] text-[#5b6e68]">Choose check-in and check-out. The charge follows those dates.</p>
+              )}
+            </div>
             {formError ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
             <button type="button" onClick={bookHotel} className={stayBtn}>
-              Continue to checkout
+              {stayQuote ? `Continue to checkout · ${inr(stayQuote.total)}` : "Continue to checkout"}
             </button>
           </div>
         ) : (
@@ -357,16 +374,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 })}
               </div>
             ) : null}
-            {isHotel ? (
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Check-in">
-                  <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className={stayInput} />
-                </Field>
-                <Field label="Check-out">
-                  <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className={stayInput} />
-                </Field>
-              </div>
-            ) : (
+            {isHotel ? null : (
               <Field label="Travel date">
                 <input
                   type="date"
@@ -381,21 +389,13 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
               </Field>
             )}
-            <p className="text-[13px] text-[#7a6a52]">
-              {isHotel ? `${nights} night${nights === 1 ? "" : "s"} · ` : ""}
-              Estimated {inr(estimate)} before tax.
-            </p>
+            {isHotel ? null : <p className="text-[13px] text-[#7a6a52]">Estimated {inr(estimate)} before tax.</p>}
             {formError && !isHotel && phase === "idle" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
-            {isHotel && formError && hotelStep === "rooms" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
             <button
               type="button"
               onClick={() => {
                 if (!isHotel) {
                   openLocationPopup();
-                  return;
-                }
-                if (new Date(checkOut).getTime() <= new Date(checkIn).getTime()) {
-                  setFormError("Check-out must be after check-in.");
                   return;
                 }
                 setFormError("");
