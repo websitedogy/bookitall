@@ -271,84 +271,128 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   }
 
   if (isStay) {
+    const nights = Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000) || 1);
     return (
       <div className="space-y-3">
-        <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />
-        {isHotel && rooms.length ? (
-          <div className="space-y-2">
-            <p className="text-[12px] font-medium text-[#5b6e68]">Rooms</p>
-            {rooms.map((room) => {
-              const active = room.name === (selectedRoom?.name ?? "");
-              return (
-                <button
-                  key={room.name}
-                  type="button"
-                  onClick={() => setRoomName(room.name)}
-                  className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3 py-2.5 text-left ring-1 ${active ? "bg-white ring-[#0f3d38]" : "bg-[#fbf9f4] ring-[#efe6d4]"}`}
-                >
-                  <span>
-                    <span className="block text-sm font-semibold text-[#12241f]">{room.name}</span>
-                    <span className="mt-0.5 block text-[12px] text-[#7a6a52]">{room.guests} guests · {room.available} available</span>
-                  </span>
-                  <span className="shrink-0 text-sm font-semibold text-[#0f3d38]">{inr(room.rate)}</span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-        {isHotel ? (
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="Check-in">
-              <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className={stayInput} />
-            </Field>
-            <Field label="Check-out">
-              <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className={stayInput} />
-            </Field>
-          </div>
-        ) : (
-          <Field label="Travel date">
-            <input
-              type="date"
-              value={scheduledAt.slice(0, 10)}
-              onChange={(e) => setScheduledAt(`${e.target.value}T10:00`)}
-              className={stayInput}
-            />
-          </Field>
-        )}
-        {isHotel ? (
-          <div className="space-y-2">
+        {isHotel && hotelStep === "guest" ? (
+          <div className="space-y-3">
+            <button type="button" onClick={() => setHotelStep("rooms")} className="text-[12px] font-semibold text-[#0f766e]">
+              ← Room and dates
+            </button>
+            <div className="rounded-2xl bg-[#f6f1e8] px-3.5 py-3 ring-1 ring-[#eadfcd]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a6a52]">Your stay</p>
+              <p className="mt-1 text-sm font-semibold text-[#12241f]">{selectedRoom?.name || "Room"}</p>
+              <p className="mt-0.5 text-[13px] text-[#5b6e68]">
+                {checkIn} → {checkOut} · {nights} night{nights === 1 ? "" : "s"}
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#0f3d38]">{inr(estimate)}</p>
+            </div>
             <Field label="Guest name">
               <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Name for the booking" className={stayInput} />
             </Field>
-            <div className="grid grid-cols-[1fr_5.5rem] gap-2">
-              <Field label="Mobile">
-                <input
-                  inputMode="numeric"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  placeholder="10-digit number"
-                  className={stayInput}
-                />
-              </Field>
-              <Field label="Guests">
-                <input
-                  inputMode="numeric"
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                  className={stayInput}
-                />
-              </Field>
-            </div>
+            <Field label="Mobile">
+              <input
+                inputMode="numeric"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="10-digit number"
+                className={stayInput}
+              />
+            </Field>
+            <Field label="Guests">
+              <input
+                inputMode="numeric"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                className={stayInput}
+              />
+            </Field>
+            <Field label="Notes">
+              <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
+            </Field>
+            {formError ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
+            <button type="button" onClick={bookHotel} className={stayBtn}>
+              Continue to checkout
+            </button>
           </div>
-        ) : null}
-        <Field label="Notes">
-          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
-        </Field>
-        <p className="text-[13px] text-[#7a6a52]">Estimated {inr(estimate)} before tax.</p>
-        {formError && (isHotel || phase === "idle") ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
-        <button type="button" onClick={isHotel ? bookHotel : openLocationPopup} className={stayBtn}>
-          Book now
-        </button>
+        ) : (
+          <>
+            <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />
+            {isHotel && rooms.length ? (
+              <div className="space-y-2">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#7a6a52]">Rooms and price</p>
+                {rooms.map((room) => {
+                  const active = room.name === (selectedRoom?.name ?? "");
+                  return (
+                    <button
+                      key={room.name}
+                      type="button"
+                      onClick={() => setRoomName(room.name)}
+                      className={`flex w-full items-center justify-between gap-3 rounded-2xl px-3.5 py-3 text-left ring-1 ${active ? "bg-white ring-[#0f3d38]" : "bg-[#fbf9f4] ring-[#efe6d4]"}`}
+                    >
+                      <span>
+                        <span className="block text-sm font-semibold text-[#12241f]">{room.name}</span>
+                        <span className="mt-0.5 block text-[12px] text-[#7a6a52]">{room.guests} guests · {room.available} available</span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className="block text-base font-semibold text-[#0f3d38]">{inr(room.rate)}</span>
+                        <span className="block text-[11px] text-[#7a6a52]">per room</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+            {isHotel ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Check-in">
+                  <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className={stayInput} />
+                </Field>
+                <Field label="Check-out">
+                  <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className={stayInput} />
+                </Field>
+              </div>
+            ) : (
+              <Field label="Travel date">
+                <input
+                  type="date"
+                  value={scheduledAt.slice(0, 10)}
+                  onChange={(e) => setScheduledAt(`${e.target.value}T10:00`)}
+                  className={stayInput}
+                />
+              </Field>
+            )}
+            {isHotel ? null : (
+              <Field label="Notes">
+                <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
+              </Field>
+            )}
+            <p className="text-[13px] text-[#7a6a52]">
+              {isHotel ? `${nights} night${nights === 1 ? "" : "s"} · ` : ""}
+              Estimated {inr(estimate)} before tax.
+            </p>
+            {formError && !isHotel && phase === "idle" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
+            {isHotel && formError && hotelStep === "rooms" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
+            <button
+              type="button"
+              onClick={() => {
+                if (!isHotel) {
+                  openLocationPopup();
+                  return;
+                }
+                if (new Date(checkOut).getTime() <= new Date(checkIn).getTime()) {
+                  setFormError("Check-out must be after check-in.");
+                  return;
+                }
+                setFormError("");
+                setHotelStep("guest");
+              }}
+              className={stayBtn}
+            >
+              Book now
+            </button>
+          </>
+        )}
         {!isHotel && (phase === "ask" || phase === "locating") ? (
           <LocationPopup
             locating={gpsState === "detecting"}

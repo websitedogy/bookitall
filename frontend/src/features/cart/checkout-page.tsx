@@ -50,6 +50,16 @@ export function CheckoutPage() {
   const [busy, setBusy] = useState(false);
   const [topupBusy, setTopupBusy] = useState(false);
 
+  const hotelCheckout = items.length > 0 && items.every((item) => item.categoryId === "hotels");
+  const payMethods = hotelCheckout
+    ? [
+        { id: "UPI" as const, label: "UPI", hint: "GPay, PhonePe, Paytm", icon: Smartphone },
+        { id: "CARD" as const, label: "Card", hint: "Visa, Mastercard, RuPay", icon: CreditCard },
+        { id: "NET_BANKING" as const, label: "Net banking", hint: "All major banks", icon: Landmark },
+        { id: "CASH" as const, label: "COD", hint: "Pay cash at the hotel", icon: Wallet },
+      ]
+    : METHODS;
+  const guest = items.find((item) => item.guestName?.trim() || item.guestPhone?.trim());
   const totals = quote ?? localTotals;
   const walletBalance = Number(wallet?.availableBalance ?? 0);
   const needsAddress = items.some((item) => !["hotels", "tours"].includes(item.categoryId));
@@ -209,9 +219,10 @@ export function CheckoutPage() {
         </div>
 
         <section className="rounded-[28px] bg-white p-5 shadow-[var(--studio-shadow)] ring-1 ring-[var(--studio-line)]">
-          <h2 className="font-semibold">Contact</h2>
-          <p className="mt-2 text-sm">{user?.fullName}</p>
-          <p className="text-sm text-[var(--text-muted)]">{user?.phone}</p>
+          <h2 className="font-semibold">Guest</h2>
+          <p className="mt-2 text-sm">{guest?.guestName?.trim() || user?.fullName}</p>
+          <p className="text-sm text-[var(--text-muted)]">{guest?.guestPhone?.trim() || user?.phone}</p>
+          {guest?.guests ? <p className="mt-1 text-sm text-[var(--text-muted)]">{guest.guests} guest{guest.guests === 1 ? "" : "s"}</p> : null}
         </section>
 
         {stayLocation ? (
@@ -262,7 +273,7 @@ export function CheckoutPage() {
         <section className="rounded-[28px] bg-white p-5 shadow-[var(--studio-shadow)] ring-1 ring-[var(--studio-line)]">
           <h2 className="font-semibold">Payment</h2>
           <ul className="mt-3 space-y-2">
-            {METHODS.map((option) => {
+            {payMethods.map((option) => {
               const Icon = option.icon;
               const active = draft.method === option.id;
               return (
@@ -345,7 +356,9 @@ export function CheckoutPage() {
         </button>
         <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
           {draft.method === "CASH"
-            ? "No money is collected now."
+            ? hotelCheckout
+              ? "Pay cash at the hotel. The booking is confirmed now."
+              : "No money is collected now."
             : draft.method === "WALLET"
               ? "Amount is deducted from your Book It All wallet."
               : "Card and UPI details are checked here. Full card number is not stored."}
