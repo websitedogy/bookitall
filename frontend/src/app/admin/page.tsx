@@ -65,8 +65,9 @@ export default function AdminHomePage() {
       <section>
         <h2 className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">Daily verified</h2>
         <div className="mt-2.5 grid grid-cols-2 gap-2.5 lg:grid-cols-3">
-          <DashBox href="/admin/users?status=PENDING_VERIFICATION" label="Pending users" count={data.dailyVerified.pendingUsers} icon={Users} />
+          {/* <DashBox href="/admin/users?status=PENDING_VERIFICATION" label="Pending users" count={data.dailyVerified.pendingUsers} icon={Users} /> */}
           <DashBox href="/admin/vendors?bucket=pending" label="Pending vendors" count={data.dailyVerified.pendingVendors} icon={Store} />
+          <DashBox href="/admin/listings" label="Pending posts" count={data.vendors.pendingPosts} icon={FileCheck} />
           <DashBox href="/admin/payments" label="Weekly amount" count={`₹${data.dailyVerified.weeklyAmount.toLocaleString("en-IN")}`} icon={CreditCard} />
         </div>
       </section>
@@ -88,11 +89,10 @@ export default function AdminHomePage() {
 
       <section className="mt-4">
         <h2 className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">Vendor section</h2>
-        <div className="mt-2.5 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <div className="mt-2.5 grid grid-cols-2 gap-2.5 lg:grid-cols-3">
           <DashBox href="/admin/vendors?bucket=active" label="Active vendors" count={data.vendors.active} icon={Store} />
           <DashBox href="/admin/vendors?bucket=rejected" label="Disabled vendors" count={data.vendors.rejected} icon={Ban} />
           <DashBox href="/admin/vendors?bucket=blocked" label="Blocked vendors" count={data.vendors.blocked} icon={BadgeCheck} />
-          <DashBox href="/admin/listings" label="Pending posts" count={data.vendors.pendingPosts} icon={FileCheck} />
         </div>
         <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {SERVICE_NAV.map((service) => {
