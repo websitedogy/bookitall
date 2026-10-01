@@ -1,11 +1,24 @@
+function uploadPath(src: string) {
+  if (src.startsWith("/uploads/")) return src;
+  if (!src.startsWith("http://") && !src.startsWith("https://")) return "";
+  try {
+    const url = new URL(src);
+    if (url.pathname.startsWith("/uploads/")) return `${url.pathname}${url.search}`;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
 export function mediaUrl(src: string) {
-  if (!src.startsWith("/uploads/")) return src;
+  const path = uploadPath(src);
+  if (!path) return src;
   const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (configured?.startsWith("http")) {
     const origin = configured.replace("://localhost", "://127.0.0.1").replace(/\/api\/v1\/?$/, "");
-    return `${origin}${src}`;
+    return `${origin}${path}`;
   }
-  return src;
+  return path;
 }
 
 export function stableImage(src: string | undefined, fallback: string) {

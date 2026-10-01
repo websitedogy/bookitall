@@ -75,7 +75,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-      <html lang="en" className={`${inter.variable} ${sourceSerif.variable} ${poppins.variable} h-full antialiased`} suppressHydrationWarning>
+      <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${sourceSerif.variable} ${poppins.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full bg-white font-sans text-[var(--text)]" suppressHydrationWarning>
         <JsonLd data={organizationGraph()} />
         {GA_MEASUREMENT_ID ? (

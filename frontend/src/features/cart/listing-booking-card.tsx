@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, LocateFixed, MapPin, X } from "lucide-react";
+import { useAuth } from "@/features/auth/store";
 import { useCart } from "@/features/cart/store";
 import { PickupMapPicker } from "@/features/cart/pickup-map-picker";
 import { defaultDate, defaultSlot, pad } from "@/features/cart/pricing";
@@ -42,6 +43,7 @@ function soonSlot() {
 
 export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const router = useRouter();
+  const user = useAuth((s) => s.user);
   const addItem = useCart((s) => s.addItem);
   const rooms = listing.rooms ?? [];
   const [roomName, setRoomName] = useState(rooms[0]?.name ?? "");
@@ -62,6 +64,10 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const [pickupAddress, setPickupAddress] = useState("");
   const [dropAddress, setDropAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guests, setGuests] = useState("1");
+  const guestFilled = useRef(false);
   const [formError, setFormError] = useState("");
   const [phase, setPhase] = useState<"idle" | "ask" | "locating" | "map" | "choose" | "schedule">("idle");
   const [gpsState, setGpsState] = useState<"idle" | "detecting" | "detected">("idle");
@@ -69,6 +75,14 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const [customerLng, setCustomerLng] = useState<number | null>(null);
   const [resolving, setResolving] = useState(false);
   const moveTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (guestFilled.current || !user) return;
+    guestFilled.current = true;
+    if (user.fullName) setGuestName(user.fullName);
+    const digits = (user.phone || "").replace(/\D/g, "").slice(-10);
+    if (digits) setGuestPhone(digits);
+  }, [user]);
 
   const estimate = useMemo(() => {
     if (isHotel) {
@@ -100,6 +114,9 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       scheduledAt: isHotel ? undefined : when,
       address: isHotel ? extras?.address || exactAddress() : isTour ? undefined : exactAddress(),
       notes: [selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} guests · ${selectedRoom.available} available` : "", notes].filter(Boolean).join("\n"),
+      guestName: isHotel ? guestName.trim() : undefined,
+      guestPhone: isHotel ? guestPhone.replace(/\D/g, "").slice(-10) : undefined,
+      guests: isHotel ? Math.max(1, Number(guests) || 1) : undefined,
       checkIn: isHotel ? checkIn : undefined,
       checkOut: isHotel ? checkOut : undefined,
       travelers: isTour ? 1 : undefined,
@@ -163,6 +180,30 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   function openLocationPopup() {
     setFormError("");
     setPhase("ask");
+  }
+
+  function bookHotel() {
+    setFormError("");
+    if (!guestName.trim()) {
+      setFormError("Enter the guest name.");
+      return;
+    }
+    const phone = guestPhone.replace(/\D/g, "").slice(-10);
+    if (!/^\d{10}$/.test(phone)) {
+      setFormError("Enter a 10-digit mobile number.");
+      return;
+    }
+    const count = Math.max(1, Number(guests) || 1);
+    if (count > 20) {
+      setFormError("Enter up to 20 guests.");
+      return;
+    }
+    try {
+      addItem(toCartItem(scheduledAt));
+      router.push("/checkout");
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Could not book");
+    }
   }
 
   function stayCheckout() {
@@ -273,15 +314,41 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
             />
           </Field>
         )}
+        {isHotel ? (
+          <div className="space-y-2">
+            <Field label="Guest name">
+              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Name for the booking" className={stayInput} />
+            </Field>
+            <div className="grid grid-cols-[1fr_5.5rem] gap-2">
+              <Field label="Mobile">
+                <input
+                  inputMode="numeric"
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  placeholder="10-digit number"
+                  className={stayInput}
+                />
+              </Field>
+              <Field label="Guests">
+                <input
+                  inputMode="numeric"
+                  value={guests}
+                  onChange={(e) => setGuests(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                  className={stayInput}
+                />
+              </Field>
+            </div>
+          </div>
+        ) : null}
         <Field label="Notes">
           <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
         </Field>
         <p className="text-[13px] text-[#7a6a52]">Estimated {inr(estimate)} before tax.</p>
-        {formError && phase === "idle" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
-        <button type="button" onClick={openLocationPopup} className={stayBtn}>
+        {formError && (isHotel || phase === "idle") ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
+        <button type="button" onClick={isHotel ? bookHotel : openLocationPopup} className={stayBtn}>
           Book now
         </button>
-        {phase === "ask" || phase === "locating" ? (
+        {!isHotel && (phase === "ask" || phase === "locating") ? (
           <LocationPopup
             locating={gpsState === "detecting"}
             detected={gpsState === "detected"}

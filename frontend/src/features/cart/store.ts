@@ -27,6 +27,9 @@ export type CartItem = {
   dropAddress?: string;
   customerLat?: number;
   customerLng?: number;
+  guestName?: string;
+  guestPhone?: string;
+  guests?: number;
 };
 
 type CartState = {

@@ -164,8 +164,8 @@ export function CheckoutPage() {
           items: toCheckoutItems(items, address.trim()),
           ...paymentPayload(draft),
           address: address.trim(),
-          customerName: user?.fullName,
-          customerPhone: user?.phone,
+          customerName: items.find((item) => item.guestName?.trim())?.guestName?.trim() || user?.fullName,
+          customerPhone: items.find((item) => item.guestPhone?.trim())?.guestPhone?.trim() || user?.phone,
           pay: true,
         }),
       });
