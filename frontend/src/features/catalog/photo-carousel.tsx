@@ -125,6 +125,7 @@ export function PhotoCarousel({
   variant?: "page" | "hero";
 }) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [active, setActive] = useState(0);
   const slides = photos.length ? photos : fallback ? [fallback] : [];
   const last = Math.max(0, slides.length - 1);
   const many = slides.length > 1;
@@ -219,7 +220,7 @@ export function PhotoCarousel({
 
   return (
     <div className={variant === "hero" ? "bg-transparent" : "bg-white"}>
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3 lg:hidden">
         {slides.map((src, i) => (
           <button
             key={`${src}-${i}`}
@@ -234,6 +235,57 @@ export function PhotoCarousel({
             <SlideImage src={src} categoryId={categoryId} alt="" className="h-full w-full object-cover" />
           </button>
         ))}
+      </div>
+      <div className="relative hidden lg:block">
+        <button
+          type="button"
+          onClick={() => setViewerIndex(active)}
+          aria-label={`Open photo ${active + 1}`}
+          className="flex h-[min(72vh,640px)] w-full items-center justify-center overflow-hidden rounded-[28px] bg-[#12241f]"
+        >
+          <SlideImage
+            src={slides[active] ?? slides[0]}
+            categoryId={categoryId}
+            alt={title}
+            className="h-full w-full object-contain"
+          />
+        </button>
+        {many ? (
+          <>
+            <button
+              type="button"
+              aria-label="Previous photo"
+              onClick={() => setActive((current) => (current === 0 ? last : current - 1))}
+              className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#12241f] shadow-lg"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next photo"
+              onClick={() => setActive((current) => (current === last ? 0 : current + 1))}
+              className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#12241f] shadow-lg"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+            <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
+              {slides.map((src, i) => (
+                <button
+                  key={`desk-${src}-${i}`}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-label={`Show photo ${i + 1}`}
+                  className={cn(
+                    "h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f4efe4] ring-2 ring-offset-1",
+                    i === active ? "ring-[var(--primary)]" : "ring-transparent",
+                  )}
+                >
+                  <SlideImage src={src} categoryId={categoryId} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
       {modal}
     </div>
