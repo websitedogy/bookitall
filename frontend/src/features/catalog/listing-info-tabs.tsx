@@ -95,8 +95,7 @@ export function ListingInfoTabs({
       </div>
 
       <div className="border-t border-[#efe6d4] p-5">
-        {children}
-        <div className="mt-5">
+        <div>
           {tabs.length ? (
             <>
               <div role="tablist" aria-label="Listing details" className="no-scrollbar flex gap-1 overflow-x-auto rounded-full bg-[#f4efe4] p-1">
@@ -126,6 +125,7 @@ export function ListingInfoTabs({
             <p className="text-sm text-[#7a6a52]">No extra details for this listing yet.</p>
           )}
         </div>
+        {children ? <div className="mt-6 border-t border-[#efe6d4] pt-5">{children}</div> : null}
       </div>
 
       {action === "reviews" ? (

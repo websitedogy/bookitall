@@ -117,7 +117,7 @@ export function NearbyProfessionals({
     <ul className="space-y-2.5 px-3 py-3 md:px-7 md:pb-7">
       {ads.map((ad) => {
         const href = listingHref(ad);
-        const book = bookHref(ad);
+        const book = category === "hotels" ? href : bookHref(ad);
         return (
           <li key={ad.id}>
             <article className="flex items-center gap-3.5 rounded-2xl bg-white px-3 py-3 ring-1 ring-[var(--studio-line)] transition md:hover:ring-[var(--primary)]/25">

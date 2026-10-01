@@ -67,6 +67,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guests, setGuests] = useState("1");
+  const [hotelStep, setHotelStep] = useState<"rooms" | "guest">("rooms");
   const guestFilled = useRef(false);
   const [formError, setFormError] = useState("");
   const [phase, setPhase] = useState<"idle" | "ask" | "locating" | "map" | "choose" | "schedule">("idle");
