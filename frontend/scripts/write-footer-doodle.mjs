@@ -227,49 +227,47 @@ const icons = {
 };
 
 const roads = `
-  <path d="M40 150 C180 120 320 190 520 140" stroke-dasharray="7 8"/>
-  <path d="M560 250 C700 210 860 280 1040 220" stroke-dasharray="7 8"/>
-  <path d="M180 430 C340 390 520 470 760 420" stroke-dasharray="7 8"/>
-  <path d="M900 470 C1080 430 1240 500 1480 450" stroke-dasharray="7 8"/>
-  <path d="M80 300 C160 340 220 280 300 320" stroke-dasharray="6 7"/>
+  <path d="M30 145 C200 115 380 175 620 125" stroke-dasharray="6 7"/>
+  <path d="M700 175 C860 140 1040 190 1280 145" stroke-dasharray="6 7"/>
+  <path d="M1320 190 C1460 160 1560 200 1660 170" stroke-dasharray="6 7"/>
+  <path d="M40 300 C220 270 400 330 640 285" stroke-dasharray="6 7"/>
+  <path d="M720 320 C900 285 1100 345 1380 300" stroke-dasharray="6 7"/>
+  <path d="M420 455 C620 425 820 480 1100 440" stroke-dasharray="6 7"/>
+  <path d="M1160 470 C1320 440 1480 490 1640 450" stroke-dasharray="6 7"/>
 `;
 
 const placements = [
-  mark(24, 28, 0.95, -8, icons.pin),
-  mark(130, 18, 0.9, 0, icons.charminar),
-  mark(250, 48, 0.9, -3, icons.car),
-  mark(420, 16, 0.82, 0, icons.gate),
-  mark(560, 20, 0.85, 0, icons.signal),
-  mark(680, 22, 0.9, 0, icons.hotel),
-  mark(860, 28, 1.0, -2, icons.auto),
-  mark(1100, 24, 0.95, 0, icons.person),
-  mark(1280, 36, 0.8, -4, icons.suitcase),
-  mark(1440, 28, 0.82, 6, icons.plug),
-  mark(1560, 48, 0.72, -2, icons.sedan),
-  mark(16, 210, 1.0, -6, icons.rider),
-  mark(230, 220, 0.85, 2, icons.taj),
-  mark(400, 248, 0.82, 8, icons.handPhone),
-  mark(560, 230, 0.82, -8, icons.helmet),
-  mark(720, 220, 0.88, 4, icons.scooter),
-  mark(920, 210, 0.8, -4, icons.map),
-  mark(1100, 200, 0.85, 3, icons.minar),
-  mark(1260, 210, 0.78, 0, icons.shield),
-  mark(1420, 230, 0.75, 8, icons.broom),
-  mark(1540, 220, 0.72, -6, icons.mirror),
-  mark(360, 400, 0.72, 0, icons.gauge),
-  mark(500, 390, 0.78, -2, icons.bus),
-  mark(700, 400, 0.78, 2, icons.truck),
-  mark(900, 395, 0.75, -4, icons.boxes),
-  mark(1080, 410, 0.75, 4, icons.parcel),
-  mark(1240, 385, 0.72, 0, icons.ac),
-  mark(1400, 405, 0.7, 4, icons.roller),
-  mark(1520, 395, 0.68, -6, icons.saw),
-  mark(80, 430, 0.7, 6, icons.briefcase),
-  mark(200, 420, 0.72, -3, icons.pot),
-  mark(300, 200, 0.7, 0, icons.fridge),
+  mark(36, 18, 1.05, -8, icons.pin),
+  mark(150, 8, 1.0, 0, icons.charminar),
+  mark(280, 36, 1.0, -3, icons.car),
+  mark(430, 6, 0.95, 0, icons.gate),
+  mark(590, 10, 0.95, 0, icons.signal),
+  mark(720, 12, 1.0, 0, icons.hotel),
+  mark(900, 16, 1.05, -2, icons.auto),
+  mark(1160, 10, 1.0, 0, icons.person),
+  mark(1360, 22, 0.9, -4, icons.suitcase),
+  mark(1520, 16, 0.95, 4, icons.plug),
+  mark(20, 175, 1.05, -6, icons.rider),
+  mark(250, 185, 0.95, 2, icons.taj),
+  mark(430, 205, 0.9, 6, icons.handPhone),
+  mark(590, 190, 0.9, -8, icons.helmet),
+  mark(760, 180, 0.95, 4, icons.scooter),
+  mark(960, 170, 0.9, -4, icons.map),
+  mark(1140, 160, 0.95, 2, icons.minar),
+  mark(1320, 175, 0.85, 0, icons.shield),
+  mark(1480, 185, 0.85, 6, icons.broom),
+  mark(430, 340, 0.85, 0, icons.gauge),
+  mark(580, 325, 0.9, -2, icons.bus),
+  mark(790, 335, 0.9, 2, icons.truck),
+  mark(1000, 325, 0.85, -4, icons.boxes),
+  mark(1180, 345, 0.85, 4, icons.parcel),
+  mark(1340, 320, 0.85, 0, icons.ac),
+  mark(1500, 340, 0.8, 4, icons.roller),
+  mark(200, 355, 0.8, -3, icons.pot),
+  mark(300, 345, 0.75, 8, icons.mirror),
 ];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 640" fill="none" aria-hidden="true">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 520" fill="none" aria-hidden="true">
   <g fill="none" stroke="#B7C3CE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     ${roads}
     ${placements.join("\n    ")}
