@@ -133,36 +133,38 @@ const icons = {
     <path d="M36 64 V76"/>
     <path d="M28 76 H44"/>`,
   pipe: `
-    <path d="M12 18 H40 V34 H58 V62"/>
-    <path d="M12 18 V8 M40 18 V28"/>
-    <path d="M58 62 V74"/>
-    <path d="M54 70 H62"/>
-    <circle cx="58" cy="78" r="2"/>`,
+    <path d="M18 10 V36 H52 V68"/>
+    <path d="M10 10 H26"/>
+    <path d="M44 36 H60"/>
+    <path d="M52 68 V82"/>
+    <circle cx="52" cy="86" r="2.4"/>`,
   ac: `
-    <path d="M8 14 H72 V46 H8 Z"/>
-    <path d="M14 22 H66 M14 28 H66 M14 34 H66"/>
-    <path d="M24 46 C22 58 18 62 16 70"/>
-    <path d="M40 46 C40 58 40 64 40 72"/>
-    <path d="M56 46 C58 58 62 62 64 70"/>`,
+    <path d="M6 16 H78 V50 H6 Z"/>
+    <path d="M14 26 H70"/>
+    <path d="M14 34 H70"/>
+    <path d="M18 50 V66 M40 50 V72 M62 50 V66"/>`,
   broom: `
-    <path d="M36 4 V40"/>
-    <path d="M16 40 H56 L50 72 H22 Z"/>
-    <path d="M24 48 L18 72 M36 40 V72 M48 48 L54 72"/>`,
+    <path d="M42 4 L30 42"/>
+    <path d="M14 42 H58"/>
+    <path d="M18 42 L12 74"/>
+    <path d="M28 42 L26 74"/>
+    <path d="M38 42 L40 74"/>
+    <path d="M48 42 L54 74"/>`,
   mirror: `
     <circle cx="28" cy="28" r="18"/>
     <circle cx="28" cy="28" r="12"/>
     <path d="M28 46 L40 74"/>
     <path d="M34 74 H48"/>`,
   roller: `
-    <path d="M8 16 H52 V36 H8 Z"/>
-    <path d="M52 26 H68"/>
-    <path d="M68 26 L84 58"/>
-    <path d="M78 64 H92"/>`,
+    <path d="M4 18 H62 V40 H4 Z"/>
+    <path d="M62 29 H78"/>
+    <path d="M78 29 L92 58"/>
+    <path d="M84 64 H100"/>`,
   saw: `
-    <path d="M8 28 H70"/>
-    <path d="M14 28 L18 40 L24 28 L30 40 L36 28 L42 40 L48 28 L54 40 L60 28"/>
-    <path d="M62 18 H78 V40 H62 Z"/>
-    <circle cx="70" cy="28" r="3"/>`,
+    <path d="M4 34 H66"/>
+    <path d="M10 34 L16 48 L24 34 L32 48 L40 34 L48 48 L56 34"/>
+    <path d="M66 20 H86 V46 H66 Z"/>
+    <circle cx="76" cy="33" r="3"/>`,
   fridge: `
     <path d="M16 6 H56 V78 H16 Z"/>
     <path d="M16 36 H56"/>
@@ -233,39 +235,39 @@ const roads = `
 `;
 
 const placements = [
-  mark(24, 28, 1.15, -6, icons.pin),
-  mark(110, 36, 1.2, 0, icons.charminar),
-  mark(250, 48, 1.15, -2, icons.car),
-  mark(430, 18, 1.05, 0, icons.gate),
-  mark(620, 24, 1.05, 0, icons.signal),
-  mark(760, 18, 1.15, 0, icons.hotel),
-  mark(980, 8, 1.35, -2, icons.auto),
-  mark(1288, 18, 1.2, 0, icons.person),
-  mark(18, 168, 1.35, -4, icons.rider),
-  mark(250, 188, 1.05, 2, icons.taj),
-  mark(470, 210, 1.05, 6, icons.handPhone),
-  mark(650, 196, 1.05, -8, icons.helmet),
-  mark(860, 188, 1.1, 3, icons.scooter),
-  mark(1088, 176, 1, -4, icons.map),
-  mark(1288, 168, 1.05, 2, icons.minar),
-  mark(1468, 150, 0.95, 0, icons.shield),
-  mark(430, 360, 0.95, 8, icons.plug),
-  mark(560, 372, 0.95, -6, icons.pipe),
-  mark(700, 348, 0.95, 0, icons.ac),
-  mark(860, 368, 0.9, 6, icons.broom),
-  mark(1000, 360, 0.9, -8, icons.mirror),
-  mark(1140, 368, 0.85, 4, icons.roller),
-  mark(1300, 360, 0.85, -6, icons.saw),
-  mark(1460, 348, 0.85, 0, icons.fridge),
-  mark(36, 470, 0.9, -4, icons.suitcase),
-  mark(180, 488, 0.85, 5, icons.briefcase),
-  mark(330, 478, 0.9, -3, icons.pot),
-  mark(500, 500, 0.85, 0, icons.gauge),
-  mark(680, 470, 0.95, -2, icons.bus),
-  mark(900, 478, 0.95, 2, icons.truck),
-  mark(1120, 470, 0.85, -4, icons.boxes),
-  mark(1300, 488, 0.9, 3, icons.parcel),
-  mark(1468, 500, 0.85, -2, icons.sedan),
+  mark(8, 8, 1.45, -8, icons.pin),
+  mark(90, 18, 1.45, 0, icons.charminar),
+  mark(230, 28, 1.45, -3, icons.car),
+  mark(400, 4, 1.25, 0, icons.gate),
+  mark(590, 8, 1.3, 0, icons.signal),
+  mark(730, 4, 1.4, 0, icons.hotel),
+  mark(940, 0, 1.7, -2, icons.auto),
+  mark(1260, 6, 1.5, 0, icons.person),
+  mark(0, 150, 1.7, -6, icons.rider),
+  mark(250, 170, 1.35, 2, icons.taj),
+  mark(460, 200, 1.3, 8, icons.handPhone),
+  mark(640, 186, 1.3, -10, icons.helmet),
+  mark(820, 176, 1.35, 4, icons.scooter),
+  mark(1040, 160, 1.25, -4, icons.map),
+  mark(1240, 150, 1.3, 3, icons.minar),
+  mark(1440, 140, 1.2, 0, icons.shield),
+  mark(400, 340, 1.25, 6, icons.plug),
+  mark(540, 350, 1.2, -4, icons.pipe),
+  mark(700, 330, 1.2, 0, icons.ac),
+  mark(880, 350, 1.15, 8, icons.broom),
+  mark(1040, 340, 1.15, -6, icons.mirror),
+  mark(1180, 348, 1.1, 4, icons.roller),
+  mark(1340, 340, 1.1, -8, icons.saw),
+  mark(1500, 328, 1.1, 0, icons.fridge),
+  mark(20, 460, 1.15, -4, icons.suitcase),
+  mark(160, 478, 1.1, 6, icons.briefcase),
+  mark(310, 468, 1.15, -3, icons.pot),
+  mark(480, 490, 1.1, 0, icons.gauge),
+  mark(640, 450, 1.2, -2, icons.bus),
+  mark(880, 458, 1.2, 2, icons.truck),
+  mark(1100, 450, 1.1, -4, icons.boxes),
+  mark(1280, 470, 1.15, 4, icons.parcel),
+  mark(1460, 480, 1.05, -2, icons.sedan),
 ];
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 640" fill="none" aria-hidden="true">
