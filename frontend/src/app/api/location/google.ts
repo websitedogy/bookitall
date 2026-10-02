@@ -129,6 +129,22 @@ export async function googleSearchPlaces(query: string): Promise<LocatedPlace[]>
   if (!autoRes.ok) return [];
   const autoJson = (await autoRes.json()) as PlaceAutocomplete;
   const predictions = (autoJson.predictions ?? []).slice(0, 6);
+  if (!predictions.length) {
+    const geocoded = await geocode({ address: query, components: "country:IN" });
+    return geocoded
+      .map((result) => {
+        const lat = result.geometry?.location?.lat;
+        const lng = result.geometry?.location?.lng;
+        if (lat == null || lng == null) return null;
+        return {
+          ...formatExactAddress(addressFromGoogle(result), result.formatted_address),
+          lat,
+          lng,
+        };
+      })
+      .filter((row): row is LocatedPlace => Boolean(row))
+      .slice(0, 6);
+  }
 
   const details = await Promise.all(
     predictions.map(async (row) => {

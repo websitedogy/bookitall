@@ -32,6 +32,35 @@ async function nominatimSearch(q: string) {
   return (await response.json()) as SearchHit[];
 }
 
+function addressAttempts(q: string) {
+  const attempts: string[] = [];
+  const add = (value: string) => {
+    const next = value
+      .replace(/\s+/g, " ")
+      .replace(/\s*,\s*/g, ", ")
+      .replace(/(?:,\s*){2,}/g, ", ")
+      .replace(/^[,\s]+|[,\s]+$/g, "")
+      .trim();
+    if (next.length < 2) return;
+    if (attempts.some((item) => item.toLowerCase() === next.toLowerCase())) return;
+    attempts.push(next);
+  };
+
+  const stripped = q.replace(
+    /\b(?:opp\.?|opposite(?:\s+to)?|near(?:by)?|beside|besides|behind|next\s+to|in\s+front\s+of|adjacent\s+to)\b[^,]*/gi,
+    " ",
+  );
+  add(stripped);
+  const parts = stripped
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 2);
+  if (parts.length >= 2) add(`${parts[0]}, ${parts[parts.length - 1]}`);
+  add(q);
+  if (parts.length) add(parts[parts.length - 1]);
+  return attempts.slice(0, 4);
+}
+
 function score(row: SearchHit) {
   const address = row.address ?? {};
   let n = 0;
@@ -47,23 +76,30 @@ export async function GET(request: Request) {
   const q = new URL(request.url).searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) return Response.json([]);
 
-  if (googleMapsKey()) {
-    const google = await googleSearchPlaces(q);
-    if (google.length) return Response.json(google);
+  const attempts = addressAttempts(q);
+  let rows: SearchHit[] = [];
+
+  for (const attempt of attempts) {
+    if (googleMapsKey()) {
+      const google = await googleSearchPlaces(attempt);
+      if (google.length) return Response.json(google);
+    }
+    rows = await nominatimSearch(attempt);
+    if (!rows.length && !attempt.includes(",") && !/telangana|andhra|india/i.test(attempt)) {
+      rows = await nominatimSearch(`${attempt} Telangana`);
+    }
+    if (rows.length) break;
   }
-
-  const queries = [q];
-  if (!/telangana|india/i.test(q)) queries.push(`${q} village Telangana`);
-
-  const rows = (await Promise.all(queries.map(nominatimSearch))).flat();
   const seen = new Set<string>();
   const results: LocationSearchResult[] = [];
 
   for (const row of rows.sort((a, b) => score(b) - score(a))) {
     const lat = Number(row.lat);
     const lng = Number(row.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng) || !row.address) continue;
-    const place = formatExactAddress(row.address, row.display_name);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    const place = row.address
+      ? formatExactAddress(row.address, row.display_name)
+      : { line1: row.display_name || q, line2: "", full: row.display_name || q };
     const key = `${place.full}|${lat.toFixed(4)}|${lng.toFixed(4)}`;
     if (seen.has(key)) continue;
     seen.add(key);
