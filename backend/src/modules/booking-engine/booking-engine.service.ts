@@ -1095,13 +1095,6 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     const missing = [];
     if (!user.fullName?.trim()) missing.push('Full Name');
     if (!user.phone?.trim()) missing.push('Mobile Number');
-    if (!user.nickname?.trim()) missing.push('Nick name');
-    if (!user.email?.trim()) missing.push('Email Address');
-    if (!user.avatarUrl?.trim()) missing.push('Profile Photo');
-    if (!user.dateOfBirth) missing.push('Date of Birth');
-    if (!user.gender) missing.push('Gender');
-    if (!user.personalAddress?.trim()) missing.push('Personal Address');
-    if (!/^\d{6}$/.test(String(user.pincode ?? '').replace(/\D/g, ''))) missing.push('Pincode');
     if (missing.length) {
       throw new BadRequestException(`Complete your profile to book. Missing: ${missing.join(', ')}. Go to /account to complete your profile.`);
     }

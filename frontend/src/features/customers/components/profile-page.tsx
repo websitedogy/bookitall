@@ -15,7 +15,6 @@ import { ProfileStatusBadge } from "./profile-status-badge";
 type FormState = {
   nickname: string;
   email: string;
-  dateOfBirth: string;
   gender: ProfileGender | "";
   personalAddress: string;
   pincode: string;
@@ -33,7 +32,6 @@ function fromUser(user: AuthUser): FormState {
   return {
     nickname: user.nickname ?? "",
     email: publicEmail(user.email),
-    dateOfBirth: user.dateOfBirth?.slice(0, 10) ?? "",
     gender: user.gender ?? "",
     personalAddress: user.personalAddress ?? "",
     pincode: user.pincode ?? "",
@@ -94,7 +92,6 @@ export function ProfilePage() {
       ...user,
       nickname: form.nickname,
       email: form.email,
-      dateOfBirth: form.dateOfBirth,
       gender: form.gender || null,
       personalAddress: form.personalAddress,
       pincode: form.pincode,
@@ -170,7 +167,6 @@ export function ProfilePage() {
         body: JSON.stringify({
           nickname: next.nickname.trim(),
           email: next.email.trim(),
-          dateOfBirth: next.dateOfBirth || null,
           gender: next.gender || null,
           personalAddress: next.personalAddress.trim(),
           pincode: next.pincode.replace(/\D/g, ""),
@@ -201,10 +197,7 @@ export function ProfilePage() {
         <button
           type="button"
           onClick={() => photoRef.current?.click()}
-          className={cn(
-            "relative inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--primary)] text-xl font-semibold text-white",
-            missing.includes("avatarUrl") && "ring-2 ring-amber-400 ring-offset-2",
-          )}
+          className="relative inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--primary)] text-xl font-semibold text-white"
           aria-label="Profile photo"
         >
           {user.avatarUrl ? (
@@ -232,7 +225,7 @@ export function ProfilePage() {
           <p className="truncate text-lg font-semibold">{user.fullName}</p>
           <p className="truncate text-sm text-[var(--text-muted)]">{user.phone}</p>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            {photoBusy ? "Uploading…" : missing.includes("avatarUrl") ? "Photo required" : ""}
+            {photoBusy ? "Uploading…" : "Photo optional"}
           </p>
         </div>
       </section>
@@ -244,31 +237,13 @@ export function ProfilePage() {
           void save();
         }}
       >
-        <Field label="Nick name" missing={missing.includes("nickname")}>
-          <input
-            value={form.nickname}
-            onChange={(event) => patch("nickname", event.target.value)}
-            className={inputClass(missing.includes("nickname"))}
-          />
+        <Field label="Nick name" hint="Optional">
+          <input value={form.nickname} onChange={(event) => patch("nickname", event.target.value)} className={inputClass(false)} />
         </Field>
-        <Field label="Email" missing={missing.includes("email")}>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(event) => patch("email", event.target.value)}
-            className={inputClass(missing.includes("email"))}
-          />
+        <Field label="Email" hint="Optional">
+          <input type="email" value={form.email} onChange={(event) => patch("email", event.target.value)} className={inputClass(false)} />
         </Field>
-        <Field label="Date of Birth" missing={missing.includes("dateOfBirth")}>
-          <input
-            type="date"
-            value={form.dateOfBirth}
-            max={new Date().toISOString().slice(0, 10)}
-            onChange={(event) => patch("dateOfBirth", event.target.value)}
-            className={inputClass(missing.includes("dateOfBirth"))}
-          />
-        </Field>
-        <Field label="Gender" missing={missing.includes("gender")}>
+        <Field label="Gender" hint="Optional">
           <div className="grid grid-cols-3 gap-2">
             {GENDERS.map((option) => (
               <button
@@ -279,9 +254,7 @@ export function ProfilePage() {
                   "h-11 rounded-2xl text-sm font-semibold ring-1",
                   form.gender === option.value
                     ? "bg-[var(--primary)] text-white ring-[var(--primary)]"
-                    : missing.includes("gender")
-                      ? "bg-amber-50 text-[var(--text)] ring-amber-300"
-                      : "bg-white text-[var(--text)] ring-[var(--border)]",
+                    : "bg-white text-[var(--text)] ring-[var(--border)]",
                 )}
               >
                 {option.label}
