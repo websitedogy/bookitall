@@ -121,7 +121,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       quantity: 1,
       scheduledAt: isHotel ? undefined : when,
       address: isHotel ? extras?.address || exactAddress() : isTour ? undefined : exactAddress(),
-      notes: [selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} guests · ${selectedRoom.available} available` : "", notes].filter(Boolean).join("\n"),
+      notes: [selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} members · ${selectedRoom.available} available` : "", notes].filter(Boolean).join("\n"),
       guestName: isHotel ? guestName.trim() : undefined,
       guestPhone: isHotel ? guestPhone.replace(/\D/g, "").slice(-10) : undefined,
       guests: isHotel ? Math.max(1, Number(guests) || 1) : undefined,
@@ -200,7 +200,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       return;
     }
     if (!guestName.trim()) {
-      setFormError("Enter the guest name.");
+      setFormError("Enter your name.");
       return;
     }
     const phone = guestPhone.replace(/\D/g, "").slice(-10);
@@ -210,7 +210,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
     }
     const count = Math.max(1, Number(guests) || 1);
     if (count > 20) {
-      setFormError("Enter up to 20 guests.");
+      setFormError("Enter up to 20 members.");
       return;
     }
     try {
@@ -301,8 +301,8 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 <input type="date" value={checkOut} min={checkIn || defaultDate(0)} onChange={(e) => setCheckOut(e.target.value)} className={stayInput} />
               </Field>
             </div>
-            <Field label="Guest name">
-              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Name for the booking" className={stayInput} />
+            <Field label="Your name">
+              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Your name" className={stayInput} />
             </Field>
             <Field label="Mobile">
               <input
@@ -313,7 +313,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 className={stayInput}
               />
             </Field>
-            <Field label="Guests">
+            <Field label="Members">
               <input
                 inputMode="numeric"
                 value={guests}
@@ -332,7 +332,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                   </p>
                   {stayQuote.extraGuests > 0 && stayQuote.extraRate > 0 ? (
                     <p className="mt-1 text-[13px] text-[#5b6e68]">
-                      {stayQuote.extraGuests} extra guest{stayQuote.extraGuests === 1 ? "" : "s"} × {inr(stayQuote.extraRate)} × {stayQuote.nights} night{stayQuote.nights === 1 ? "" : "s"}
+                      {stayQuote.extraGuests} extra member{stayQuote.extraGuests === 1 ? "" : "s"} × {inr(stayQuote.extraRate)} × {stayQuote.nights} night{stayQuote.nights === 1 ? "" : "s"}
                     </p>
                   ) : null}
                   <p className="mt-1 text-sm font-semibold text-[#0f3d38]">Charge {inr(stayQuote.total)} before tax</p>
@@ -362,7 +362,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                     >
                       <span>
                         <span className="block text-sm font-semibold text-[#12241f]">{room.name}</span>
-                        <span className="mt-0.5 block text-[12px] text-[#7a6a52]">{room.guests} guests · {room.available} available</span>
+                        <span className="mt-0.5 block text-[12px] text-[#7a6a52]">{room.guests} members · {room.available} available</span>
                       </span>
                       <span className="shrink-0 text-right">
                         <span className="block text-base font-semibold text-[#0f3d38]">{inr(room.rate)}</span>

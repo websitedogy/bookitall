@@ -170,7 +170,7 @@ export function BookingDetailPage({ id }: { id: string }) {
           <Row label="Total" value={inr(booking.total)} />
           {stayIn && stayOut ? <Row label="Stay" value={`${stayIn} → ${stayOut}`} /> : booking.scheduledAt ? <Row label="When" value={new Date(booking.scheduledAt).toLocaleString("en-IN")} /> : null}
           {isVendorView && customerPhoneOf(booking) ? <Row label="Customer phone" value={customerPhoneOf(booking)} /> : null}
-          {booking.details?.guests ? <Row label="Guests" value={String(booking.details.guests)} /> : null}
+          {booking.details?.guests ? <Row label="Members" value={String(booking.details.guests)} /> : null}
           {serviceLocationOf(booking) && (booking.partnerId !== userId || vendorSeesCustomerLocation(booking)) ? (
             <Row label={booking.partnerId === userId ? "Customer location" : "Service location"} value={serviceLocationOf(booking)} />
           ) : waitingAdmin && booking.partnerId === userId ? (

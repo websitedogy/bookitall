@@ -219,10 +219,10 @@ export function CheckoutPage() {
         </div>
 
         <section className="rounded-[28px] bg-white p-5 shadow-[var(--studio-shadow)] ring-1 ring-[var(--studio-line)]">
-          <h2 className="font-semibold">Guest</h2>
+          <h2 className="font-semibold">Your details</h2>
           <p className="mt-2 text-sm">{guest?.guestName?.trim() || user?.fullName}</p>
           <p className="text-sm text-[var(--text-muted)]">{guest?.guestPhone?.trim() || user?.phone}</p>
-          {guest?.guests ? <p className="mt-1 text-sm text-[var(--text-muted)]">{guest.guests} guest{guest.guests === 1 ? "" : "s"}</p> : null}
+          {guest?.guests ? <p className="mt-1 text-sm text-[var(--text-muted)]">{guest.guests} member{guest.guests === 1 ? "" : "s"}</p> : null}
         </section>
 
         {stayLocation ? (
@@ -331,7 +331,7 @@ export function CheckoutPage() {
                   <span className="block text-xs text-[var(--text-muted)]">
                     {item.roomName ? `${item.roomName} · ` : ""}
                     {nightsBetween(item.checkIn, item.checkOut)} night{nightsBetween(item.checkIn, item.checkOut) === 1 ? "" : "s"}
-                    {item.guests ? ` · ${item.guests} guest${item.guests === 1 ? "" : "s"}` : ""}
+                    {item.guests ? ` · ${item.guests} member${item.guests === 1 ? "" : "s"}` : ""}
                   </span>
                 ) : (
                   <span className="block text-xs text-[var(--text-muted)]">× {item.quantity}</span>
