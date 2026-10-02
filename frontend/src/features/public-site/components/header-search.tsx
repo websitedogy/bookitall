@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import { FormEvent, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { SERVICE_NAV } from "@/features/home/service-nav";
@@ -39,37 +40,15 @@ function searchHref(query: string) {
 function categorySuggestions(query: string, isEnabled: (slug: string) => boolean): Suggestion[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];
-  return SERVICE_NAV.filter((item) => {
-    if (!isEnabled(item.id)) return false;
-    const words = [item.name, ...(CATEGORY_WORDS[item.id] ?? [])].map((word) => word.toLowerCase());
-    return words.some((word) => word.includes(q) || q.includes(word));
-  }).map((item) => ({
-    key: `cat-${item.id}`,
-    kind: "query" as const,
-    label: item.name,
-    href: item.href,
-  }));
-}
-
-function phraseSuggestions(rows: PublicListingPost[], query: string): Suggestion[] {
-  const q = query.trim().toLowerCase();
-  const seen = new Set<string>();
-  const items: Suggestion[] = [];
-  const add = (label: string) => {
-    const text = label.replace(/\s+/g, " ").trim();
-    const key = text.toLowerCase();
-    if (text.length < 2 || key === q || seen.has(key) || !key.includes(q)) return;
-    seen.add(key);
-    items.push({ key: `q-${key}`, kind: "query", label: text, href: searchHref(text) });
-  };
-  for (const row of rows) {
-    add(row.title);
-    if (row.category) add(row.category);
-    const place = (row.location || "").split(",").map((part) => part.trim()).filter(Boolean).at(-1);
-    if (row.category && place) add(`${row.category} in ${place}`);
-    if (row.title && place) add(`${row.title} ${place}`);
-  }
-  return items.slice(0, 5);
+  return SERVICE_NAV.flatMap((item) => {
+    if (!isEnabled(item.id)) return [];
+    const name = item.name.toLowerCase();
+    const aliasHit =
+      q.length >= 3 &&
+      (CATEGORY_WORDS[item.id] ?? []).some((word) => word.startsWith(q) || q.startsWith(word));
+    if (!name.includes(q) && !aliasHit) return [];
+    return [{ key: `cat-${item.id}`, kind: "query" as const, label: item.name, href: item.href }];
+  });
 }
 
 function listingSuggestions(rows: PublicListingPost[]): Suggestion[] {
@@ -102,21 +81,40 @@ export function HeaderSearch({ inputId = "header-search" }: { inputId?: string }
   const { isEnabled } = useServiceCatalog();
   const listId = useId();
   const rootRef = useRef<HTMLFormElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState<PublicListingPost[]>([]);
   const [active, setActive] = useState(0);
+  const [box, setBox] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const suggestions = [
     ...(query.trim()
       ? [{ key: "typed", kind: "query" as const, label: query.trim(), href: searchHref(query) }]
       : []),
     ...categorySuggestions(query, isEnabled),
-    ...phraseSuggestions(listings, query),
-    ...listingSuggestions(listings),
-  ].filter((item, index, all) => all.findIndex((other) => other.key === item.key || (item.kind === "query" && other.kind === "query" && other.label.toLowerCase() === item.label.toLowerCase())) === index)
+    ...listingSuggestions(listings.filter((row) => `${row.title} ${row.category}`.toLowerCase().includes(query.trim().toLowerCase()) || (query.trim().length >= 3 && (row.location || "").toLowerCase().includes(query.trim().toLowerCase())))),
+  ]
+    .filter((item, index, all) => all.findIndex((other) => other.label.toLowerCase() === item.label.toLowerCase() && other.kind === item.kind) === index)
     .slice(0, 8);
+  const showList = open && query.trim().length > 0;
+
+  useLayoutEffect(() => {
+    if (!showList) return;
+    const update = () => {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setBox({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [showList, query, suggestions.length]);
 
   useEffect(() => {
     const q = query.trim();
@@ -150,7 +148,9 @@ export function HeaderSearch({ inputId = "header-search" }: { inputId?: string }
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target) || listRef.current?.contains(target)) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
