@@ -5,7 +5,7 @@ export function BrandMark() {
         className="pointer-events-none absolute inset-0"
         aria-hidden
         style={{
-          backgroundImage: "url(/brand/footer-doodle.svg)",
+          backgroundImage: "url(/brand/footer-doodle.svg?v=2)",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
