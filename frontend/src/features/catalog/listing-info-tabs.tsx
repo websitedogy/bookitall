@@ -74,10 +74,40 @@ export function ListingInfoTabs({
   const [tab, setTab] = useState<DetailTabId>(tabs[0] ?? "basics");
   const [action, setAction] = useState<ActionId | null>(null);
   const activeTab = tabs.includes(tab) ? tab : (tabs[0] ?? "basics");
+  const compact = categoryId === "hotels";
+  const detailPanel = tabs.length ? (
+    <>
+      <div role="tablist" aria-label="Listing details" className="no-scrollbar flex gap-1 overflow-x-auto rounded-full bg-[#f4efe4] p-1">
+        {tabs.map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === id}
+            onClick={() => setTab(id)}
+            className={cn(
+              "h-9 shrink-0 rounded-full px-3.5 text-[12px] font-semibold",
+              activeTab === id ? "bg-white text-[#0f3d38] shadow-[0_4px_12px_-8px_rgba(7,22,20,0.45)]" : "text-[#7a6a52]",
+            )}
+          >
+            {names[id]}
+          </button>
+        ))}
+      </div>
+      {activeTab === "destinations" && tourRouteStops(grouped.destinations).length ? (
+        <TourRouteTracker rows={grouped.destinations} />
+      ) : (
+        <DetailRows rows={grouped[activeTab]} />
+      )}
+    </>
+  ) : (
+    <p className="text-sm text-[#7a6a52]">No extra details for this listing yet.</p>
+  );
 
   return (
     <>
-      <div className="flex flex-wrap gap-2 px-5 pb-4">
+      {compact && children ? <div className="px-5 pb-4">{children}</div> : null}
+      {compact ? null : <div className="flex flex-wrap gap-2 px-5 pb-4">
         <ActionBadge
           active={action === "reviews"}
           onClick={() => setAction("reviews")}
@@ -94,38 +124,30 @@ export function ListingInfoTabs({
         />
       </div>
 
-      <div className="border-t border-[#efe6d4] p-5">
-        <div>
-          {tabs.length ? (
-            <>
-              <div role="tablist" aria-label="Listing details" className="no-scrollbar flex gap-1 overflow-x-auto rounded-full bg-[#f4efe4] p-1">
-                {tabs.map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === id}
-                    onClick={() => setTab(id)}
-                    className={cn(
-                      "h-9 shrink-0 rounded-full px-3.5 text-[12px] font-semibold",
-                      activeTab === id ? "bg-white text-[#0f3d38] shadow-[0_4px_12px_-8px_rgba(7,22,20,0.45)]" : "text-[#7a6a52]",
-                    )}
-                  >
-                    {names[id]}
-                  </button>
-                ))}
-              </div>
-              {activeTab === "destinations" && tourRouteStops(grouped.destinations).length ? (
-                <TourRouteTracker rows={grouped.destinations} />
-              ) : (
-                <DetailRows rows={grouped[activeTab]} />
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-[#7a6a52]">No extra details for this listing yet.</p>
-          )}
-        </div>
-        {children ? <div className="mt-6 border-t border-[#efe6d4] pt-5">{children}</div> : null}
+      <div className={cn("border-t border-[#efe6d4] p-5", compact && "pt-4")}>
+        {compact ? (
+          <details className="group">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-[#0f766e] [&::-webkit-details-marker]:hidden">
+              Hotel details
+            </summary>
+            <div className="mt-3">{detailPanel}</div>
+          </details>
+        ) : (
+          <>
+            {detailPanel}
+            {children ? <div className="mt-6 border-t border-[#efe6d4] pt-5">{children}</div> : null}
+          </>
+        )}
+        {compact ? (
+          <div className="mt-4 flex gap-4 text-[12px] font-semibold text-[#7a6a52]">
+            <button type="button" onClick={() => setAction("reviews")} className="inline-flex items-center gap-1">
+              <Star className="h-3 w-3" aria-hidden /> Reviews {reviewCount}
+            </button>
+            <button type="button" onClick={() => setAction("report")} className="inline-flex items-center gap-1">
+              <Flag className="h-3 w-3" aria-hidden /> Report
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {action === "reviews" ? (
