@@ -27,15 +27,35 @@ class _AuthPageState extends State<AuthPage> {
   final _name = TextEditingController();
   final _phone = TextEditingController();
   final _otp = TextEditingController();
+  bool? _known;
+
+  @override
+  void initState() {
+    super.initState();
+    _phone.addListener(_onPhoneChanged);
+  }
   final _google = GoogleSignIn(scopes: const ['email', 'profile']);
 
   @override
   void dispose() {
     _resendTimer?.cancel();
+    _phone.removeListener(_onPhoneChanged);
     _name.dispose();
     _phone.dispose();
     _otp.dispose();
     super.dispose();
+  }
+
+  void _onPhoneChanged() {
+    final phone = _phone.text.replaceAll(RegExp(r'\D'), '');
+    if (phone.length != 10) {
+      if (_known != null) setState(() => _known = null);
+      return;
+    }
+    phoneAlreadyRegistered(phone).then((known) {
+      if (!mounted || _phone.text.replaceAll(RegExp(r'\D'), '') != phone) return;
+      setState(() => _known = known);
+    });
   }
 
   void _startResendClock() {
@@ -63,15 +83,23 @@ class _AuthPageState extends State<AuthPage> {
     widget.onSignedIn?.call();
   }
 
+  Future<bool> _isReturning(String phone) async {
+    if (_known != null) return _known!;
+    final known = await phoneAlreadyRegistered(phone);
+    if (mounted) setState(() => _known = known);
+    return known;
+  }
+
   Future<void> _sendOtp() async {
-    final name = _name.text.trim();
     final phone = _phone.text.replaceAll(RegExp(r'\D'), '');
-    if (name.isEmpty) {
-      setState(() => _error = 'Enter your name');
-      return;
-    }
     if (phone.length != 10) {
       setState(() => _error = 'Enter a 10-digit mobile number');
+      return;
+    }
+    final returning = await _isReturning(phone);
+    final name = returning ? '' : _name.text.trim();
+    if (!returning && name.isEmpty) {
+      setState(() => _error = 'Enter your name');
       return;
     }
     if (!isFirebaseConfigured()) {
@@ -135,12 +163,13 @@ class _AuthPageState extends State<AuthPage> {
   Future<void> _googleContinue() async {
     final name = _name.text.trim();
     final phone = _phone.text.replaceAll(RegExp(r'\D'), '');
-    if (name.isEmpty) {
-      setState(() => _error = 'Enter your name');
-      return;
-    }
     if (phone.length != 10) {
       setState(() => _error = 'Enter your 10-digit mobile number, then continue with Google');
+      return;
+    }
+    final returning = await _isReturning(phone);
+    if (!returning && name.isEmpty) {
+      setState(() => _error = 'Enter your name');
       return;
     }
     setState(() {
@@ -187,17 +216,15 @@ class _AuthPageState extends State<AuthPage> {
             Text(
               _otpStep
                   ? 'Enter the 6-digit OTP sent to +91 $phone.'
-                  : 'Enter your name and mobile number. We will send an OTP to sign in.',
+                  : _known == true
+                      ? 'This number already has an account. We will send an OTP.'
+                      : _known == false
+                          ? 'New number. Add your name, then we will send an OTP.'
+                          : 'Enter your mobile number.',
               style: const TextStyle(color: AppColors.textMuted, height: 1.45),
             ),
             const SizedBox(height: 24),
             if (!_otpStep) ...[
-              TextField(
-                controller: _name,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              const SizedBox(height: 12),
               TextField(
                 controller: _phone,
                 keyboardType: TextInputType.phone,
@@ -207,6 +234,14 @@ class _AuthPageState extends State<AuthPage> {
                   prefixText: '+91  ',
                 ),
               ),
+              if (_known == false) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _name,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+              ],
               const SizedBox(height: 20),
               OutlinedButton(
                 onPressed: _busy ? null : _googleContinue,

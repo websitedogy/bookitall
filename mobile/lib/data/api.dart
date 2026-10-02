@@ -380,11 +380,26 @@ Future<void> continueWithPhone({
   String? otp,
 }) {
   return _authPost('/auth/phone', {
-    'fullName': fullName,
+    if (fullName.trim().isNotEmpty) 'fullName': fullName.trim(),
     'phone': phone,
     if (idToken != null && idToken.isNotEmpty) 'idToken': idToken,
     if (otp != null && otp.isNotEmpty) 'otp': otp,
   });
+}
+
+Future<bool> phoneAlreadyRegistered(String phone) async {
+  try {
+    final base = await apiBaseUrl();
+    final response = await http
+        .get(_joinApi(base, '/auth/phone-known', {'phone': phone}))
+        .timeout(const Duration(seconds: 6));
+    if (response.statusCode >= 400) return false;
+    final json = _asJsonMap(response.body);
+    final data = _dataMap(json['data']) ?? json;
+    return data['known'] == true;
+  } catch (_) {
+    return false;
+  }
 }
 
 Future<void> continueWithGoogle({
