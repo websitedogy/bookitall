@@ -231,6 +231,46 @@ const FIELD_LABELS: Record<string, string> = {
   material: 'Material',
 };
 
+const SEARCH_TEXT_FIELDS = [
+  'location',
+  'city',
+  'area',
+  'state',
+  'address',
+  'street',
+  'destinations',
+  'hotelName',
+  'shopName',
+  'packageName',
+  'driverName',
+  'kitchenName',
+  'companyName',
+  'electricianName',
+  'plumberName',
+  'cleanerName',
+  'technicianName',
+  'carpenterName',
+  'painterName',
+  'beauticianName',
+  'ownerName',
+  'jobTitle',
+  'serviceType',
+  'vehicleType',
+  'serviceName',
+];
+
+function listingSearchRank(row: VendorListing, needle: string) {
+  const q = needle.toLowerCase();
+  const title = row.title.toLowerCase();
+  const category = row.category.replace(/-/g, ' ').toLowerCase();
+  const blob = SEARCH_TEXT_FIELDS.map((field) => (row.fields?.[field] ?? '').toLowerCase()).join(' ');
+  if (title.startsWith(q)) return 0;
+  if (title.includes(q)) return 1;
+  if (category.startsWith(q) || category.includes(q)) return 2;
+  if (blob.includes(q)) return 3;
+  return 4;
+}
+
 function vendorHeld(status: UserStatus) {
   return status === UserStatus.INACTIVE || status === UserStatus.SUSPENDED;
 }
@@ -402,13 +442,34 @@ export class VendorListingsService {
     return listing;
   }
 
-  async listNearby(query: { category?: string; lat?: number; lng?: number; city?: string; radiusKm?: number }) {
+  async listNearby(query: { category?: string; lat?: number; lng?: number; city?: string; radiusKm?: number; q?: string }) {
     if (query.category && query.category !== 'all' && !(await this.platformServices.isEnabled(query.category))) {
       return [];
     }
-    const where: { status: ListingStatus; category?: string } = { status: ListingStatus.ACCEPTED };
-    if (query.category && query.category !== 'all') where.category = query.category;
-    const rows = await this.listings.find({ where, order: { createdAt: 'DESC' }, take: 200 });
+    const needle = (query.q ?? '').trim().slice(0, 60);
+    let rows: VendorListing[];
+    if (needle) {
+      const like = `%${needle.replace(/[%_\\]/g, '\\$&')}%`;
+      const textMatch = [
+        `listing.title ILIKE :q ESCAPE '\\'`,
+        `REPLACE(listing.category, '-', ' ') ILIKE :q ESCAPE '\\'`,
+        ...SEARCH_TEXT_FIELDS.map((field) => `listing.fields->>'${field}' ILIKE :q ESCAPE '\\'`),
+      ].join(' OR ');
+      const qb = this.listings
+        .createQueryBuilder('listing')
+        .where('listing.status = :status', { status: ListingStatus.ACCEPTED })
+        .andWhere('listing.deletedAt IS NULL')
+        .andWhere(`(${textMatch})`, { q: like });
+      if (query.category && query.category !== 'all') {
+        qb.andWhere('listing.category = :category', { category: query.category });
+      }
+      rows = await qb.orderBy('listing.createdAt', 'DESC').take(40).getMany();
+      rows.sort((a, b) => listingSearchRank(a, needle) - listingSearchRank(b, needle));
+    } else {
+      const where: { status: ListingStatus; category?: string } = { status: ListingStatus.ACCEPTED };
+      if (query.category && query.category !== 'all') where.category = query.category;
+      rows = await this.listings.find({ where, order: { createdAt: 'DESC' }, take: 200 });
+    }
     const enabled = await this.platformServices.enabledSlugs();
     const hidden = new Set([
       ...(await this.users.idsWithStatus(rows.map((row) => row.userId), UserStatus.SUSPENDED)),

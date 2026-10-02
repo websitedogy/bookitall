@@ -16,12 +16,14 @@ export class VendorListingsController {
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('city') city?: string,
+    @Query('q') q?: string,
   ) {
     return this.listings.listNearby({
       category,
       lat: lat != null && lat !== '' ? Number(lat) : undefined,
       lng: lng != null && lng !== '' ? Number(lng) : undefined,
       city,
+      q,
     });
   }
 
