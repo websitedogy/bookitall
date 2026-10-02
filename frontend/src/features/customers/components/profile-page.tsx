@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, LocateFixed, MapPin } from "lucide-react";
+import { Camera, LocateFixed } from "lucide-react";
 import { useAuth, useAuthHydrated, type AuthUser, type ProfileGender } from "@/features/auth/store";
 import { api, ApiError } from "@/shared/lib/api";
 import { publicEmail } from "@/shared/lib/email";
@@ -57,7 +57,6 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
-  const [addressMode, setAddressMode] = useState<"pick" | "manual">("pick");
 
   useEffect(() => {
     if (!ready) return;
@@ -67,7 +66,6 @@ export function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     setForm((current) => current ?? fromUser(user));
-    if (user.personalAddress && !user.addressLatitude) setAddressMode("manual");
   }, [user]);
 
   useEffect(() => {
@@ -78,7 +76,6 @@ export function ProfilePage() {
         if (cancelled || !res.data) return;
         updateUser(res.data);
         setForm(fromUser(res.data));
-        if (res.data.personalAddress && !res.data.addressLatitude) setAddressMode("manual");
       })
       .catch(() => undefined);
     return () => {
@@ -145,11 +142,9 @@ export function ProfilePage() {
             }
           : current,
       );
-      setAddressMode("pick");
       setSaved(false);
     } catch {
       setError("Allow location access, or enter your address.");
-      setAddressMode("manual");
     } finally {
       setLocateBusy(false);
     }
@@ -262,38 +257,15 @@ export function ProfilePage() {
             ))}
           </div>
         </Field>
-        <Field label="Address" missing={missing.includes("personalAddress")}>
-          <div className="mb-2 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setAddressMode("pick");
-                void pickCurrentLocation();
-              }}
-              className={cn(
-                "inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl text-xs font-semibold ring-1",
-                addressMode === "pick"
-                  ? "bg-[var(--primary-soft)] text-[var(--primary)] ring-[var(--primary)]/20"
-                  : "bg-white text-[var(--text)] ring-[var(--border)]",
-              )}
-            >
-              <LocateFixed className="h-3.5 w-3.5" aria-hidden />
-              {locateBusy ? "Detecting…" : "Current location"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setAddressMode("manual")}
-              className={cn(
-                "inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl text-xs font-semibold ring-1",
-                addressMode === "manual"
-                  ? "bg-[var(--primary-soft)] text-[var(--primary)] ring-[var(--primary)]/20"
-                  : "bg-white text-[var(--text)] ring-[var(--border)]",
-              )}
-            >
-              <MapPin className="h-3.5 w-3.5" aria-hidden />
-              Enter manually
-            </button>
-          </div>
+        <Field label="Address" hint="Optional">
+          <button
+            type="button"
+            onClick={() => void pickCurrentLocation()}
+            className="mb-2 inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-[var(--primary)] ring-1 ring-[var(--border)]"
+          >
+            <LocateFixed className="h-3.5 w-3.5" aria-hidden />
+            {locateBusy ? "Detecting…" : "Use current location"}
+          </button>
           <textarea
             value={form.personalAddress}
             onChange={(event) => {
@@ -304,17 +276,18 @@ export function ProfilePage() {
                 if (pin) patch("pincode", pin);
               }
             }}
-            rows={3}
-            className={cn(inputClass(missing.includes("personalAddress")), "min-h-[88px] resize-none py-3")}
+            rows={2}
+            placeholder="House, street, city"
+            className={cn(inputClass(false), "min-h-[72px] resize-none py-3")}
           />
         </Field>
-        <Field label="Pincode" missing={missing.includes("pincode")}>
+        <Field label="Pincode" hint="Optional">
           <input
             inputMode="numeric"
             maxLength={6}
             value={form.pincode}
             onChange={(event) => patch("pincode", event.target.value.replace(/\D/g, "").slice(0, 6))}
-            className={inputClass(missing.includes("pincode"))}
+            className={inputClass(false)}
           />
         </Field>
 
@@ -335,18 +308,18 @@ export function ProfilePage() {
 
 function Field({
   label,
-  missing,
+  hint,
   children,
 }: {
   label: string;
-  missing?: boolean;
+  hint?: string;
   children: ReactNode;
 }) {
   return (
     <label className="block">
       <span className="flex items-center justify-between gap-3">
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</span>
-        {missing ? <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">Required</span> : null}
+        {hint ? <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{hint}</span> : null}
       </span>
       <span className="mt-1.5 block">{children}</span>
     </label>
