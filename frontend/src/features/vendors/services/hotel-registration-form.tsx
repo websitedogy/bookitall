@@ -9,7 +9,7 @@ import { ServiceSubmitButton } from "./service-submit-button";
 import { StayCheckGrid, StayField, StaySection, stayInputClass } from "./stay-form-ui";
 import { useAuth } from "@/features/auth/store";
 import { ApiError, authFetch } from "@/shared/lib/api";
-import { geocodeVendorAddress } from "./detect-exact-location";
+import { districtNameFromLabel, geocodeVendorAddress } from "./detect-exact-location";
 import { VendorLocationPopup } from "./vendor-location-popup";
 import { useDraftFiles, useDraftState } from "./use-vendor-form-draft";
 import { cn } from "@/shared/lib/cn";
@@ -148,7 +148,8 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
     setError("");
     try {
       const body = new FormData();
-      const info = ELECTRICIAN_DISTRICTS.find((item) => item.name === district);
+      const areaDistrict = district || districtNameFromLabel(locationLabel.trim()) || "";
+      const info = ELECTRICIAN_DISTRICTS.find((item) => item.name === areaDistrict);
       const rates = rooms
         .map((room) => `${room}: ₹${quotes[room].rate} / ${quotes[room].occupancy} guests / ${quotes[room].available} rooms`)
         .join("; ");
@@ -176,9 +177,9 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
       body.append("price", firstRate);
       body.append("priceUnit", "PER_ROOM");
       body.append("location", locationLabel.trim());
-      body.append("district", district);
+      body.append("district", areaDistrict);
       body.append("state", info?.state || "");
-      body.append("city", district);
+      body.append("city", areaDistrict);
       body.append("area", locationLabel.trim());
       let pinLat = lat;
       let pinLng = lng;
