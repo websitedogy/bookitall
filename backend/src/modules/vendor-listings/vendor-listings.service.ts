@@ -231,14 +231,7 @@ const FIELD_LABELS: Record<string, string> = {
   material: 'Material',
 };
 
-const SEARCH_TEXT_FIELDS = [
-  'location',
-  'city',
-  'area',
-  'state',
-  'address',
-  'street',
-  'destinations',
+const SEARCH_NAME_FIELDS = [
   'hotelName',
   'shopName',
   'packageName',
@@ -254,10 +247,12 @@ const SEARCH_TEXT_FIELDS = [
   'beauticianName',
   'ownerName',
   'jobTitle',
-  'serviceType',
-  'vehicleType',
   'serviceName',
 ];
+
+const SEARCH_PLACE_FIELDS = ['location', 'city', 'area', 'state', 'address', 'street', 'destinations', 'serviceType', 'vehicleType'];
+
+const SEARCH_TEXT_FIELDS = [...SEARCH_NAME_FIELDS, ...SEARCH_PLACE_FIELDS];
 
 function listingSearchRank(row: VendorListing, needle: string) {
   const q = needle.toLowerCase();
@@ -450,10 +445,11 @@ export class VendorListingsService {
     let rows: VendorListing[];
     if (needle) {
       const like = `%${needle.replace(/[%_\\]/g, '\\$&')}%`;
+      const fields = needle.length < 3 ? SEARCH_NAME_FIELDS : SEARCH_TEXT_FIELDS;
       const textMatch = [
         `listing.title ILIKE :q ESCAPE '\\'`,
         `REPLACE(listing.category, '-', ' ') ILIKE :q ESCAPE '\\'`,
-        ...SEARCH_TEXT_FIELDS.map((field) => `listing.fields->>'${field}' ILIKE :q ESCAPE '\\'`),
+        ...fields.map((field) => `listing.fields->>'${field}' ILIKE :q ESCAPE '\\'`),
       ].join(' OR ');
       const qb = this.listings
         .createQueryBuilder('listing')
