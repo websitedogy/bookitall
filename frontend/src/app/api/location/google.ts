@@ -126,9 +126,8 @@ export async function googleSearchPlaces(query: string): Promise<LocatedPlace[]>
   autoUrl.searchParams.set("language", "en");
   autoUrl.searchParams.set("key", key);
   const autoRes = await fetch(autoUrl, { cache: "no-store" });
-  if (!autoRes.ok) return [];
-  const autoJson = (await autoRes.json()) as PlaceAutocomplete;
-  const predictions = (autoJson.predictions ?? []).slice(0, 6);
+  const autoJson = autoRes.ok ? ((await autoRes.json()) as PlaceAutocomplete) : { status: "ERROR", predictions: [] };
+  const predictions = autoJson.status === "OK" ? (autoJson.predictions ?? []).slice(0, 6) : [];
   if (!predictions.length) {
     const geocoded = await geocode({ address: query, components: "country:IN" });
     return geocoded

@@ -46,10 +46,19 @@ function addressAttempts(q: string) {
     attempts.push(next);
   };
 
+  const landmark = q.match(
+    /\b(?:opp\.?|opposite(?:\s+to)?|near(?:by)?|beside|besides|behind|next\s+to|in\s+front\s+of|adjacent\s+to)\b\s*\.?\s*([^,]+)/i,
+  );
   const stripped = q.replace(
     /\b(?:opp\.?|opposite(?:\s+to)?|near(?:by)?|beside|besides|behind|next\s+to|in\s+front\s+of|adjacent\s+to)\b[^,]*/gi,
     " ",
   );
+  const tail = stripped
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .pop();
+  if (landmark?.[1] && tail) add(`${landmark[1].trim()}, ${tail}`);
   add(stripped);
   const parts = stripped
     .split(",")

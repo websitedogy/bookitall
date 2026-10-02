@@ -62,6 +62,7 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
   const [workPhotos, setWorkPhotos] = useDraftFiles("hotels", "workPhotos");
   const [extraInfo, setExtraInfo] = useDraftState("hotels", "extraInfo", "");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pinNote, setPinNote] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState("");
@@ -122,8 +123,29 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
     setLat(found.lat);
     setLng(found.lng);
     if (found.districtName) setDistrict(found.districtName);
+    setPinNote(found.lat != null && found.lng != null ? "Location pinned on the map" : "");
     setPickerOpen(false);
     setError("");
+  }
+
+  async function pinTypedAddress(label: string) {
+    const text = label.trim();
+    if (text.length < 4) {
+      setPinNote("");
+      return null;
+    }
+    const pin = await geocodeVendorAddress(text);
+    if (!pin) {
+      setPinNote("");
+      return null;
+    }
+    setLat(pin.lat);
+    setLng(pin.lng);
+    const area = districtNameFromLabel(text) || (pin.label ? districtNameFromLabel(pin.label) : undefined);
+    if (area) setDistrict(area);
+    setPinNote(pin.label ? `Pinned near ${pin.label}` : "Location pinned on the map");
+    setError("");
+    return pin;
   }
 
   function validate() {
@@ -184,8 +206,8 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
       let pinLat = lat;
       let pinLng = lng;
       if (pinLat == null || pinLng == null) {
-        const pin = await geocodeVendorAddress(locationLabel.trim());
-        if (!pin) throw new Error("Could not pin this hotel on the map. Use Detect or enter a clearer address.");
+        const pin = await pinTypedAddress(locationLabel.trim());
+        if (!pin) throw new Error("Could not find that address. Add the area and city, for example Nehru Nagar, Khammam.");
         pinLat = pin.lat;
         pinLng = pin.lng;
       }
@@ -417,14 +439,19 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
                     setLat(null);
                     setLng(null);
                     setDistrict("");
+                    setPinNote("");
                   }}
-                  placeholder="House, street, area — or tap Detect"
+                  onBlur={() => {
+                    if (locationLabel.trim().length >= 4) void pinTypedAddress(locationLabel);
+                  }}
+                  placeholder="House, street, area, city"
                   className={`${stayInputClass} mt-0`}
                 />
                 <button type="button" onClick={() => setPickerOpen(true)} className="shrink-0 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white">
                   Detect
                 </button>
               </div>
+              {pinNote ? <p className="mt-2 text-xs font-medium text-[var(--primary)]">{pinNote}</p> : null}
             </StayField>
             {pickerOpen ? (
               <VendorLocationPopup
