@@ -8,237 +8,269 @@ const appBrand = join(root, "..", "mobile", "assets", "brand");
 for (const dir of [webBrand, appBrand]) mkdirSync(dir, { recursive: true });
 
 function mark(x, y, scale, rotate, body) {
-  return `<g transform="translate(${x} ${y}) rotate(${rotate}) scale(${scale})" fill="none">${body}</g>`;
+  return `<g transform="translate(${x} ${y}) rotate(${rotate}) scale(${scale})">${body}</g>`;
 }
 
 const icons = {
-  house: `
-    <path d="M4 22 L20 8 L36 22"/>
-    <path d="M9 20 V34 H31 V20"/>
-    <path d="M16 34 V24 H24 V34"/>
-    <path d="M25 14 V10 H30 V18"/>`,
-  building: `
-    <path d="M10 36 V8 H30 V36"/>
-    <path d="M14 14 H18 M22 14 H26 M14 20 H18 M22 20 H26 M14 26 H18 M22 26 H26"/>
-    <path d="M17 36 V30 H23 V36"/>`,
-  tallBuilding: `
-    <path d="M12 38 V4 H28 V38"/>
-    <path d="M16 10 H18 M22 10 H24 M16 16 H18 M22 16 H24 M16 22 H18 M22 22 H24 M16 28 H18 M22 28 H24"/>
-    <path d="M18 4 V1 H22 V4"/>`,
-  car: `
-    <path d="M3 24 L7 18 H13 L17 13 H31 L37 19 V26 H3 Z"/>
-    <path d="M13 18 L16 14 H30 L34 19"/>
-    <circle cx="12" cy="26" r="3.2"/>
-    <circle cx="29" cy="26" r="3.2"/>`,
-  auto: `
-    <path d="M5 26 H10 L13 16 H23 C28 16 31 20 33 24 H37 V28 H5 Z"/>
-    <path d="M13 16 V28"/>
-    <path d="M23 16 V22 H31"/>
-    <path d="M16 19 H21"/>
-    <circle cx="13" cy="28" r="3.1"/>
-    <circle cx="31" cy="28" r="3.1"/>`,
-  bus: `
-    <path d="M4 14 H36 V28 H4 Z"/>
-    <path d="M4 14 C4 10 8 10 10 10 H34 C36 10 36 14 36 14"/>
-    <path d="M8 14 V22 H16 V14 M20 14 V22 H28 V14"/>
-    <path d="M4 22 H36"/>
-    <circle cx="12" cy="28" r="3.2"/>
-    <circle cx="30" cy="28" r="3.2"/>
-    <path d="M33 16 H36 V20"/>`,
-  bike: `
-    <circle cx="11" cy="26" r="6"/>
-    <circle cx="31" cy="26" r="6"/>
-    <path d="M11 26 L18 14 H26 L31 26"/>
-    <path d="M18 14 L20 26 H28"/>
-    <path d="M26 14 L30 10 H34"/>
-    <path d="M20 14 V10"/>`,
   pin: `
-    <path d="M20 6 C13 6 8 12 8 18 C8 28 20 36 20 36 S32 28 32 18 C32 12 27 6 20 6 Z"/>
-    <circle cx="20" cy="17" r="4"/>`,
-  suitcase: `
-    <path d="M8 14 H32 V34 H8 Z"/>
-    <path d="M14 14 V9 H26 V14"/>
-    <path d="M8 20 H32"/>
-    <path d="M20 20 V28"/>`,
-  shopping: `
-    <path d="M10 14 H30 L27 34 H13 Z"/>
-    <path d="M16 14 C16 8 24 8 24 14"/>`,
-  box: `
-    <path d="M8 16 L20 10 L32 16 L20 22 Z"/>
-    <path d="M8 16 V28 L20 34 V22"/>
-    <path d="M32 16 V28 L20 34"/>
-    <path d="M20 10 V16"/>`,
-  wrench: `
-    <path d="M12 8 C8 8 7 14 11 15 L25 29 C27 31 31 31 32 27 C33 23 29 22 27 24 L14 11 C15 9 14 8 12 8 Z"/>
-    <circle cx="11" cy="11" r="2.2"/>`,
-  screwdriver: `
-    <path d="M8 32 L24 16"/>
-    <path d="M24 16 L28 12 L32 16 L28 20 Z"/>
-    <path d="M8 32 L5 35 L9 36 Z"/>`,
-  hammer: `
-    <path d="M18 14 L22 36"/>
-    <path d="M8 10 H28 L30 16 H10 Z"/>`,
-  plug: `
-    <path d="M14 16 H26 V30 C26 34 22 36 20 36 C18 36 14 34 14 30 Z"/>
-    <path d="M17 16 V8 M23 16 V8"/>
-    <path d="M20 36 V40"/>`,
-  bulb: `
-    <path d="M20 6 C13 6 10 13 12 18 C14 22 16 24 16 28 H24 C24 24 26 22 28 18 C30 13 27 6 20 6 Z"/>
-    <path d="M16 30 H24 M17 33 H23 M18 36 H22"/>`,
-  broom: `
-    <path d="M20 4 V24"/>
-    <path d="M11 24 H29 L26 36 H14 Z"/>
-    <path d="M14 28 L12 36 M20 24 V36 M26 28 L28 36"/>`,
-  bucket: `
-    <path d="M12 16 H28 L26 34 H14 Z"/>
-    <path d="M12 16 C12 10 28 10 28 16"/>
-    <path d="M20 10 V6"/>`,
-  mop: `
-    <path d="M20 4 V26"/>
-    <path d="M12 26 C12 22 28 22 28 26 C28 34 12 34 12 26 Z"/>`,
-  pan: `
-    <ellipse cx="16" cy="20" rx="12" ry="8"/>
-    <path d="M28 20 H40"/>
-    <path d="M38 17 V23"/>`,
-  pot: `
-    <path d="M10 16 H30 V30 C30 34 26 36 20 36 C14 36 10 34 10 30 Z"/>
-    <path d="M10 16 C10 12 30 12 30 16"/>
-    <path d="M6 20 H10 M30 20 H34"/>`,
-  chefHat: `
-    <path d="M12 22 C8 22 8 12 16 12 C16 6 24 6 24 12 C32 12 32 22 28 22 Z"/>
-    <path d="M13 22 H27 V26 H13 Z"/>`,
-  worker: `
-    <circle cx="20" cy="8" r="5"/>
-    <path d="M20 13 V24"/>
-    <path d="M10 18 H30"/>
-    <path d="M12 38 L20 24 L28 38"/>
-    <path d="M30 18 L36 12"/>`,
-  chef: `
-    <path d="M12 10 C10 4 30 4 28 10 H12 Z"/>
-    <circle cx="20" cy="16" r="4.5"/>
-    <path d="M20 21 V30"/>
-    <path d="M11 26 H29"/>
-    <path d="M13 40 L20 30 L27 40"/>
-    <path d="M29 26 L34 22"/>`,
-  truck: `
-    <path d="M3 14 H22 V28 H3 Z"/>
-    <path d="M22 18 H33 L36 26 V28 H22"/>
-    <path d="M24 18 V24 H33"/>
-    <circle cx="10" cy="28" r="3.2"/>
-    <circle cx="28" cy="28" r="3.2"/>`,
-  tree: `
-    <path d="M20 18 C10 18 8 8 20 6 C32 8 30 18 20 18 Z"/>
-    <path d="M12 26 C8 26 8 18 20 16 C32 18 32 26 28 26 H12 Z"/>
-    <path d="M20 26 V38"/>`,
-  pine: `
-    <path d="M20 4 L8 18 H32 Z"/>
-    <path d="M20 12 L6 28 H34 Z"/>
-    <path d="M20 22 L10 36 H30 Z"/>
-    <path d="M20 36 V40"/>`,
-  cloud: `
-    <path d="M12 24 C6 24 6 14 14 14 C16 8 28 8 30 14 C38 14 38 24 32 24 Z"/>`,
-  taj: `
-    <path d="M40 6 V12"/>
-    <circle cx="40" cy="5" r="1.6"/>
-    <path d="M40 12 C26 14 20 26 20 34 H60 C60 26 54 14 40 12 Z"/>
-    <path d="M16 30 C12 30 10 36 10 40 H22 C22 36 20 30 16 30 Z"/>
-    <path d="M64 30 C60 30 58 36 58 40 H70 C70 36 68 30 64 30 Z"/>
-    <path d="M10 40 H70 V66 H10 Z"/>
-    <path d="M32 66 V50 C32 44 48 44 48 50 V66"/>
-    <path d="M16 66 V56 C16 52 26 52 26 56 V66"/>
-    <path d="M54 66 V56 C54 52 64 52 64 56 V66"/>
-    <path d="M4 28 V66 M4 28 V22"/>
-    <circle cx="4" cy="21" r="2"/>
-    <path d="M1 40 H7 M1 52 H7"/>
-    <path d="M76 28 V66 M76 28 V22"/>
-    <circle cx="76" cy="21" r="2"/>
-    <path d="M73 40 H79 M73 52 H79"/>`,
-  lotus: `
-    <path d="M40 66 C18 64 6 40 18 20 C28 32 36 36 40 26 C44 36 52 32 62 20 C74 40 62 64 40 66 Z"/>
-    <path d="M40 60 C26 58 18 40 28 26 C34 36 38 38 40 30 C42 38 46 36 52 26 C62 40 54 58 40 60 Z"/>
-    <path d="M24 66 H56"/>`,
-  gate: `
-    <path d="M8 70 V20 H72 V70"/>
-    <path d="M8 20 H72"/>
-    <path d="M12 12 H68 L72 20 H8 Z"/>
-    <path d="M24 70 V42 C24 28 56 28 56 42 V70"/>
-    <circle cx="40" cy="24" r="3"/>
-    <path d="M4 70 H18 M62 70 H76"/>`,
-  minar: `
-    <path d="M22 8 L16 70 H36 L30 8 Z"/>
-    <path d="M18 22 H34 M17 38 H35 M16 54 H36"/>
-    <path d="M22 8 C22 3 30 3 30 8"/>
-    <circle cx="26" cy="2" r="1.6"/>`,
+    <path d="M18 4 C10 4 5 10 5 17 C5 28 18 40 18 40 S31 28 31 17 C31 10 26 4 18 4 Z"/>
+    <circle cx="18" cy="16" r="4.5"/>`,
   charminar: `
-    <path d="M8 18 H32 V58 H8 Z"/>
-    <path d="M8 18 V8 H12 V18 M28 18 V8 H32 V18"/>
-    <path d="M8 58 V66 H12 V58 M28 58 V66 H32 V58"/>
-    <path d="M14 58 V40 C14 32 26 32 26 40 V58"/>
-    <path d="M16 18 V26 H24 V18"/>
-    <circle cx="10" cy="6" r="1.4"/>
-    <circle cx="30" cy="6" r="1.4"/>`,
+    <path d="M6 22 H42 V62 H6 Z"/>
+    <path d="M6 22 V10 H12 V22 M36 22 V10 H42 V22"/>
+    <path d="M6 62 V72 H12 V62 M36 62 V72 H42 V62"/>
+    <path d="M14 62 V40 C14 30 34 30 34 40 V62"/>
+    <path d="M18 22 V32 H30 V22"/>
+    <circle cx="9" cy="7" r="2"/>
+    <circle cx="39" cy="7" r="2"/>`,
+  car: `
+    <path d="M4 34 L10 24 H22 L30 16 H52 L62 26 V36 H4 Z"/>
+    <path d="M22 24 L28 17 H50 L58 26"/>
+    <path d="M32 17 V26 M44 17 V26"/>
+    <circle cx="18" cy="36" r="5"/>
+    <circle cx="50" cy="36" r="5"/>`,
+  gate: `
+    <path d="M6 78 V22 H70 V78"/>
+    <path d="M6 22 H70"/>
+    <path d="M10 14 H66 L70 22 H6 Z"/>
+    <path d="M22 78 V46 C22 30 54 30 54 46 V78"/>
+    <circle cx="38" cy="28" r="3.2"/>
+    <path d="M2 78 H16 M60 78 H74"/>`,
+  signal: `
+    <path d="M22 8 H40 V48 H22 Z"/>
+    <circle cx="31" cy="16" r="3.2"/>
+    <circle cx="31" cy="26" r="3.2"/>
+    <circle cx="31" cy="36" r="3.2"/>
+    <path d="M31 48 V78"/>
+    <path d="M18 78 H44"/>`,
+  auto: `
+    <path d="M6 48 H16 L26 22 H62 C82 22 96 34 104 46 H118 V56 H6 Z"/>
+    <path d="M26 22 V56"/>
+    <path d="M48 22 V40 H92"/>
+    <path d="M32 32 H46"/>
+    <path d="M62 22 L70 8 H86"/>
+    <circle cx="28" cy="56" r="6"/>
+    <circle cx="92" cy="56" r="6"/>
+    <circle cx="118" cy="52" r="3.2"/>`,
+  person: `
+    <circle cx="28" cy="12" r="8"/>
+    <path d="M28 20 V46"/>
+    <path d="M12 32 H40"/>
+    <path d="M16 70 L28 46 L40 70"/>
+    <path d="M40 32 L54 18"/>
+    <rect x="48" y="8" width="14" height="22" rx="2"/>
+    <path d="M52 14 H58 M52 18 H58"/>
+    <path d="M70 6 C70 2 78 2 78 8 C78 14 70 16 70 16"/>
+    <circle cx="74" cy="20" r="2"/>`,
+  rider: `
+    <circle cx="36" cy="78" r="16"/>
+    <circle cx="108" cy="78" r="16"/>
+    <path d="M36 78 L58 48 H88 L108 78"/>
+    <path d="M58 48 L72 78 H98"/>
+    <path d="M88 48 L104 28 H122"/>
+    <path d="M104 28 L112 22"/>
+    <circle cx="72" cy="28" r="10"/>
+    <path d="M64 26 H80"/>
+    <path d="M66 36 C62 48 60 58 66 66"/>
+    <path d="M78 38 L96 52"/>
+    <path d="M64 62 L50 74"/>
+    <path d="M18 78 H8 M124 78 H136"/>`,
+  taj: `
+    <path d="M48 8 V16"/>
+    <circle cx="48" cy="6" r="2.2"/>
+    <path d="M48 16 C30 18 22 34 22 44 H74 C74 34 66 18 48 16 Z"/>
+    <path d="M16 38 C10 38 8 46 8 52 H24 C24 46 22 38 16 38 Z"/>
+    <path d="M80 38 C74 38 72 46 72 52 H88 C88 46 86 38 80 38 Z"/>
+    <path d="M8 52 H88 V82 H8 Z"/>
+    <path d="M36 82 V62 C36 54 60 54 60 62 V82"/>
+    <path d="M16 82 V70 C16 64 28 64 28 70 V82"/>
+    <path d="M68 82 V70 C68 64 80 64 80 70 V82"/>`,
+  handPhone: `
+    <path d="M18 46 C8 46 6 28 16 24 C14 14 28 10 32 20 C40 12 52 20 48 32 C58 34 58 48 48 50 Z"/>
+    <rect x="28" y="6" width="22" height="36" rx="3"/>
+    <path d="M34 14 H44 M39 28 L44 22"/>
+    <circle cx="46" cy="18" r="2.4"/>`,
+  helmet: `
+    <path d="M12 36 C12 16 48 12 56 28 C64 18 78 24 74 40 H18"/>
+    <path d="M18 40 H70"/>
+    <path d="M22 40 V48 H62 V40"/>
+    <path d="M28 28 H52"/>`,
+  scooter: `
+    <circle cx="22" cy="58" r="10"/>
+    <circle cx="78" cy="58" r="10"/>
+    <path d="M22 58 L40 28 H62 L78 58"/>
+    <path d="M40 28 L48 58 H66"/>
+    <path d="M62 28 L74 14 H88"/>
+    <path d="M36 28 V18 H48"/>
+    <path d="M48 22 H58"/>`,
+  map: `
+    <path d="M8 18 L28 10 L52 18 L72 10 V62 L52 70 L28 62 L8 70 Z"/>
+    <path d="M28 10 V62 M52 18 V70"/>
+    <path d="M36 28 C36 22 48 22 48 30 C48 40 36 42 36 42"/>
+    <circle cx="42" cy="46" r="2"/>`,
+  minar: `
+    <path d="M28 6 L18 78 H46 L36 6 Z"/>
+    <path d="M22 22 H42 M20 40 H44 M18 58 H46"/>
+    <path d="M28 6 C28 1 36 1 36 6"/>
+    <circle cx="32" cy="0" r="2.2"/>`,
+  hotel: `
+    <path d="M10 78 V22 H62 V78"/>
+    <path d="M10 22 L36 6 L62 22"/>
+    <path d="M18 34 H26 M34 34 H42 M50 34 H58"/>
+    <path d="M18 48 H26 M34 48 H42 M50 48 H58"/>
+    <path d="M18 62 H26 M50 62 H58"/>
+    <path d="M30 78 V62 H42 V78"/>
+    <path d="M22 22 V14 H30 V22"/>`,
+  suitcase: `
+    <path d="M10 24 H62 V70 H10 Z"/>
+    <path d="M22 24 V12 H50 V24"/>
+    <path d="M10 36 H62"/>
+    <path d="M36 36 V58"/>
+    <path d="M4 32 V40 M68 32 V40"/>`,
+  plug: `
+    <path d="M22 28 H50 V52 C50 64 22 64 22 52 Z"/>
+    <path d="M30 28 V10 M42 28 V10"/>
+    <path d="M36 64 V76"/>
+    <path d="M28 76 H44"/>`,
+  pipe: `
+    <path d="M12 18 H40 V34 H58 V62"/>
+    <path d="M12 18 V8 M40 18 V28"/>
+    <path d="M58 62 V74"/>
+    <path d="M54 70 H62"/>
+    <circle cx="58" cy="78" r="2"/>`,
+  ac: `
+    <path d="M8 14 H72 V46 H8 Z"/>
+    <path d="M14 22 H66 M14 28 H66 M14 34 H66"/>
+    <path d="M24 46 C22 58 18 62 16 70"/>
+    <path d="M40 46 C40 58 40 64 40 72"/>
+    <path d="M56 46 C58 58 62 62 64 70"/>`,
+  broom: `
+    <path d="M36 4 V40"/>
+    <path d="M16 40 H56 L50 72 H22 Z"/>
+    <path d="M24 48 L18 72 M36 40 V72 M48 48 L54 72"/>`,
+  mirror: `
+    <circle cx="28" cy="28" r="18"/>
+    <circle cx="28" cy="28" r="12"/>
+    <path d="M28 46 L40 74"/>
+    <path d="M34 74 H48"/>`,
+  roller: `
+    <path d="M8 16 H52 V36 H8 Z"/>
+    <path d="M52 26 H68"/>
+    <path d="M68 26 L84 58"/>
+    <path d="M78 64 H92"/>`,
+  saw: `
+    <path d="M8 28 H70"/>
+    <path d="M14 28 L18 40 L24 28 L30 40 L36 28 L42 40 L48 28 L54 40 L60 28"/>
+    <path d="M62 18 H78 V40 H62 Z"/>
+    <circle cx="70" cy="28" r="3"/>`,
+  fridge: `
+    <path d="M16 6 H56 V78 H16 Z"/>
+    <path d="M16 36 H56"/>
+    <path d="M48 16 V28 M48 48 V62"/>`,
+  briefcase: `
+    <path d="M8 28 H72 V70 H8 Z"/>
+    <path d="M26 28 V16 H54 V28"/>
+    <path d="M8 44 H72"/>
+    <path d="M32 44 V52 H48 V44"/>`,
+  pot: `
+    <path d="M14 28 H58 V52 C58 66 14 66 14 52 Z"/>
+    <path d="M14 28 C14 18 58 18 58 28"/>
+    <path d="M6 36 H14 M58 36 H66"/>
+    <path d="M28 18 C28 8 44 8 44 18"/>`,
+  bus: `
+    <path d="M8 22 H84 V58 H8 Z"/>
+    <path d="M8 22 C8 12 16 12 20 12 H76 C82 12 84 18 84 22"/>
+    <path d="M16 22 V40 H34 V22 M42 22 V40 H60 V22"/>
+    <path d="M8 40 H84"/>
+    <circle cx="24" cy="58" r="6"/>
+    <circle cx="66" cy="58" r="6"/>
+    <path d="M70 18 H80 V28"/>`,
+  truck: `
+    <path d="M4 24 H48 V58 H4 Z"/>
+    <path d="M48 32 H70 L82 48 V58 H48"/>
+    <path d="M54 32 V46 H74"/>
+    <circle cx="20" cy="58" r="6"/>
+    <circle cx="66" cy="58" r="6"/>`,
+  boxes: `
+    <path d="M8 40 L28 30 L48 40 L28 50 Z"/>
+    <path d="M8 40 V58 L28 68 V50"/>
+    <path d="M48 40 V58 L28 68"/>
+    <path d="M36 28 L56 18 L76 28 L56 38 Z"/>
+    <path d="M36 28 V46 L56 56 V38"/>
+    <path d="M76 28 V46 L56 56"/>`,
+  parcel: `
+    <path d="M18 36 L8 28 L28 16 L48 28 L38 36"/>
+    <path d="M18 36 V58 L38 70 V48"/>
+    <path d="M38 36 V58"/>
+    <path d="M48 28 V50 L38 58"/>
+    <path d="M22 40 H34"/>`,
+  sedan: `
+    <path d="M4 40 L12 28 H28 L40 16 H78 L92 30 V44 H4 Z"/>
+    <path d="M28 28 L36 18 H74 L86 30"/>
+    <path d="M46 18 V30 M62 18 V30"/>
+    <circle cx="26" cy="44" r="7"/>
+    <circle cx="74" cy="44" r="7"/>`,
+  gauge: `
+    <circle cx="36" cy="36" r="26"/>
+    <path d="M36 36 L50 22"/>
+    <path d="M18 48 H22 M36 54 V50 M52 46 H48"/>
+    <path d="M16 22 L20 26 M52 18 L48 24"/>`,
+  shield: `
+    <circle cx="22" cy="16" r="7"/>
+    <path d="M22 23 V40"/>
+    <path d="M10 32 H30"/>
+    <path d="M14 58 L22 40 L30 58"/>
+    <path d="M34 28 H62 V58 C62 70 34 74 34 58 Z"/>
+    <path d="M40 46 L46 52 L56 38"/>`,
 };
 
+const roads = `
+  <path d="M40 150 C180 120 320 190 520 140" stroke-dasharray="7 8"/>
+  <path d="M560 250 C700 210 860 280 1040 220" stroke-dasharray="7 8"/>
+  <path d="M180 430 C340 390 520 470 760 420" stroke-dasharray="7 8"/>
+  <path d="M900 470 C1080 430 1240 500 1480 450" stroke-dasharray="7 8"/>
+  <path d="M80 300 C160 340 220 280 300 320" stroke-dasharray="6 7"/>
+`;
+
 const placements = [
-  mark(36, 70, 0.95, -2, icons.gate),
-  mark(168, 200, 0.92, -4, icons.lotus),
-  mark(400, 56, 1.05, 1, icons.taj),
-  mark(730, 390, 0.9, 3, icons.minar),
-  mark(1368, 48, 1.15, -3, icons.charminar),
-  mark(70, 390, 0.95, -7, icons.house),
-  mark(980, 36, 0.82, 8, icons.house),
-  mark(1248, 268, 0.9, 4, icons.building),
-  mark(590, 18, 0.72, -5, icons.tallBuilding),
-  mark(1508, 300, 0.7, 6, icons.building),
-  mark(292, 372, 1.02, -5, icons.auto),
-  mark(1088, 168, 0.88, 6, icons.auto),
-  mark(840, 128, 0.92, 3, icons.car),
-  mark(188, 488, 0.78, -8, icons.car),
-  mark(1040, 430, 0.95, -2, icons.bus),
-  mark(500, 488, 0.86, 5, icons.bike),
-  mark(1448, 410, 0.8, -6, icons.bike),
-  mark(768, 228, 0.92, 4, icons.truck),
-  mark(118, 148, 0.72, 8, icons.truck),
-  mark(1288, 150, 0.7, -7, icons.truck),
-  mark(638, 188, 0.92, -4, icons.worker),
-  mark(910, 292, 0.9, 5, icons.chef),
-  mark(1488, 190, 0.76, 9, icons.worker),
-  mark(350, 48, 0.62, 0, icons.pin),
-  mark(872, 408, 0.58, 10, icons.pin),
-  mark(1228, 70, 0.55, -8, icons.pin),
-  mark(58, 286, 0.5, 12, icons.pin),
-  mark(1540, 470, 0.52, -6, icons.pin),
-  mark(528, 338, 0.82, -5, icons.suitcase),
-  mark(1172, 338, 0.76, 7, icons.shopping),
-  mark(392, 518, 0.72, 4, icons.box),
-  mark(1310, 500, 0.66, -6, icons.box),
-  mark(680, 500, 0.6, 12, icons.box),
-  mark(248, 28, 0.68, 22, icons.wrench),
-  mark(1004, 518, 0.68, -16, icons.screwdriver),
-  mark(580, 430, 0.62, 18, icons.hammer),
-  mark(698, 48, 0.64, 8, icons.plug),
-  mark(1524, 70, 0.6, -10, icons.bulb),
-  mark(148, 548, 0.74, 10, icons.broom),
-  mark(812, 530, 0.66, -4, icons.bucket),
-  mark(1410, 530, 0.6, 8, icons.mop),
-  mark(1118, 70, 0.7, 14, icons.pan),
-  mark(470, 28, 0.58, -10, icons.chefHat),
-  mark(960, 200, 0.62, 6, icons.pot),
-  mark(78, 518, 0.78, 0, icons.tree),
-  mark(608, 540, 0.68, 6, icons.tree),
-  mark(1390, 540, 0.74, -4, icons.tree),
-  mark(330, 268, 0.58, 0, icons.pine),
-  mark(880, 20, 0.52, 4, icons.pine),
-  mark(240, 8, 0.82, 0, icons.cloud),
-  mark(700, 6, 0.7, 4, icons.cloud),
-  mark(1190, 8, 0.76, -3, icons.cloud),
-  mark(40, 8, 0.52, 2, icons.cloud),
-  mark(980, 230, 0.5, 8, icons.cloud),
-  mark(1560, 140, 0.48, -6, icons.cloud),
+  mark(24, 28, 1.15, -6, icons.pin),
+  mark(110, 36, 1.2, 0, icons.charminar),
+  mark(250, 48, 1.15, -2, icons.car),
+  mark(430, 18, 1.05, 0, icons.gate),
+  mark(620, 24, 1.05, 0, icons.signal),
+  mark(760, 18, 1.15, 0, icons.hotel),
+  mark(980, 8, 1.35, -2, icons.auto),
+  mark(1288, 18, 1.2, 0, icons.person),
+  mark(18, 168, 1.35, -4, icons.rider),
+  mark(250, 188, 1.05, 2, icons.taj),
+  mark(470, 210, 1.05, 6, icons.handPhone),
+  mark(650, 196, 1.05, -8, icons.helmet),
+  mark(860, 188, 1.1, 3, icons.scooter),
+  mark(1088, 176, 1, -4, icons.map),
+  mark(1288, 168, 1.05, 2, icons.minar),
+  mark(1468, 150, 0.95, 0, icons.shield),
+  mark(430, 360, 0.95, 8, icons.plug),
+  mark(560, 372, 0.95, -6, icons.pipe),
+  mark(700, 348, 0.95, 0, icons.ac),
+  mark(860, 368, 0.9, 6, icons.broom),
+  mark(1000, 360, 0.9, -8, icons.mirror),
+  mark(1140, 368, 0.85, 4, icons.roller),
+  mark(1300, 360, 0.85, -6, icons.saw),
+  mark(1460, 348, 0.85, 0, icons.fridge),
+  mark(36, 470, 0.9, -4, icons.suitcase),
+  mark(180, 488, 0.85, 5, icons.briefcase),
+  mark(330, 478, 0.9, -3, icons.pot),
+  mark(500, 500, 0.85, 0, icons.gauge),
+  mark(680, 470, 0.95, -2, icons.bus),
+  mark(900, 478, 0.95, 2, icons.truck),
+  mark(1120, 470, 0.85, -4, icons.boxes),
+  mark(1300, 488, 0.9, 3, icons.parcel),
+  mark(1468, 500, 0.85, -2, icons.sedan),
 ];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" fill="none" aria-hidden="true">
-  <g stroke="#94A3B8" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.92">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 640" fill="none" aria-hidden="true">
+  <g fill="none" stroke="#B7C3CE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    ${roads}
     ${placements.join("\n    ")}
   </g>
 </svg>
@@ -246,4 +278,4 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" fill
 
 writeFileSync(join(webBrand, "footer-doodle.svg"), svg);
 writeFileSync(join(appBrand, "footer-doodle.svg"), svg);
-console.log("Wrote footer doodle pattern for web and mobile.");
+console.log("Wrote Rapido-style footer doodle for web and mobile.");

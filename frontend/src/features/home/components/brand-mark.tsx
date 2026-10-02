@@ -1,23 +1,22 @@
 export function BrandMark() {
   return (
-    <section className="relative mt-1 min-h-[12rem] overflow-hidden md:min-h-[14rem]" aria-label="Book It All">
+    <section className="relative mt-2 min-h-[26rem] overflow-hidden bg-white md:min-h-[32rem]" aria-label="Book It All">
       <div
         className="pointer-events-none absolute inset-0"
         aria-hidden
         style={{
           backgroundImage: "url(/brand/footer-doodle.svg)",
-          backgroundRepeat: "repeat",
+          backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
-          backgroundSize: "920px 368px",
-          opacity: 0.42,
+          backgroundSize: "cover",
         }}
       />
-      <div className="relative flex min-h-[12rem] flex-col justify-center px-6 py-8 md:min-h-[14rem] md:px-8">
-        <p className="text-3xl font-extrabold italic leading-none tracking-tight text-slate-500 md:text-4xl">
+      <div className="relative flex min-h-[26rem] flex-col justify-end px-6 pb-8 pt-16 md:min-h-[32rem] md:px-10 md:pb-10">
+        <p className="text-[2.65rem] font-extrabold italic leading-none tracking-tight text-slate-500 md:text-6xl">
           BOOK it all
         </p>
-        <p className="mt-3 text-[13px] font-medium text-slate-500">🇮🇳 Made for India</p>
-        <p className="mt-1 text-[13px] font-medium text-slate-500">❤️ Made in Telangana</p>
+        <p className="mt-4 text-[13px] font-medium text-slate-500 md:text-sm">🇮🇳 Made for India</p>
+        <p className="mt-1 text-[13px] font-medium text-slate-500 md:text-sm">❤️ Made in Telangana</p>
       </div>
     </section>
   );

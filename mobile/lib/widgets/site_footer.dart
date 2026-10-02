@@ -157,7 +157,7 @@ class _FooterDoodle extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Opacity(
-        opacity: 0.42,
+        opacity: 1,
         child: SvgPicture.asset(
           'assets/brand/footer-doodle.svg',
           fit: BoxFit.cover,
