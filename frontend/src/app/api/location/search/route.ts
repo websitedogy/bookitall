@@ -53,21 +53,17 @@ function addressAttempts(q: string) {
     /\b(?:opp\.?|opposite(?:\s+to)?|near(?:by)?|beside|besides|behind|next\s+to|in\s+front\s+of|adjacent\s+to)\b[^,]*/gi,
     " ",
   );
-  const tail = stripped
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .pop();
-  if (landmark?.[1] && tail) add(`${landmark[1].trim()}, ${tail}`);
-  add(stripped);
   const parts = stripped
     .split(",")
     .map((part) => part.trim())
     .filter((part) => part.length > 2);
-  if (parts.length >= 2) add(`${parts[0]}, ${parts[parts.length - 1]}`);
+  const tail = parts[parts.length - 1];
+  add(stripped);
+  if (parts.length >= 2 && tail) add(`${parts[0]}, ${tail}`);
   add(q);
-  if (parts.length) add(parts[parts.length - 1]);
-  return attempts.slice(0, 4);
+  if (landmark?.[1] && tail) add(`${landmark[1].trim()}, ${tail}`);
+  if (tail) add(tail);
+  return attempts.slice(0, 5);
 }
 
 function score(row: SearchHit) {
