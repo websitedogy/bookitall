@@ -107,22 +107,24 @@ export function ListingInfoTabs({
   return (
     <>
       {compact && children ? <div className="px-5 pb-4">{children}</div> : null}
-      {compact ? null : <div className="flex flex-wrap gap-2 px-5 pb-4">
-        <ActionBadge
-          active={action === "reviews"}
-          onClick={() => setAction("reviews")}
-          icon={<Star className="h-3 w-3" aria-hidden />}
-          label="Reviews"
-          badge={String(reviewCount)}
-        />
-        <ActionBadge
-          active={action === "report"}
-          onClick={() => setAction("report")}
-          icon={<Flag className="h-3 w-3" aria-hidden />}
-          label="Report"
-          alert
-        />
-      </div>
+      {compact ? null : (
+        <div className="flex flex-wrap gap-2 px-5 pb-4">
+          <ActionBadge
+            active={action === "reviews"}
+            onClick={() => setAction("reviews")}
+            icon={<Star className="h-3 w-3" aria-hidden />}
+            label="Reviews"
+            badge={String(reviewCount)}
+          />
+          <ActionBadge
+            active={action === "report"}
+            onClick={() => setAction("report")}
+            icon={<Flag className="h-3 w-3" aria-hidden />}
+            label="Report"
+            alert
+          />
+        </div>
+      )}
 
       <div className={cn("border-t border-[#efe6d4] p-5", compact && "pt-4")}>
         {compact ? (

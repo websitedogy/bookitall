@@ -222,7 +222,10 @@ export function ListingDetailView({ id, initial }: { id: string; initial?: Listi
       >
         <div className="px-5 pt-5 pb-2">
           <div className="flex items-start justify-between gap-3">
-            <h1 className="min-w-0 text-left text-[22px] font-semibold tracking-[-0.03em] text-[#12241f] md:text-[26px]">{listing.title}</h1>
+            <div className="min-w-0">
+              <h1 className="text-left text-[22px] font-semibold tracking-[-0.03em] text-[#12241f] md:text-[26px]">{listing.title}</h1>
+              {listing.location ? <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#5b6e68]">{listing.location}</p> : null}
+            </div>
             <div className="flex shrink-0 items-center gap-2">
               <WishlistButton
                 labeled

@@ -348,10 +348,9 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
           </div>
         ) : (
           <>
-            <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />
+            {isHotel && rooms.length ? null : <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />}
             {isHotel && rooms.length ? (
               <div className="space-y-2">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#7a6a52]">Rooms and price</p>
                 {rooms.map((room) => {
                   const active = room.name === (selectedRoom?.name ?? "");
                   return (
@@ -367,7 +366,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                       </span>
                       <span className="shrink-0 text-right">
                         <span className="block text-base font-semibold text-[#0f3d38]">{inr(room.rate)}</span>
-                        <span className="block text-[11px] text-[#7a6a52]">per room</span>
+                        <span className="block text-[11px] text-[#7a6a52]">per night</span>
                       </span>
                     </button>
                   );
