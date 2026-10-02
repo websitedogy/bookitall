@@ -441,8 +441,8 @@ export function HotelRegistrationForm({ embedded = false }: { embedded?: boolean
                     setDistrict("");
                     setPinNote("");
                   }}
-                  onBlur={() => {
-                    if (locationLabel.trim().length >= 4) void pinTypedAddress(locationLabel);
+                  onBlur={(e) => {
+                    if (e.target.value.trim().length >= 4) void pinTypedAddress(e.target.value);
                   }}
                   placeholder="House, street, area, city"
                   className={`${stayInputClass} mt-0`}
