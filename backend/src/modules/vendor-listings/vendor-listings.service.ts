@@ -245,7 +245,6 @@ const SEARCH_NAME_FIELDS = [
   'carpenterName',
   'painterName',
   'beauticianName',
-  'ownerName',
   'jobTitle',
   'serviceName',
 ];
@@ -253,6 +252,21 @@ const SEARCH_NAME_FIELDS = [
 const SEARCH_PLACE_FIELDS = ['location', 'city', 'area', 'state', 'address', 'street', 'destinations', 'serviceType', 'vehicleType'];
 
 const SEARCH_TEXT_FIELDS = [...SEARCH_NAME_FIELDS, ...SEARCH_PLACE_FIELDS];
+
+function listingVisibleMatch(row: VendorListing, needle: string) {
+  const q = needle.toLowerCase();
+  const fields = row.fields ?? {};
+  const chunks = [
+    row.title,
+    row.category.replace(/-/g, ' '),
+    ...SEARCH_NAME_FIELDS.map((field) => fields[field] ?? ''),
+    fields.city,
+    fields.area,
+    fields.destinations,
+    ...(q.length >= 3 ? [fields.location, fields.address, fields.street, fields.state, fields.serviceType, fields.vehicleType] : []),
+  ];
+  return chunks.some((value) => (value ?? '').toLowerCase().includes(q));
+}
 
 function listingSearchRank(row: VendorListing, needle: string) {
   const q = needle.toLowerCase();
@@ -459,7 +473,8 @@ export class VendorListingsService {
       if (query.category && query.category !== 'all') {
         qb.andWhere('listing.category = :category', { category: query.category });
       }
-      rows = await qb.orderBy('listing.createdAt', 'DESC').take(40).getMany();
+      rows = await qb.orderBy('listing.createdAt', 'DESC').take(80).getMany();
+      rows = rows.filter((row) => listingVisibleMatch(row, needle));
       rows.sort((a, b) => listingSearchRank(a, needle) - listingSearchRank(b, needle));
     } else {
       const where: { status: ListingStatus; category?: string } = { status: ListingStatus.ACCEPTED };
