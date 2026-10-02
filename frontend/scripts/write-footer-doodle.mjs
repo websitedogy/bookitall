@@ -256,15 +256,12 @@ const placements = [
   mark(1140, 160, 0.95, 2, icons.minar),
   mark(1320, 175, 0.85, 0, icons.shield),
   mark(1480, 185, 0.85, 6, icons.broom),
-  mark(430, 340, 0.85, 0, icons.gauge),
   mark(580, 325, 0.9, -2, icons.bus),
   mark(790, 335, 0.9, 2, icons.truck),
   mark(1000, 325, 0.85, -4, icons.boxes),
   mark(1180, 345, 0.85, 4, icons.parcel),
   mark(1340, 320, 0.85, 0, icons.ac),
   mark(1500, 340, 0.8, 4, icons.roller),
-  mark(200, 355, 0.8, -3, icons.pot),
-  mark(300, 345, 0.75, 8, icons.mirror),
 ];
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 520" fill="none" aria-hidden="true">
