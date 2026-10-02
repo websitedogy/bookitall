@@ -4,7 +4,7 @@ import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ConfirmationResult } from "firebase/auth";
-import { api } from "@/shared/lib/api";
+import { api, publicApi } from "@/shared/lib/api";
 import {
   RECAPTCHA_HOST_ID,
   clearRecaptcha,
@@ -49,6 +49,7 @@ export function LoginForm() {
   const [step, setStep] = useState<"details" | "otp">("details");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [known, setKnown] = useState<boolean | null>(null);
   const [otp, setOtp] = useState("");
   const [resendIn, setResendIn] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -66,6 +67,22 @@ export function LoginForm() {
     return () => clearRecaptcha();
   }, []);
 
+  useEffect(() => {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length !== 10) {
+      setKnown(null);
+      return;
+    }
+    const controller = new AbortController();
+    publicApi<{ known: boolean }>(`/auth/phone-known?phone=${digits}`, { signal: controller.signal })
+      .then((result) => setKnown(Boolean(result.data?.known)))
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setKnown(false);
+      });
+    return () => controller.abort();
+  }, [phone]);
+
   async function finishSignIn(name: string, digits: string, extras?: { otp?: string; idToken?: string }) {
     const result = await api<{ accessToken: string; refreshToken: string; user: AuthUser }>("/auth/phone", {
       method: "POST",
@@ -80,14 +97,24 @@ export function LoginForm() {
   }
 
   async function requestOtp() {
-    const name = fullName.trim();
     const digits = phone.replace(/\D/g, "");
-    if (!name) {
-      setError("Enter your name");
-      return;
-    }
     if (digits.length !== 10) {
       setError("Enter a 10-digit mobile number");
+      return;
+    }
+    let returning = known;
+    if (returning == null) {
+      try {
+        const result = await publicApi<{ known: boolean }>(`/auth/phone-known?phone=${digits}`);
+        returning = Boolean(result.data?.known);
+        setKnown(returning);
+      } catch {
+        returning = false;
+      }
+    }
+    const name = returning ? "" : fullName.trim();
+    if (!returning && !name) {
+      setError("Enter your name");
       return;
     }
     setError("");
@@ -165,9 +192,13 @@ export function LoginForm() {
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-[var(--studio-muted)]">
             {step === "details"
-              ? onLocalhost
-                ? "Name and mobile. On this computer we do not send SMS — next screen use 123456."
-                : "Name and mobile. We send a one-time code — no password."
+              ? known
+                ? "This number already has an account. We will send an OTP."
+                : known === false
+                  ? onLocalhost
+                    ? "New number. Add your name. On this computer the OTP is 123456."
+                    : "New number. Add your name, then we will send an OTP."
+                  : "Enter your mobile number."
               : onLocalhost
                 ? "No SMS on this computer. Enter 123456."
                 : `Code sent to +91 ${phone}.`}
@@ -176,20 +207,22 @@ export function LoginForm() {
           <div className="mt-8 space-y-6">
             {step === "details" ? (
               <>
-                <label className="block">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--studio-muted)]">
-                    Name
-                  </span>
-                  <input
-                    className={`${fieldClass} mt-1`}
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    onKeyDown={onEnter}
-                    placeholder="Your name"
-                    autoComplete="name"
-                    autoCapitalize="words"
-                  />
-                </label>
+                {known === false ? (
+                  <label className="block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--studio-muted)]">
+                      Name
+                    </span>
+                    <input
+                      className={`${fieldClass} mt-1`}
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      onKeyDown={onEnter}
+                      placeholder="Your name"
+                      autoComplete="name"
+                      autoCapitalize="words"
+                    />
+                  </label>
+                ) : null}
                 <label className="block">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--studio-muted)]">
                     Mobile

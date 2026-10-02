@@ -52,8 +52,10 @@ export class GoogleAuthDto {
   @IsEmail()
   email!: string;
 
+  @IsOptional()
   @IsString()
-  fullName!: string;
+  @MaxLength(80)
+  fullName?: string;
 
   @IsOptional()
   @IsString()

@@ -76,9 +76,14 @@ export class AuthService {
       user = await this.users.findByEmail(email);
     }
 
+    const fullName = dto.fullName?.trim() ?? '';
+    if (!user && !fullName) {
+      throw new UnauthorizedException('Enter your name');
+    }
+
     if (!user) {
       user = await this.users.create({
-        fullName: dto.fullName.trim(),
+        fullName,
         email,
         phone,
         passwordHash: await bcrypt.hash(`google:${email}:${Date.now()}`, 12),
@@ -93,8 +98,8 @@ export class AuthService {
       if (user.status === UserStatus.SUSPENDED) {
         throw new UnauthorizedException('Account is suspended');
       }
-      if (dto.fullName.trim()) {
-        user.fullName = dto.fullName.trim();
+      if (fullName) {
+        user.fullName = fullName;
       }
       user.phone = phone;
       if (isPlaceholderEmail(user.email) || user.email === email) {
