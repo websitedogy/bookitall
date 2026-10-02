@@ -105,18 +105,26 @@ export class AuthService {
     return this.issueTokens(user.id, user.email, user.role);
   }
 
+  async phoneKnown(rawPhone: string) {
+    const phone = normalizeMobile(rawPhone);
+    if (!/^\d{10}$/.test(phone)) return { known: false };
+    const user = await this.users.findByPhone(phone);
+    return { known: Boolean(user) && !isPanelRole(user?.role) };
+  }
+
   async continueWithPhone(dto: PhoneAuthDto) {
     const phone = normalizeMobile(dto.phone);
     if (!/^\d{10}$/.test(phone)) {
       throw new UnauthorizedException('Enter a 10-digit mobile number');
     }
-    const fullName = dto.fullName.trim();
-    if (!fullName) {
+    const fullName = dto.fullName?.trim() ?? '';
+    const existing = await this.users.findByPhone(phone);
+    if (!existing && !fullName) {
       throw new UnauthorizedException('Enter your name');
     }
     await this.assertPhoneVerified(phone, dto);
 
-    let user = await this.users.findByPhone(phone);
+    let user = existing;
     if (!user) {
       try {
         user = await this.users.create({

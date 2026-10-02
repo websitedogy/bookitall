@@ -65,8 +65,10 @@ export class GoogleAuthDto {
 }
 
 export class PhoneAuthDto {
+  @IsOptional()
   @IsString()
-  fullName!: string;
+  @MaxLength(80)
+  fullName?: string;
 
   @IsString()
   phone!: string;

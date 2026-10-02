@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Patch, Post, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Patch, Post, Query, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto, GoogleAuthDto, LoginDto, PhoneAuthDto, RegisterDto, UpdateProfileDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -25,6 +25,12 @@ export class AuthController {
   @Post('google')
   google(@Body() dto: GoogleAuthDto) {
     return this.auth.continueWithGoogle(dto);
+  }
+
+  @Public()
+  @Get('phone-known')
+  phoneKnown(@Query('phone') phone?: string) {
+    return this.auth.phoneKnown(phone ?? '');
   }
 
   @Public()
