@@ -2,7 +2,7 @@
 
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Flag, Star, X } from "lucide-react";
+import { ChevronRight, Flag, Star, X } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/cn";
@@ -129,8 +129,9 @@ export function ListingInfoTabs({
       <div className={cn("border-t border-[#efe6d4] p-5", compact && "pt-4")}>
         {compact ? (
           <details className="group">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-[#0f766e] [&::-webkit-details-marker]:hidden">
-              Hotel details
+            <summary className="flex h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-full bg-[#0f766e] px-4 text-sm font-semibold text-white [&::-webkit-details-marker]:hidden">
+              View hotel details
+              <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
             </summary>
             <div className="mt-3">{detailPanel}</div>
           </details>
