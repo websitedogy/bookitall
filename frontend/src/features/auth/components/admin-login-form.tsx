@@ -102,7 +102,7 @@ export function AdminLoginForm() {
               className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@bookitall.com"
+              placeholder="Enter your username"
               autoComplete="username"
             />
 
