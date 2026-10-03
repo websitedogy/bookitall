@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../data/service_catalog.dart';
 import '../../data/professionals.dart';
 import '../../data/api.dart';
@@ -330,7 +329,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _brandMark() {
     return AspectRatio(
-      aspectRatio: 1400 / 1220,
+      aspectRatio: 1,
       child: ColoredBox(
         color: const Color(0xFFF7F8FA),
         child: Stack(
@@ -385,9 +384,9 @@ class _BrandDoodle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/brand/footer-doodle.svg',
-      fit: BoxFit.fill,
+    return Image.asset(
+      'assets/brand/footer-doodle-art.jpg',
+      fit: BoxFit.cover,
       alignment: Alignment.center,
     );
   }
