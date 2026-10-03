@@ -388,8 +388,8 @@ class _BrandDoodle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/brand/footer-doodle-art.jpg',
-      fit: BoxFit.cover,
-      alignment: const Alignment(0, -0.15),
+      fit: BoxFit.contain,
+      alignment: Alignment.center,
     );
   }
 }
