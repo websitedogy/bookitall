@@ -313,6 +313,62 @@ a {
   margin-top: -2px;
 }
 
+@media (max-width: 767px) {
+  .admin-table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tbody {
+    display: block;
+  }
+
+  .admin-table tr {
+    display: block;
+    border-bottom: 1px solid #d1fae5;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .admin-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0.28rem 0 !important;
+    text-align: right;
+    white-space: normal !important;
+  }
+
+  .admin-table td::before {
+    content: attr(data-label);
+    flex: 0 0 5.5rem;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+
+  .admin-table td:not([data-label])::before,
+  .admin-table td[data-label=""]::before {
+    content: none;
+  }
+
+  .admin-table td[colspan] {
+    display: block;
+    padding-top: 0.45rem !important;
+    text-align: left;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

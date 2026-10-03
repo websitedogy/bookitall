@@ -139,7 +139,7 @@ export function FilterDropdown({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex h-7 max-w-[7.5rem] cursor-pointer items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-500"
+        className="inline-flex h-7 max-w-[11rem] cursor-pointer items-center gap-1 rounded-md bg-emerald-600 px-2 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-500 sm:max-w-[14rem]"
       >
         <span className="truncate">{current}</span>
         <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition ${open ? "rotate-180" : ""}`} />
@@ -306,7 +306,7 @@ export function CompactPager({
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
   return (
-    <div className="flex items-center justify-between gap-2 border-t border-emerald-100 px-3 py-1.5 text-[11px] text-slate-500">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-emerald-100 px-3 py-1.5 text-[11px] text-slate-500">
       <label className="inline-flex items-center gap-1.5">
         <span>Rows</span>
         <select

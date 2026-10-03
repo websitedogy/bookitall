@@ -201,8 +201,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
 
-      <div className="min-w-0 lg:pl-[260px]">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-emerald-100 bg-white px-4 py-2.5 md:px-6">
+      <div className="min-w-0 overflow-x-hidden lg:pl-[260px]">
+        <header className="sticky top-0 z-30 flex min-w-0 items-center justify-between gap-2 border-b border-emerald-100 bg-white px-3 py-2.5 sm:gap-3 sm:px-4 md:px-6">
           <button type="button" className="rounded-lg p-2 text-slate-600 ring-1 ring-emerald-100 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
@@ -210,7 +210,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <AdminTopbar user={user} />
           </div>
         </header>
-        <main className="px-4 py-3 md:px-6 md:py-4">{children}</main>
+        <main className="min-w-0 px-3 py-3 sm:px-4 md:px-6 md:py-4">{children}</main>
       </div>
     </div>
   );
@@ -218,9 +218,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 export function AdminHeader({ title, extra, action }: { title: string; subtitle?: string; extra?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-2 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-      <h1 className="shrink-0 text-sm font-semibold tracking-tight text-slate-900">{title}</h1>
-      <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+    <div className="mb-2 flex flex-wrap items-center gap-2">
+      <h1 className="min-w-0 text-sm font-semibold tracking-tight text-slate-900">{title}</h1>
+      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
         {extra}
         {action}
       </div>

@@ -61,8 +61,8 @@ export default function AdminSettlementsPage() {
           <EmptyState>No settlements in this filter.</EmptyState>
         ) : (
           <div>
-            <div className="overflow-x-auto">
-            <ul className="min-w-[36rem] divide-y divide-slate-100">
+            <div>
+            <ul className="divide-y divide-slate-100">
               {rows.map((row, index) => (
                 <li key={row.id} className="flex items-center gap-3 whitespace-nowrap px-3 py-2 md:px-4">
                   <span className="w-8 shrink-0 text-xs tabular-nums text-slate-500">{(page - 1) * limit + index + 1}</span>

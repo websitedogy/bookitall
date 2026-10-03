@@ -46,10 +46,10 @@ export default function AdminPaymentsPage() {
           <EmptyState>No pending payments.</EmptyState>
         ) : (
           <div>
-            <div className="overflow-x-auto">
-            <ul className="min-w-[36rem] divide-y divide-slate-100">
+            <div>
+            <ul className="divide-y divide-slate-100">
               {rows.map((row, index) => (
-                <li key={row.id} className="flex items-center gap-3 whitespace-nowrap px-3 py-2 md:px-4">
+                <li key={row.id} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
                   <span className="w-8 shrink-0 text-xs tabular-nums text-slate-500">{(page - 1) * limit + index + 1}</span>
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-1.5 text-sm font-medium">

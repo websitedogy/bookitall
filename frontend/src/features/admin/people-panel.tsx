@@ -102,7 +102,7 @@ export function AdminPeoplePanel({
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <h1 className="shrink-0 text-sm font-semibold text-slate-900">{title}</h1>
         {tabs ? (
-          <div className="inline-flex rounded-lg bg-emerald-50 p-0.5 ring-1 ring-emerald-100">
+          <div className="flex max-w-full flex-wrap rounded-lg bg-emerald-50 p-0.5 ring-1 ring-emerald-100">
             {tabs.items.map((item) => {
               const active = tabs.value === item.id;
               return (
@@ -127,7 +127,7 @@ export function AdminPeoplePanel({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search"
-          className="ml-auto h-7 w-28 shrink-0 rounded-md border border-emerald-100 bg-white px-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-200 sm:w-[10.5rem]"
+          className="h-8 w-full min-w-0 rounded-md border border-emerald-100 bg-white px-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-200 sm:ml-auto sm:h-7 sm:w-44"
         />
       </div>
       {note ? <p className="mb-1.5 text-xs font-medium text-emerald-700">{note}</p> : null}
@@ -139,8 +139,8 @@ export function AdminPeoplePanel({
         ) : displayed.length === 0 ? (
           <EmptyState>{empty}</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[40rem] w-full text-left text-sm">
+          <div>
+            <table className="admin-table w-full text-left text-sm">
               <thead className="bg-emerald-50/60 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
                 <tr>
                   <th className="w-12 whitespace-nowrap px-3 py-2">S.no</th>
@@ -168,8 +168,8 @@ export function AdminPeoplePanel({
                     : "—";
                   return (
                     <tr key={user.id} className="bg-white hover:bg-emerald-50/40">
-                      <td className="whitespace-nowrap px-3 py-2 text-xs tabular-nums text-slate-500">{sno}</td>
-                      <td className="whitespace-nowrap px-3 py-2">
+                      <td data-label="S.no" className="whitespace-nowrap px-3 py-2 text-xs tabular-nums text-slate-500">{sno}</td>
+                      <td data-label="Name" className="whitespace-nowrap px-3 py-2">
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
@@ -181,19 +181,19 @@ export function AdminPeoplePanel({
                           <StatusPill value={user.status} />
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+                      <td data-label="Contact" className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                         <p>{user.phone || "—"}</p>
                         {publicEmail(user.email) ? (
                           <p className="text-[11px] text-slate-400">{publicEmail(user.email)}</p>
                         ) : null}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+                      <td data-label="Role" className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                         <p>{user.role.replaceAll("_", " ")}</p>
                         {user.businessName ? <p className="text-[11px] text-slate-400">{user.businessName}</p> : null}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-500">{joined}</td>
+                      <td data-label="Joined" className="whitespace-nowrap px-3 py-2 text-xs text-slate-500">{joined}</td>
                       {showPosts ? (
-                        <td className="whitespace-nowrap px-3 py-2">
+                        <td data-label="Posts" className="whitespace-nowrap px-3 py-2">
                           <button
                             type="button"
                             onClick={() => router.push(viewHref)}
@@ -211,11 +211,11 @@ export function AdminPeoplePanel({
                         </td>
                       ) : null}
                       {showReport ? (
-                        <td className="whitespace-nowrap px-3 py-2">
+                        <td data-label="Report" className="whitespace-nowrap px-3 py-2">
                           <VendorReportButton userId={user.id} name={user.fullName} />
                         </td>
                       ) : null}
-                      <td className="whitespace-nowrap px-3 py-2 text-right">
+                      <td data-label="Actions" className="whitespace-nowrap px-3 py-2 text-right">
                         <RowActions
                           items={[
                             ...(canManage && vendor

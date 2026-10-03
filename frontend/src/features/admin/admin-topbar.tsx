@@ -126,7 +126,7 @@ export function AdminTopbar({ user }: { user: AuthUser }) {
             <span className="hidden max-w-[8rem] truncate text-sm font-medium text-slate-800 md:block">{user.fullName}</span>
           </button>
           {open === "profile" ? (
-            <div className="absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200">
+            <div className="absolute right-0 z-40 mt-2 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200">
               <div className="border-b border-slate-100 px-4 py-3">
                 <p className="truncate text-sm font-semibold text-slate-900">{user.fullName}</p>
                 <p className="truncate text-xs text-slate-500">{user.email || user.phone}</p>

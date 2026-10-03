@@ -98,8 +98,8 @@ export function AdminBookingsPanel({
       ) : rows.length === 0 ? (
         <EmptyState>{empty}</EmptyState>
       ) : (
-        <div className="overflow-x-auto">
-          <ul className="min-w-[40rem] divide-y divide-slate-100">
+        <div>
+          <ul className="divide-y divide-slate-100">
             {rows.map((row, index) => {
               const customer = personFrom(row, "customer");
               const vendor = personFrom(row, "vendor");
@@ -125,10 +125,10 @@ export function AdminBookingsPanel({
                   : []),
               ];
               return (
-                <li key={row.id} className="flex items-center gap-3 whitespace-nowrap px-3 py-2 md:px-4">
+                <li key={row.id} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
                   <span className="w-8 shrink-0 text-xs tabular-nums text-slate-500">{sno}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                       <p className="text-sm font-medium text-slate-900">
                         {customer.name || "—"} <span className="text-xs font-normal text-slate-500">{customer.phone}</span>
                       </p>
@@ -138,7 +138,7 @@ export function AdminBookingsPanel({
                       <p className="text-sm font-semibold text-slate-900">{inr(row.total)}</p>
                       <StatusPill value={row.status} />
                     </div>
-                    <p className="mt-0.5 text-[11px] text-slate-500">
+                    <p className="mt-0.5 break-words text-[11px] text-slate-500">
                       {[
                         row.bookingNumber,
                         row.type.replaceAll("_", " "),
