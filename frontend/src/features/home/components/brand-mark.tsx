@@ -4,9 +4,9 @@ export function BrandMark() {
       <img
         src="/brand/footer-doodle-art.jpg?v=1"
         alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80"
       />
-      <div className="absolute left-[5%] top-[44%] max-w-[56%]">
+      <div className="absolute left-[5%] top-[58%] max-w-[52%]">
         <p className="text-[clamp(2.7rem,6.6vw,6rem)] font-extrabold italic leading-[0.9] tracking-tight text-[#7D8BA6]">
           BOOK it all
         </p>

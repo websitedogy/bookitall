@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(24, 0, 24, 36),
                 child: Align(
-                  alignment: Alignment(-1, 0.12),
+                  alignment: Alignment(-1, 0.32),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
