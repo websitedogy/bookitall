@@ -231,7 +231,7 @@ export function AdminListingCard({
           </div>
         </td>
         <td data-label="Name" className="max-w-[16rem] px-3 py-2 align-middle max-md:max-w-none">
-          <p className="flex items-center gap-1.5 truncate text-sm font-medium text-slate-900">
+          <p className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-slate-900 md:flex-nowrap md:truncate">
             {listing.title}
             <StatusPill value={listing.status} />
           </p>

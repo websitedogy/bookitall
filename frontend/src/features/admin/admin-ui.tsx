@@ -31,7 +31,7 @@ export function DashBox({
           </span>
         ) : null}
       </div>
-      <p className="text-xl font-semibold tracking-tight text-slate-900">{count}</p>
+      <p className="break-words text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">{count}</p>
     </Link>
   );
 }

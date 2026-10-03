@@ -312,15 +312,15 @@ function PostGroup({
       ) : (
         <div className="space-y-4">
           {listings.map((listing) => (
-            <AdminCard key={listing.id} className="p-5">
-              <div className="flex items-start gap-4">
+            <AdminCard key={listing.id} className="p-3 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-2 text-base font-semibold text-slate-900">
                     {listing.title}
                     <StatusPill value={listing.status} />
                     {listing.priceLabel ? <span className="text-sm font-semibold text-emerald-700">{listing.priceLabel}</span> : null}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 break-words text-sm text-slate-500">
                     {[listing.category, listing.location, listing.mobileNumber].filter(Boolean).join(" · ")}
                   </p>
                   <div className="mt-2">
