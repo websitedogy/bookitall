@@ -40,7 +40,7 @@ export function HeroBanners() {
             fetchPriority={index === 0 ? "high" : "low"}
             loading={index === 0 ? "eager" : "lazy"}
             className={cn(
-              "h-[10.5rem] w-full object-cover sm:h-[13rem] md:h-[200px] lg:h-[240px]",
+              "h-[10.5rem] w-full object-cover brightness-110 saturate-125 sm:h-[13rem] md:h-[200px] lg:h-[240px]",
               index === active ? "relative opacity-100" : "absolute inset-0 opacity-0",
             )}
           />
