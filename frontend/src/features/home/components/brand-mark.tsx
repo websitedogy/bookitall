@@ -1,17 +1,17 @@
 export function BrandMark() {
   return (
-    <section className="relative mt-2 aspect-square overflow-hidden bg-[#F7F8FA]" aria-label="Book It All">
+    <section className="relative mt-2 h-52 overflow-hidden bg-[#F7F8FA] sm:h-60 md:h-64 lg:h-72" aria-label="Book It All">
       <img
         src="/brand/footer-doodle-art.jpg?v=1"
         alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_42%] opacity-80"
       />
-      <div className="absolute left-[5%] top-[58%] max-w-[52%]">
-        <p className="text-[clamp(2.7rem,6.6vw,6rem)] font-extrabold italic leading-[0.9] tracking-tight text-[#7D8BA6]">
+      <div className="absolute bottom-4 left-[5%] max-w-[58%] md:bottom-6">
+        <p className="text-[clamp(1.7rem,3.4vw,3rem)] font-extrabold italic leading-[0.9] tracking-tight text-[#7D8BA6]">
           BOOK it all
         </p>
-        <p className="mt-4 text-[clamp(0.9rem,1.6vw,1.2rem)] font-semibold text-[#6B7A99]">🇮🇳 Made for India</p>
-        <p className="mt-1.5 text-[clamp(0.9rem,1.6vw,1.2rem)] font-semibold text-[#6B7A99]">❤️ Made in Telangana</p>
+        <p className="mt-2 text-xs font-semibold text-[#6B7A99] md:mt-2.5 md:text-sm">🇮🇳 Made for India</p>
+        <p className="mt-0.5 text-xs font-semibold text-[#6B7A99] md:text-sm">❤️ Made in Telangana</p>
       </div>
     </section>
   );

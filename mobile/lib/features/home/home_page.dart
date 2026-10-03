@@ -328,8 +328,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _brandMark() {
-    return AspectRatio(
-      aspectRatio: 1,
+    final wide = MediaQuery.sizeOf(context).width >= 700;
+    return SizedBox(
+      height: wide ? 230 : 188,
+      width: double.infinity,
       child: ColoredBox(
         color: const Color(0xFFF7F8FA),
         child: Stack(
@@ -341,7 +343,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(24, 0, 24, 36),
                 child: Align(
-                  alignment: Alignment(-1, 0.32),
+                  alignment: Alignment(-1, 0.72),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,7 +352,7 @@ class _HomePageState extends State<HomePage> {
                     'BOOK it all',
                     style: TextStyle(
                       color: Color(0xD96B7A99),
-                      fontSize: 40,
+                      fontSize: 30,
                       fontWeight: FontWeight.w800,
                       fontStyle: FontStyle.italic,
                       letterSpacing: -0.8,
@@ -387,7 +389,7 @@ class _BrandDoodle extends StatelessWidget {
     return Image.asset(
       'assets/brand/footer-doodle-art.jpg',
       fit: BoxFit.cover,
-      alignment: Alignment.center,
+      alignment: const Alignment(0, -0.15),
     );
   }
 }
