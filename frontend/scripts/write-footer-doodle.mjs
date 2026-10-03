@@ -224,48 +224,55 @@ const icons = {
     <path d="M14 58 L22 40 L30 58"/>
     <path d="M34 28 H62 V58 C62 70 34 74 34 58 Z"/>
     <path d="M40 46 L46 52 L56 38"/>`,
+  gopuram: `
+    <circle cx="40" cy="4" r="2.2"/>
+    <path d="M32 8 L24 26 H56 L48 8 Z"/>
+    <path d="M18 26 H62 V46 H18 Z"/>
+    <path d="M12 46 H68 V66 H12 Z"/>
+    <path d="M6 66 H74 V86 H6 Z"/>
+    <path d="M30 86 V108 H50 V86"/>
+    <path d="M24 36 H32 M40 36 H48 M56 36 H60"/>
+    <path d="M20 56 H28 M36 56 H44 M52 56 H60"/>`,
 };
 
 const roads = `
-  <path d="M30 145 C200 115 380 175 620 125" stroke-dasharray="6 7"/>
-  <path d="M700 175 C860 140 1040 190 1280 145" stroke-dasharray="6 7"/>
-  <path d="M1320 190 C1460 160 1560 200 1660 170" stroke-dasharray="6 7"/>
-  <path d="M40 300 C220 270 400 330 640 285" stroke-dasharray="6 7"/>
-  <path d="M720 320 C900 285 1100 345 1380 300" stroke-dasharray="6 7"/>
-  <path d="M420 455 C620 425 820 480 1100 440" stroke-dasharray="6 7"/>
-  <path d="M1160 470 C1320 440 1480 490 1640 450" stroke-dasharray="6 7"/>
+  <path d="M-40 250 C 180 180 360 320 620 220 S 1100 140 1640 230" stroke-width="10" stroke-opacity="0.45"/>
+  <path d="M-20 620 C 240 540 480 700 820 600 S 1280 520 1660 640" stroke-width="10" stroke-opacity="0.35"/>
+  <path d="M40 150 C 220 110 360 190 560 130" stroke-dasharray="7 9"/>
+  <path d="M640 190 C 820 140 980 230 1220 160" stroke-dasharray="7 9"/>
+  <path d="M1260 210 C 1380 170 1480 240 1600 190" stroke-dasharray="7 9"/>
+  <path d="M80 430 C 260 380 420 470 640 410" stroke-dasharray="7 9"/>
+  <path d="M860 470 C 1040 410 1220 520 1500 450" stroke-dasharray="7 9"/>
+  <path d="M700 760 C 900 710 1100 800 1380 730" stroke-dasharray="7 9"/>
 `;
 
 const placements = [
-  mark(36, 18, 1.05, -8, icons.pin),
-  mark(150, 8, 1.0, 0, icons.charminar),
-  mark(280, 36, 1.0, -3, icons.car),
-  mark(430, 6, 0.95, 0, icons.gate),
-  mark(590, 10, 0.95, 0, icons.signal),
-  mark(720, 12, 1.0, 0, icons.hotel),
-  mark(900, 16, 1.05, -2, icons.auto),
-  mark(1160, 10, 1.0, 0, icons.person),
-  mark(1360, 22, 0.9, -4, icons.suitcase),
-  mark(1520, 16, 0.95, 4, icons.plug),
-  mark(20, 175, 1.05, -6, icons.rider),
-  mark(250, 185, 0.95, 2, icons.taj),
-  mark(430, 205, 0.9, 6, icons.handPhone),
-  mark(590, 190, 0.9, -8, icons.helmet),
-  mark(760, 180, 0.95, 4, icons.scooter),
-  mark(960, 170, 0.9, -4, icons.map),
-  mark(1140, 160, 0.95, 2, icons.minar),
-  mark(1320, 175, 0.85, 0, icons.shield),
-  mark(1480, 185, 0.85, 6, icons.broom),
-  mark(580, 325, 0.9, -2, icons.bus),
-  mark(790, 335, 0.9, 2, icons.truck),
-  mark(1000, 325, 0.85, -4, icons.boxes),
-  mark(1180, 345, 0.85, 4, icons.parcel),
-  mark(1340, 320, 0.85, 0, icons.ac),
-  mark(1500, 340, 0.8, 4, icons.roller),
+  mark(36, 36, 1.7, -6, icons.pin),
+  mark(150, 8, 1.35, 0, icons.gopuram),
+  mark(360, 48, 1.45, -4, icons.car),
+  mark(560, 10, 1.25, 0, icons.gate),
+  mark(760, 18, 1.4, 0, icons.signal),
+  mark(900, 28, 1.35, -2, icons.auto),
+  mark(1240, 12, 1.3, 0, icons.person),
+  mark(8, 250, 1.25, -4, icons.rider),
+  mark(340, 230, 1.15, 2, icons.taj),
+  mark(560, 280, 1.2, 6, icons.handPhone),
+  mark(760, 250, 1.15, -6, icons.helmet),
+  mark(920, 200, 1.2, 0, icons.minar),
+  mark(1080, 250, 1.15, -3, icons.map),
+  mark(1260, 280, 1.25, 4, icons.scooter),
+  mark(1440, 220, 1.1, 0, icons.shield),
+  mark(680, 120, 1.05, 0, icons.charminar),
+  mark(760, 560, 1.15, -2, icons.bus),
+  mark(980, 580, 1.1, 2, icons.truck),
+  mark(700, 700, 1.05, -4, icons.boxes),
+  mark(900, 720, 1.05, 4, icons.parcel),
+  mark(1120, 620, 1.4, 0, icons.sedan),
 ];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 520" fill="none" aria-hidden="true">
-  <g fill="none" stroke="#B7C3CE" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none" aria-hidden="true">
+  <rect width="1600" height="900" fill="#F7F8FA"/>
+  <g fill="none" stroke="#D5DAE3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     ${roads}
     ${placements.join("\n    ")}
   </g>

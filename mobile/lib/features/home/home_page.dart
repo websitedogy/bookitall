@@ -329,49 +329,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _brandMark() {
-    return SizedBox(
-      width: double.infinity,
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: 0.42,
-                child: _BrandDoodle(),
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: ColoredBox(
+        color: const Color(0xFFF7F8FA),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: IgnorePointer(child: _BrandDoodle()),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(28, 36, 28, 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BOOK it all',
+                    style: TextStyle(
+                      color: Color(0xD96B7A99),
+                      fontSize: 40,
+                      fontWeight: FontWeight.w800,
+                      fontStyle: FontStyle.italic,
+                      letterSpacing: -0.8,
+                      height: 1,
+                    ),
+                  ),
+                  SizedBox(height: 14),
+                  Text(
+                    '🇮🇳  Made for India',
+                    style: TextStyle(color: Color(0xCC6B7A99), fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    '❤️  Made in Telangana',
+                    style: TextStyle(color: Color(0xCC6B7A99), fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(28, 36, 28, 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'BOOK it all',
-                  style: TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -0.6,
-                    height: 1.05,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  '🇮🇳  Made for India',
-                  style: TextStyle(color: Color(0xFF6B7280), fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  '❤️  Made in Telangana',
-                  style: TextStyle(color: Color(0xFF6B7280), fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
