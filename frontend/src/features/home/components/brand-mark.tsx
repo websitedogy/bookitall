@@ -4,7 +4,7 @@ export function BrandMark() {
       <img
         src="/brand/footer-doodle-art.jpg?v=1"
         alt=""
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[175%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-fill opacity-80 md:h-[148%] md:w-[94%]"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[175%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-fill opacity-80 md:left-[56%] md:h-[132%] md:w-[86%]"
       />
       <div className="absolute bottom-4 left-[5%] max-w-[58%] md:bottom-6">
         <p className="text-[clamp(1.7rem,3.4vw,3rem)] font-extrabold italic leading-[0.9] tracking-tight text-[#7D8BA6]">
