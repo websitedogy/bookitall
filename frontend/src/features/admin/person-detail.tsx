@@ -157,8 +157,8 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
       {note ? <p className="mb-3 text-xs font-medium text-emerald-700">{note}</p> : null}
 
       <AdminCard className="mb-6 overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+        <div>
+          <table className="admin-table min-w-full text-left text-sm">
             <thead className="bg-emerald-50/60 text-[11px] font-semibold uppercase tracking-wide text-emerald-800">
               <tr>
                 <th className="px-5 py-3">Name</th>
@@ -173,7 +173,7 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
             </thead>
             <tbody>
               <tr className="bg-white">
-                <td className="whitespace-nowrap px-5 py-3.5">
+                <td data-label="Name" className="whitespace-nowrap px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-xs font-semibold text-emerald-700">
                       {initials}
@@ -188,13 +188,13 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
                     </div>
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{person.role.replaceAll("_", " ")}</td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{person.phone || "—"}</td>
-                <td className="max-w-[12rem] truncate px-4 py-3.5 text-slate-700">{publicEmail(person.email) || "—"}</td>
-                <td className="max-w-[10rem] truncate px-4 py-3.5 text-slate-700">{person.businessName || "—"}</td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{joined}</td>
-                <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{lastSeen}</td>
-                <td className="px-4 py-3.5 text-slate-700">
+                <td data-label="Role" className="whitespace-nowrap px-4 py-3.5 text-slate-700">{person.role.replaceAll("_", " ")}</td>
+                <td data-label="Mobile" className="whitespace-nowrap px-4 py-3.5 text-slate-700">{person.phone || "—"}</td>
+                <td data-label="Email" className="max-w-[12rem] truncate px-4 py-3.5 text-slate-700 max-md:max-w-none max-md:whitespace-normal">{publicEmail(person.email) || "—"}</td>
+                <td data-label="Business" className="max-w-[10rem] truncate px-4 py-3.5 text-slate-700 max-md:max-w-none max-md:whitespace-normal">{person.businessName || "—"}</td>
+                <td data-label="Joined" className="whitespace-nowrap px-4 py-3.5 text-slate-700">{joined}</td>
+                <td data-label="Last seen" className="whitespace-nowrap px-4 py-3.5 text-slate-700">{lastSeen}</td>
+                <td data-label="Listings" className="px-4 py-3.5 text-slate-700">
                   <p>{listings.length}</p>
                   <p className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-slate-400">
                     <span>{pendingPosts.length} pending</span>

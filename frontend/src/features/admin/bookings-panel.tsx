@@ -129,10 +129,10 @@ export function AdminBookingsPanel({
                   <span className="w-8 shrink-0 text-xs tabular-nums text-slate-500">{sno}</span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="min-w-0 break-words text-sm font-medium text-slate-900">
                         {customer.name || "—"} <span className="text-xs font-normal text-slate-500">{customer.phone}</span>
                       </p>
-                      <p className="text-sm text-slate-700">
+                      <p className="min-w-0 break-words text-sm text-slate-700">
                         {vendor.name || "—"} <span className="text-xs text-slate-500">{vendor.phone}</span>
                       </p>
                       <p className="text-sm font-semibold text-slate-900">{inr(row.total)}</p>

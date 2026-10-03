@@ -47,8 +47,8 @@ export default function AdminFinancePage() {
               <p className="py-6 text-sm text-slate-500">No payouts waiting.</p>
             ) : (
               payouts.map((payout) => (
-                <li key={payout.id} className="flex items-center justify-between py-3 text-sm">
-                  <span>{payout.user?.fullName ?? payout.id}</span>
+                <li key={payout.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+                  <span className="min-w-0 break-words">{payout.user?.fullName ?? payout.id}</span>
                   <span className="text-slate-500">
                     ₹{payout.amount} · {payout.status}
                   </span>

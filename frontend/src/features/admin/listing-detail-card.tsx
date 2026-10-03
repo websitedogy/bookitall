@@ -224,22 +224,22 @@ export function AdminListingCard({
   return (
     <>
       <tr className="bg-white hover:bg-emerald-50/40">
-        <td className="whitespace-nowrap px-3 py-2 align-middle text-xs tabular-nums text-slate-500">{sno ?? ""}</td>
-        <td className="px-3 py-2 align-middle">
+        <td data-label="S.no" className="whitespace-nowrap px-3 py-2 align-middle text-xs tabular-nums text-slate-500">{sno ?? ""}</td>
+        <td data-label="Photo" className="px-3 py-2 align-middle">
           <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-100 ring-1 ring-emerald-100">
             <ListingThumb src={listing.image} categoryId={listing.categoryId || "jobs"} className="h-full w-full object-cover" />
           </div>
         </td>
-        <td className="max-w-[16rem] px-3 py-2 align-middle">
+        <td data-label="Name" className="max-w-[16rem] px-3 py-2 align-middle max-md:max-w-none">
           <p className="flex items-center gap-1.5 truncate text-sm font-medium text-slate-900">
             {listing.title}
             <StatusPill value={listing.status} />
           </p>
           {listing.priceLabel ? <p className="text-[11px] font-semibold text-emerald-700">{listing.priceLabel}</p> : null}
         </td>
-        <td className="whitespace-nowrap px-3 py-2 align-middle text-sm text-slate-700">{mobile}</td>
-        <td className="whitespace-nowrap px-3 py-2 align-middle text-sm text-slate-700">{owner}</td>
-        <td className="whitespace-nowrap px-3 py-2 align-middle">
+        <td data-label="Mobile" className="whitespace-nowrap px-3 py-2 align-middle text-sm text-slate-700">{mobile}</td>
+        <td data-label="Owner" className="whitespace-nowrap px-3 py-2 align-middle text-sm text-slate-700">{owner}</td>
+        <td data-label="Details" className="whitespace-nowrap px-3 py-2 align-middle">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -248,10 +248,10 @@ export function AdminListingCard({
             {open ? "Hide details" : "View details"}
           </button>
         </td>
-        <td className="whitespace-nowrap px-3 py-2 align-middle">
+        <td data-label="Orders" className="whitespace-nowrap px-3 py-2 align-middle">
           <ListingOrdersReport listing={listing} category={category} />
         </td>
-        {actions ? <td className="whitespace-nowrap px-3 py-2 align-middle text-right">{actions}</td> : null}
+        {actions ? <td data-label="Actions" className="whitespace-nowrap px-3 py-2 align-middle text-right">{actions}</td> : null}
       </tr>
       {open ? (
         <tr className="bg-slate-50/80">

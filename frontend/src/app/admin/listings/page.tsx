@@ -67,8 +67,8 @@ export default function AdminListingsPage() {
           <EmptyState>No listings in this list.</EmptyState>
         ) : (
           <div>
-            <div className="overflow-x-auto">
-              <table className="min-w-[52rem] w-full text-left text-sm">
+            <div>
+              <table className="admin-table w-full text-left text-sm">
                 <thead className="bg-emerald-50/60 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
                   <tr>
                     <th className="w-12 whitespace-nowrap px-3 py-2">S.no</th>

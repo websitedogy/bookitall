@@ -377,7 +377,7 @@ function PasswordModal({ token, onClose }: { token: string | null; onClose: () =
         </label>
         {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
         {done ? <p className="mt-3 text-sm text-emerald-700">Password updated.</p> : null}
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" onClick={onClose} className="h-10 rounded-xl px-4 text-sm font-medium text-slate-600 hover:bg-slate-50">
             Cancel
           </button>

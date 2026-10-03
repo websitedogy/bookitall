@@ -114,8 +114,8 @@ function StaffPanel() {
           <EmptyState>No sub-editors yet.</EmptyState>
         ) : (
           <div>
-          <div className="overflow-x-auto">
-          <table className="min-w-[36rem] w-full text-left text-sm">
+          <div>
+          <table className="admin-table w-full text-left text-sm">
             <thead className="bg-emerald-50/60 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
               <tr>
                 <th className="w-12 whitespace-nowrap px-3 py-2">S.no</th>
@@ -128,16 +128,16 @@ function StaffPanel() {
             <tbody className="divide-y divide-slate-100">
               {paged.map((user, index) => (
                 <tr key={user.id}>
-                  <td className="whitespace-nowrap px-3 py-2 text-xs tabular-nums text-slate-500">{(page - 1) * limit + index + 1}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-900">{user.fullName}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+                  <td data-label="S.no" className="whitespace-nowrap px-3 py-2 text-xs tabular-nums text-slate-500">{(page - 1) * limit + index + 1}</td>
+                  <td data-label="Name" className="whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-900">{user.fullName}</td>
+                  <td data-label="Contact" className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                     <p>{user.phone || "—"}</p>
                     {publicEmail(user.email) ? <p className="text-[11px] text-slate-400">{publicEmail(user.email)}</p> : null}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2">
+                  <td data-label="Status" className="whitespace-nowrap px-3 py-2">
                     <StatusPill value={user.status} />
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right">
+                  <td data-label="Actions" className="whitespace-nowrap px-3 py-2 text-right">
                     <RowActions
                       items={
                         user.status !== "SUSPENDED"
