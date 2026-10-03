@@ -330,7 +330,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _brandMark() {
     return AspectRatio(
-      aspectRatio: 16 / 9,
+      aspectRatio: 1400 / 1220,
       child: ColoredBox(
         color: const Color(0xFFF7F8FA),
         child: Stack(
@@ -338,12 +338,15 @@ class _HomePageState extends State<HomePage> {
             const Positioned.fill(
               child: IgnorePointer(child: _BrandDoodle()),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(28, 36, 28, 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            const Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 36),
+                child: Align(
+                  alignment: Alignment(-1, 0.12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Text(
                     'BOOK it all',
                     style: TextStyle(
@@ -382,7 +385,7 @@ class _BrandDoodle extends StatelessWidget {
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       'assets/brand/footer-doodle.svg',
-      fit: BoxFit.cover,
+      fit: BoxFit.fill,
       alignment: Alignment.center,
     );
   }
