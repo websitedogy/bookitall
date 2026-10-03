@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import { api } from "@/shared/lib/api";
 import { useAdminAuth, isPanelRole, type AuthUser } from "@/features/auth/store";
 
@@ -80,6 +80,17 @@ export function AdminLoginForm() {
 
       <main className="flex items-center justify-center bg-[#f4f7fb] px-5 py-10 sm:px-8">
         <div className="w-full max-w-[420px]">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) router.back();
+              else router.push("/");
+            }}
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" strokeWidth={2.2} aria-hidden />
+            Back
+          </button>
           <div className="mb-8 lg:hidden">
             <Link href="/" className="text-[18px] font-semibold tracking-tight text-[var(--primary)]">
               Book It All

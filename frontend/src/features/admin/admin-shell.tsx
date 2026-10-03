@@ -14,6 +14,7 @@ import {
   FileCheck,
   Headphones,
   Layers,
+  ArrowLeft,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -106,6 +107,7 @@ function NavLinks({ onClick, superAdmin }: { onClick?: () => void; superAdmin: b
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const user = useAdminAuth((s) => s.user);
   const logout = useAdminAuth((s) => s.logout);
   const token = useAdminAuth((s) => s.accessToken);
@@ -205,6 +207,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 flex min-w-0 items-center justify-between gap-2 border-b border-emerald-100 bg-white px-3 py-2.5 sm:gap-3 sm:px-4 md:px-6">
           <button type="button" className="rounded-lg p-2 text-slate-600 ring-1 ring-emerald-100 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+                return;
+              }
+              if (pathname !== "/admin") router.push("/admin");
+            }}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-700 ring-1 ring-emerald-100 hover:bg-emerald-50"
+            aria-label="Back to the last page"
+          >
+            <ArrowLeft className="h-4 w-4" strokeWidth={2.2} aria-hidden />
+            Back
           </button>
           <div className="ml-auto">
             <AdminTopbar user={user} />

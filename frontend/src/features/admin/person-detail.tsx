@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { api } from "@/shared/lib/api";
@@ -110,10 +109,17 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
   if (error || !person) {
     return (
       <div>
-        <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push(backHref);
+          }}
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
           <ArrowLeft className="h-4 w-4" />
           {backLabel}
-        </Link>
+        </button>
         <AdminCard className="mt-4">
           <EmptyState>{error || "Profile not found."}</EmptyState>
         </AdminCard>
@@ -143,7 +149,10 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
     <div>
       <button
         type="button"
-        onClick={() => router.push(backHref)}
+        onClick={() => {
+          if (window.history.length > 1) router.back();
+          else router.push(backHref);
+        }}
         className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="h-4 w-4" />
