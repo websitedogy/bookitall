@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #0e9b86;
-  --primary-hover: #0b8574;
+  --primary: #0f766e;
+  --primary-hover: #0b5f59;
   --primary-foreground: #ffffff;
-  --primary-soft: #e7faf6;
-  --secondary: #0f6f64;
+  --primary-soft: #e7f6f3;
+  --secondary: #134e4a;
   --secondary-soft: #ecfdf8;
-  --accent: #0e9b86;
+  --accent: #0f766e;
   --accent-foreground: #ffffff;
   --background: #ffffff;
-  --background-blue: #ffffff;
-  --background-lavender: #ffffff;
+  --background-blue: #f8fafc;
+  --background-lavender: #f8fafc;
   --surface: #ffffff;
-  --text: #0b1220;
-  --text-muted: #4b5b6b;
+  --text: #0f172a;
+  --text-muted: #64748b;
   --border: #e2e8f0;
-  --success: #0e9b86;
+  --success: #0f766e;
   --warning: #b45309;
   --error: #b91c1c;
-  --ring: #0e9b86;
+  --ring: #0f766e;
   --shadow-soft: 0 12px 32px -20px rgba(15, 23, 42, 0.18);
-  --studio: #f7fcfa;
+  --studio: #f2f6f4;
   --studio-ink: #12241f;
   --studio-muted: #5b6e68;
   --studio-line: #d5e0db;
@@ -173,13 +173,19 @@ html {
 }
 
 body {
-  background: #ffffff;
+  background: var(--background);
   color: var(--text);
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: -0.011em;
   max-width: 100%;
   overflow-x: clip;
+}
+
+@media (min-width: 768px) {
+  body {
+    background: #f4f7fb;
+  }
 }
 
 .native-app body,
