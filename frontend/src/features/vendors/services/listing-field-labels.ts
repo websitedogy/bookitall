@@ -10,7 +10,7 @@ const LABELS: Record<string, string> = {
   foodTypes: "Food types",
   beautyServices: "Beauty services",
   cleaningItems: "Cleaning",
-  products: "Items",
+  products: "Item prices",
   productType: "Items",
   shopCategory: "Shop type",
   serviceLocations: "Service locations",
