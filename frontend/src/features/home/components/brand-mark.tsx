@@ -2,7 +2,7 @@ export function BrandMark() {
   return (
     <section className="relative mt-2 h-52 overflow-hidden bg-white [clip-path:inset(0)] sm:h-60 md:h-64 lg:h-72" aria-label="Book It All">
       <img
-        src="/brand/footer-doodle.svg?v=3"
+        src="/brand/footer-doodle.svg?v=4"
         alt=""
         className="pointer-events-none absolute left-1/2 top-1/2 h-[118%] w-[92%] max-w-none -translate-x-1/2 -translate-y-1/2 object-fill md:h-[132%] md:w-[56%]"
       />
