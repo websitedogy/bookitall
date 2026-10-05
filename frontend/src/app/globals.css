@@ -170,16 +170,33 @@ html {
   scroll-behavior: smooth;
   max-width: 100%;
   overflow-x: clip;
+  color-scheme: light;
+  background: #ffffff;
 }
 
 body {
-  background: var(--background);
+  background: #ffffff;
   color: var(--text);
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: -0.011em;
   max-width: 100%;
   overflow-x: clip;
+}
+
+/* iPhone Safari paints a dim full-page veil when a fixed bar uses
+   backdrop-filter. Keep those bars solid so the page stays bright. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop-blur,
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }
 
 @media (min-width: 768px) {

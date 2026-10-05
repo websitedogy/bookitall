@@ -52,7 +52,7 @@ export function MobileTabBar() {
 
   return (
     <nav aria-label="App" className="app-tab-bar pointer-events-none fixed inset-x-0 bottom-0 z-[80] w-full max-w-[100%] md:bottom-5">
-      <div className="pointer-events-auto border-t border-[var(--border)] bg-white/96 backdrop-blur-xl md:mx-auto md:w-max md:rounded-full md:border md:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]">
+      <div className="pointer-events-auto border-t border-[var(--border)] bg-white md:mx-auto md:w-max md:rounded-full md:border md:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]">
         <ul className="grid grid-cols-5 px-0.5 pt-1.5 pb-[max(0.45rem,env(safe-area-inset-bottom))] md:flex md:items-end md:gap-1 md:px-3 md:py-1.5">
           {tabs.map((tab) => {
             const active = tab.match(pathname);
