@@ -77,12 +77,24 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     ServiceCatalog.revision.addListener(_onCatalog);
     unawaited(ServiceCatalog.refresh());
+    _startBannerTimer();
+  }
+
+  void _startBannerTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 4200), (_) {
       if (!mounted) return;
       final slides = ServiceCatalog.visibleBanners;
       if (slides.isEmpty) return;
       setState(() => bannerIndex = (bannerIndex + 1) % slides.length);
     });
+  }
+
+  void _stepBanner(int delta) {
+    final slides = ServiceCatalog.visibleBanners;
+    if (slides.isEmpty) return;
+    setState(() => bannerIndex = (bannerIndex + delta + slides.length) % slides.length);
+    _startBannerTimer();
   }
 
   void _onCatalog() {
@@ -231,6 +243,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _bannerNavButton(IconData icon, String label, VoidCallback onTap) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.95),
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Icon(icon, color: AppColors.text, semanticLabel: label),
+        ),
+      ),
+    );
+  }
+
   Widget _banners() {
     final slides = ServiceCatalog.visibleBanners;
     if (slides.isEmpty) return const SizedBox.shrink();
@@ -242,12 +271,31 @@ class _HomePageState extends State<HomePage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(26),
-            child: GestureDetector(
-              onTap: () => _openService(banner.id),
-              child: SizedBox(
-                height: 184,
-                width: double.infinity,
-                child: CatalogImage(src: banner.image),
+            child: SizedBox(
+              height: 184,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  GestureDetector(
+                    onTap: () => _openService(banner.id),
+                    child: CatalogImage(src: banner.image),
+                  ),
+                  if (slides.length > 1) ...[
+                    Positioned(
+                      left: 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(child: _bannerNavButton(Icons.chevron_left, 'Previous banner', () => _stepBanner(-1))),
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(child: _bannerNavButton(Icons.chevron_right, 'Next banner', () => _stepBanner(1))),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
