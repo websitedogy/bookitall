@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Ban, CalendarClock, CheckCircle2, ClipboardList, Wrench } from "lucide-react";
+import { formatDetailValue } from "@/features/catalog/listing-detail-format";
 import { mediaUrl } from "@/shared/lib/stable-image";
 import { ListingThumb } from "@/shared/ui/listing-thumb";
 import { orderBookingsHref, StatusPill } from "@/features/admin/admin-ui";
@@ -99,7 +100,7 @@ export function AdminListingFields({ listing }: { listing: AdminListing }) {
           {details.map((item) => (
             <div key={`${item.key}-${item.label}`} className="rounded-xl bg-slate-50 px-3 py-2">
               <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{item.label}</dt>
-              <dd className="mt-0.5 break-words text-sm text-slate-800">{item.value}</dd>
+              <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-slate-800">{formatDetailValue(item)}</dd>
             </div>
           ))}
         </dl>

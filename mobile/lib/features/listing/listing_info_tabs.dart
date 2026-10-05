@@ -866,3 +866,86 @@ class _ReportFormState extends State<_ReportForm> {
     );
   }
 }
+
+String readableField(String value) {
+  final trimmed = value.trim();
+  if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) return value;
+  dynamic parsed;
+  try {
+    parsed = jsonDecode(trimmed);
+  } catch (_) {
+    return value;
+  }
+  final list = parsed is List ? parsed : [parsed];
+  if (list.isEmpty) return value;
+  if (list.every((item) => item is String && item.trim().isNotEmpty)) {
+    return list.map((item) => item.toString().trim()).join('\n');
+  }
+  if (!list.every((item) => item is Map)) return value;
+
+  String textOf(dynamic raw) => raw == null ? '' : raw.toString().trim();
+  String money(dynamic raw) {
+    final digits = textOf(raw).replaceAll(',', '');
+    final amount = int.tryParse(digits);
+    if (amount == null) return textOf(raw);
+    return '₹${_groupInr(amount)}';
+  }
+
+  final maps = list.cast<Map>();
+  final priced = maps.every((item) =>
+      textOf(item['name']).isNotEmpty &&
+      textOf(item['amount'] ?? item['price']).isNotEmpty &&
+      !item.containsKey('oneTimeAmount') &&
+      !item.containsKey('monthlyAmount'));
+  if (priced) {
+    return maps.map((item) => '${textOf(item['name'])}  ${money(item['amount'] ?? item['price'])}').join('\n');
+  }
+  if (maps.every((item) => item.containsKey('oneTimeAmount') || item.containsKey('monthlyAmount'))) {
+    return maps
+        .map((item) {
+          final bits = <String>[];
+          if (item['oneTime'] == true && textOf(item['oneTimeAmount']).isNotEmpty) {
+            bits.add('One-time ${money(item['oneTimeAmount'])} / work');
+          }
+          if (item['monthly'] == true && textOf(item['monthlyAmount']).isNotEmpty) {
+            bits.add('Monthly ${money(item['monthlyAmount'])} / month');
+          }
+          final name = textOf(item['name']);
+          return bits.isEmpty ? name : '$name — ${bits.join(', ')}';
+        })
+        .where((line) => line.trim().isNotEmpty)
+        .join('\n');
+  }
+  if (maps.every((item) => item['state'] is String && item['districts'] is List)) {
+    return maps
+        .map((item) {
+          final districts = (item['districts'] as List).map((part) => part.toString().trim()).where((part) => part.isNotEmpty).join(', ');
+          final state = textOf(item['state']);
+          if (districts.isEmpty || state.isEmpty) return '';
+          return '$districts ($state)';
+        })
+        .where((line) => line.isNotEmpty)
+        .join('\n');
+  }
+  return maps
+      .map((item) {
+        final name = textOf(item['name'] ?? item['title']);
+        final rest = item.entries
+            .where((entry) => !{'name', 'title', 'selected', 'locked'}.contains(entry.key) && entry.value != null && entry.value != '' && entry.value != false)
+            .map((entry) => '${entry.key}: ${textOf(entry.value)}')
+            .join(', ');
+        if (name.isNotEmpty && rest.isNotEmpty) return '$name — $rest';
+        return name.isNotEmpty ? name : rest;
+      })
+      .where((line) => line.trim().isNotEmpty)
+      .join('\n');
+}
+
+String _groupInr(int amount) {
+  final text = amount.toString();
+  if (text.length <= 3) return text;
+  final head = text.substring(0, text.length - 3);
+  final tail = text.substring(text.length - 3);
+  final grouped = head.replaceAllMapped(RegExp(r'(\d)(?=(\d{2})+$)'), (match) => '${match[1]},');
+  return '$grouped,$tail';
+}
