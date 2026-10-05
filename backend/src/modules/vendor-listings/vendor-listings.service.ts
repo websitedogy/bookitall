@@ -31,6 +31,7 @@ const FORMS: Record<string, { required: string[]; titleField: string; partnerTyp
   'goods-transport': { required: ['vehicleType', 'vehicleNumber', 'vehicleMake', 'vehicleModel', 'manufacturingYear', 'loadCapacity', 'driverName', 'mobileNumber', 'address', 'drivingLicenceNumber', 'price'], titleField: 'driverName', partnerType: PartnerType.HOME_SERVICE },
   'packers-movers': { required: ['companyName', 'ownerName', 'mobileNumber', 'address', 'serviceType'], titleField: 'companyName', partnerType: PartnerType.HOME_SERVICE },
   'cloud-kitchen': { required: ['kitchenName', 'ownerName', 'mobileNumber', 'location', 'cuisineType', 'price', 'priceUnit'], titleField: 'kitchenName', partnerType: PartnerType.HOME_SERVICE },
+  'local-shops': { required: ['shopName', 'ownerName', 'mobileNumber', 'location', 'shopCategory', 'price', 'priceUnit'], titleField: 'shopName', partnerType: PartnerType.HOME_SERVICE },
 };
 
 const HOME_CATEGORY: Record<string, string> = {
@@ -46,6 +47,7 @@ const HOME_CATEGORY: Record<string, string> = {
   'goods-transport': 'Goods Transport',
   'packers-movers': 'Packers & Movers',
   'cloud-kitchen': 'Cloud Kitchen',
+  'local-shops': 'Local Shops',
 };
 
 const LABELS: Record<string, string> = {
@@ -65,6 +67,7 @@ const LABELS: Record<string, string> = {
   'goods-transport': 'Goods Transport',
   'packers-movers': 'Packers & Movers',
   'cloud-kitchen': 'Cloud Kitchen',
+  'local-shops': 'Local Shops',
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -77,6 +80,9 @@ const FIELD_LABELS: Record<string, string> = {
   vehicleMake: 'Vehicle make',
   kitchenName: 'Cloud kitchen name',
   foodTypes: 'Food types',
+  shopCategory: 'Shop type',
+  productType: 'Items',
+  products: 'Item prices',
   serviceLocations: 'Service locations',
   loadCapacity: 'Load capacity',
   ownerSame: 'Owner drives',

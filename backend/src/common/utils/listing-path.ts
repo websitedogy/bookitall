@@ -14,6 +14,7 @@ const CITY_BROWSE: Record<string, string> = {
   'goods-transport': '/goods-transport/hyderabad',
   'packers-movers': '/packers-movers/hyderabad',
   'cloud-kitchen': '/cloud-kitchen/hyderabad',
+  'local-shops': '/cloud-kitchen/hyderabad',
 };
 
 export function vendorListingSlug(title: string, id: string, category: string) {

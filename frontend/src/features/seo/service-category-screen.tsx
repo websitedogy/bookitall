@@ -12,6 +12,7 @@ import { GoodsTransportTypePicker } from "@/features/vendors/services/goods-tran
 import { goodsTransportTypeById } from "@/features/vendors/services/goods-transport-data";
 import { PackersMoversTypePicker } from "@/features/vendors/services/packers-movers-type-picker";
 import { packersServiceById } from "@/features/vendors/services/packers-movers-data";
+import { LocalMarketChoices } from "@/features/vendors/services/local-market-choices";
 
 export function ServiceCategoryScreen({
   serviceId,
@@ -82,7 +83,8 @@ export function ServiceCategoryScreen({
             subtitle="Home, office, local or long-distance shifting."
           />
         ) : null}
-        {pickingType && hasListings ? null : (
+        {serviceId === "cloud-kitchen" ? <LocalMarketChoices /> : null}
+        {serviceId === "cloud-kitchen" && !hasListings ? null : pickingType && hasListings ? null : (
           <NearbyProfessionals category={serviceId} initialAds={listings} vehicleType={vehicleType} />
         )}
       </InnerPageShell>

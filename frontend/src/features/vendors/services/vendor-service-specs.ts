@@ -302,4 +302,22 @@ export const VENDOR_SERVICE_SPECS: Record<string, VendorServiceSpec> = {
       { kind: "photos", name: "photos", label: "Kitchen / food photos" },
     ],
   },
+  "local-shops": {
+    id: "local-shops",
+    title: "Local Shops",
+    navLabel: "Local Shops",
+    browseHref: publicBrowsePath("cloud-kitchen"),
+    fields: [
+      { kind: "text", name: "shopName", label: "Shop Name", required: true, placeholder: "Sri Lakshmi Kirana", wide: true },
+      { kind: "text", name: "ownerName", label: "Owner / Contact Person Name", required: true, placeholder: "Ravi Kumar", wide: true },
+      { kind: "tel", name: "mobileNumber", label: "Mobile Number", required: true, placeholder: "9876543210" },
+      { kind: "select", name: "shopCategory", label: "Shop type", required: true, options: ["Kirana", "Vegetables & Fruits", "Meat & Fish", "Bakery", "Medical", "General store"] },
+      { kind: "text", name: "productType", label: "Items", required: true, placeholder: "Groceries, Vegetables", wide: true },
+      { kind: "price", name: "price", label: "Price", units: [
+        { value: "PER_ITEM", label: "Per Item" },
+        { value: "PER_KG", label: "Per KG" },
+      ] },
+      { kind: "photos", name: "photos", label: "Shop photos" },
+    ],
+  },
 };

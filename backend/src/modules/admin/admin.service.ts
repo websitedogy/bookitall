@@ -43,6 +43,7 @@ const CATEGORIES = [
   'goods-transport',
   'packers-movers',
   'cloud-kitchen',
+  'local-shops',
 ] as const;
 
 const LABELS: Record<string, string> = {
@@ -62,6 +63,7 @@ const LABELS: Record<string, string> = {
   'goods-transport': 'Goods Transport',
   'packers-movers': 'Packers & Movers',
   'cloud-kitchen': 'Cloud Kitchen',
+  'local-shops': 'Local Shops',
 };
 
 type OrderCounts = {

@@ -76,8 +76,9 @@ export class PlatformServicesService implements OnModuleInit {
   }
 
   async isEnabled(slug: string) {
-    const row = await this.services.findOne({ where: { slug } });
-    if (!row) return PLATFORM_SERVICE_CATALOG.some((item) => item.slug === slug);
+    const key = slug === 'local-shops' ? 'cloud-kitchen' : slug;
+    const row = await this.services.findOne({ where: { slug: key } });
+    if (!row) return PLATFORM_SERVICE_CATALOG.some((item) => item.slug === key);
     return row.isEnabled;
   }
 

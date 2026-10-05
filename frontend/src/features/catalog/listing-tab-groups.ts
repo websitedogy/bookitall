@@ -100,6 +100,9 @@ export function detailTabNames(categoryId: string): Record<DetailTabId, string> 
   if (categoryId === "cloud-kitchen") {
     return withDestinations({ location: "Place", basics: "Kitchen", prices: "Prices", extra: "Extra" });
   }
+  if (categoryId === "local-shops") {
+    return withDestinations({ location: "Place", basics: "Shop", prices: "Prices", extra: "Extra" });
+  }
   if (categoryId === "jobs") {
     return withDestinations({ location: "Area", basics: "Profile", prices: "Fees", extra: "Extra" });
   }

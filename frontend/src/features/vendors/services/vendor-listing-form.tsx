@@ -15,7 +15,7 @@ import { ToursRegistrationForm } from "./tours-registration-form";
 import { PublicTransportPage } from "./public-transport-page";
 import { GoodsTransportPage } from "./goods-transport-page";
 import { PackersMoversRegistrationForm } from "./packers-movers-registration-form";
-import { CloudKitchenRegistrationForm } from "./cloud-kitchen-registration-form";
+import { LocalMarketPage } from "./local-market-page";
 import { ClaimedServiceGuard } from "./claimed-service-guard";
 import type { VendorFormConfig } from "./vendor-form-config";
 
@@ -50,10 +50,11 @@ export function VendorListingForm({ config, selectedType }: { config: VendorForm
     ) : config.id === "packers-movers" ? (
       <PackersMoversRegistrationForm />
     ) : config.id === "cloud-kitchen" ? (
-      <CloudKitchenRegistrationForm />
+      <LocalMarketPage selectedType={selectedType} />
     ) : (
       <ListingWizard config={config} />
     );
 
+  if (config.id === "cloud-kitchen") return form;
   return <ClaimedServiceGuard category={config.id}>{form}</ClaimedServiceGuard>;
 }

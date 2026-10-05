@@ -9,7 +9,10 @@ import { useClaimedCategories } from "./use-claimed-categories";
 export function AddServicePicker() {
   const catalog = useVisibleServices();
   const { claimed } = useClaimedCategories();
-  const items = catalog.filter((service) => !claimed.has(service.id));
+  const items = catalog.filter((service) => {
+    if (service.id === "cloud-kitchen") return !claimed.has("cloud-kitchen") || !claimed.has("local-shops");
+    return !claimed.has(service.id);
+  });
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-white pb-[calc(4.85rem+env(safe-area-inset-bottom))] md:h-auto md:overflow-visible">
