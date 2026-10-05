@@ -12,6 +12,7 @@ import {
   inrAmount,
   parsePricedItems,
   parseRoomRates,
+  parseStoredList,
   parseVehicleFares,
   prepareDetailRows,
   type FareRow,
@@ -270,6 +271,15 @@ function DetailRows({ rows }: { rows: ListingDetailRow[] }) {
       blocks.push(<FareTable key={row.key} rows={fares} />);
       return;
     }
+    const stored = parseStoredList(row.value);
+    if (stored?.kind === "priced") {
+      blocks.push(<PricedTable key={row.key} label={row.label} rows={stored.rows} />);
+      return;
+    }
+    if (stored?.kind === "lines") {
+      blocks.push(<LineList key={row.key} label={row.label} lines={stored.lines} />);
+      return;
+    }
     const priced = parsePricedItems(row.value);
     if (priced && (row.key === "servicesOffered" || row.key === "servicePricing" || row.key === "packagePricing")) {
       blocks.push(<PricedTable key={row.key} label={row.label} rows={priced} />);
@@ -388,14 +398,31 @@ function PricedTable({ label, rows }: { label: string; rows: PricedRow[] }) {
       </div>
       <table className="w-full border-collapse text-left text-[13px]">
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.name} className="border-t border-[#efe6d4] first:border-t-0">
+          {rows.map((row, index) => (
+            <tr key={`${row.name}-${index}`} className="border-t border-[#efe6d4] first:border-t-0">
               <td className="px-3.5 py-3 font-medium text-[#12241f]">{row.name}</td>
               <td className="px-3.5 py-3 text-right font-semibold text-[#0f3d38]">{inrAmount(row.price)}</td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function LineList({ label, lines }: { label: string; lines: string[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe6d4]">
+      <div className="border-b border-[#efe6d4] bg-[#f7f3ea] px-3.5 py-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a7b66]">{label}</p>
+      </div>
+      <ul>
+        {lines.map((line, index) => (
+          <li key={`${line}-${index}`} className="border-t border-[#efe6d4] px-3.5 py-3 text-sm font-medium text-[#12241f] first:border-t-0">
+            {line}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

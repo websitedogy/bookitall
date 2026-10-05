@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../../data/api.dart';
@@ -356,7 +357,7 @@ class _ListingInfoTabsState extends State<ListingInfoTabs> {
                           SizedBox(width: 140, child: Text(field.label, style: const TextStyle(color: Color(0xFF7A6A52)))),
                           Expanded(
                             child: Text(
-                              field.value,
+                              readableField(field.value),
                               textAlign: TextAlign.right,
                               style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF12241F)),
                             ),
@@ -549,7 +550,7 @@ class _TourRouteTrackerState extends State<_TourRouteTracker> {
                 SizedBox(width: 140, child: Text(field.label, style: const TextStyle(color: Color(0xFF7A6A52)))),
                 Expanded(
                   child: Text(
-                    field.value,
+                    readableField(field.value),
                     textAlign: TextAlign.right,
                     style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF12241F)),
                   ),

@@ -35,6 +35,7 @@ const SKIP_CHIP_KEYS = new Set([
 export type RoomRateRow = { name: string; rate: string; guests: string; rooms: string };
 export type FareRow = { name: string; rate: string; seats: string; availability: string };
 export type PricedRow = { name: string; price: string };
+export type StoredList = { kind: "priced"; rows: PricedRow[] } | { kind: "lines"; lines: string[] };
 
 export function parseRoomRates(value: string): RoomRateRow[] | null {
   const parts = splitParts(value);
@@ -70,6 +71,50 @@ export function parseVehicleFares(value: string): FareRow[] | null {
   return rows;
 }
 
+export function parseStoredList(value: string): StoredList | null {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return null;
+  }
+  const list = Array.isArray(parsed) ? parsed : [parsed];
+  if (!list.length) return null;
+  if (list.every((item) => typeof item === "string" && item.trim())) {
+    return { kind: "lines", lines: list.map((item) => String(item).trim()) };
+  }
+  if (!list.every(isRecord)) return null;
+
+  if (list.every((item) => namedPrice(item) && !("oneTimeAmount" in item) && !("monthlyAmount" in item))) {
+    const rows = list
+      .map((item) => namedPrice(item))
+      .filter((row): row is PricedRow => Boolean(row));
+    return rows.length ? { kind: "priced", rows } : null;
+  }
+
+  if (list.every((item) => "oneTimeAmount" in item || "monthlyAmount" in item)) {
+    const lines = list.map(cleaningLine).filter(Boolean);
+    return lines.length ? { kind: "lines", lines } : null;
+  }
+
+  if (list.every((item) => typeof item.state === "string" && Array.isArray(item.districts))) {
+    const lines = list
+      .map((item) => {
+        const districts = item.districts.map((part) => String(part).trim()).filter(Boolean);
+        const state = String(item.state).trim();
+        if (!districts.length || !state) return "";
+        return `${districts.join(", ")} (${state})`;
+      })
+      .filter(Boolean);
+    return lines.length ? { kind: "lines", lines } : null;
+  }
+
+  const lines = list.map(genericLine).filter(Boolean);
+  return lines.length ? { kind: "lines", lines } : null;
+}
+
 export function parsePricedItems(value: string): PricedRow[] | null {
   const parts = splitParts(value);
   if (parts.length < 2) return null;
@@ -84,6 +129,7 @@ export function parsePricedItems(value: string): PricedRow[] | null {
 
 export function chipItems(row: ListingDetailRow): string[] | null {
   if (SKIP_CHIP_KEYS.has(row.key) || row.key === "roomRates" || row.key === "vehicleFares") return null;
+  if (parseStoredList(row.value)) return null;
   const parts = row.value
     .split(/[;,]/)
     .map((part) => part.trim())
@@ -95,6 +141,9 @@ export function chipItems(row: ListingDetailRow): string[] | null {
 
 export function formatDetailValue(row: ListingDetailRow): string {
   const raw = row.value.trim();
+  const stored = parseStoredList(raw);
+  if (stored?.kind === "priced") return stored.rows.map((item) => `${item.name} ${inrAmount(item.price)}`).join("\n");
+  if (stored?.kind === "lines") return stored.lines.join("\n");
   if (row.key === "priceUnit") {
     const word = priceUnitWord(raw);
     return word ? `Per ${word}` : titleEnum(raw);
@@ -160,6 +209,43 @@ export function prepareDetailRows(categoryId: string, rows: ListingDetailRow[]):
       }
       return row;
     });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function namedPrice(item: Record<string, unknown>): PricedRow | null {
+  const name = textOf(item.name);
+  const price = textOf(item.amount ?? item.price);
+  if (!name || !price) return null;
+  return { name, price };
+}
+
+function cleaningLine(item: Record<string, unknown>) {
+  const name = textOf(item.name);
+  const bits: string[] = [];
+  if (item.oneTime && textOf(item.oneTimeAmount)) bits.push(`One-time ${inrAmount(textOf(item.oneTimeAmount))} / work`);
+  if (item.monthly && textOf(item.monthlyAmount)) bits.push(`Monthly ${inrAmount(textOf(item.monthlyAmount))} / month`);
+  if (!name && !bits.length) return "";
+  return bits.length ? `${name} — ${bits.join(", ")}` : name;
+}
+
+function genericLine(item: Record<string, unknown>) {
+  const name = textOf(item.name ?? item.title);
+  const rest = Object.entries(item)
+    .filter(([key, value]) => !["name", "title", "selected", "locked"].includes(key) && value != null && value !== "" && value !== false)
+    .map(([key, value]) => `${labelize(key)}: ${textOf(value) || (Array.isArray(value) ? value.map((part) => String(part)).join(", ") : String(value))}`);
+  if (name && rest.length) return `${name} — ${rest.join(", ")}`;
+  return name || rest.join(", ");
+}
+
+function textOf(value: unknown) {
+  return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
+}
+
+function labelize(key: string) {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
 }
 
 function splitParts(value: string) {
