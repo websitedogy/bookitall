@@ -28,4 +28,5 @@ export type VendorPushPayload = {
   body: string;
   url?: string;
   tag?: string;
+  ring?: boolean;
 };

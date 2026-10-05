@@ -1111,6 +1111,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         body,
         url: href,
         tag: bookingId ? `booking-${bookingId}` : `note-${type}`,
+        ring: metadata?.kind === 'vendor_request',
       });
     } catch {
       // In-app notification already saved.

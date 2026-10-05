@@ -125,6 +125,7 @@ export class NotificationsService {
       body: payload.body,
       url: payload.url ?? '/vendors/my-orders',
       tag: payload.tag ?? 'vendor-order',
+      ring: Boolean(payload.ring),
     });
     await Promise.all(
       rows.map(async (row) => {
@@ -132,7 +133,7 @@ export class NotificationsService {
           await webpush.sendNotification(
             { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
             body,
-            { TTL: 300, urgency: 'high' },
+            { TTL: 600, urgency: 'high' },
           );
         } catch (error) {
           const status = this.pushStatus(error);

@@ -94,10 +94,10 @@ export function VendorOrderPush() {
 
   const copy =
     mode === "install"
-      ? "Install Book It All on the Home Screen, then tap Turn on so new orders ring even if the phone is aside."
+      ? "On iPhone, add Book It All to the Home Screen, open that app, then tap Turn on. New orders will ring even after you leave the app or lock the phone."
       : mode === "denied"
-        ? "Alerts are blocked. Allow notifications for Book It All in browser or phone settings."
-        : "Tap Turn on so new jobs ring this phone even when the app is closed.";
+        ? "Alerts are blocked. Allow notifications for Book It All in phone settings, then new orders can ring when the app is closed."
+        : "Tap Turn on so new orders ring this phone even after you leave the site or lock the phone.";
 
   return (
     <div className="border-b border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-950 md:px-8">
