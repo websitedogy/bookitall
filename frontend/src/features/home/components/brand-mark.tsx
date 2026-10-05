@@ -1,10 +1,10 @@
 export function BrandMark() {
   return (
-    <section className="mt-2 bg-white px-3 pb-4" aria-label="Book It All">
+    <section className="mt-2 bg-white" aria-label="Book It All">
       <img
-        src="/brand/bookitall.png"
-        alt="#bookitall. Made for India. Crafted in Bengaluru."
-        className="mx-auto block h-auto w-full max-w-[560px] object-contain md:max-w-[680px]"
+        src="/brand/bookitall.png?v=5"
+        alt="#bookitall. Made for India. Crafted in Telangana."
+        className="mx-auto block h-40 w-full object-cover object-[center_62%] sm:h-48 md:h-auto md:w-full md:object-contain"
       />
     </section>
   );
