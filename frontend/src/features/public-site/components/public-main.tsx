@@ -41,7 +41,7 @@ export function PublicMain({ children }: { children: React.ReactNode }) {
               : isMyOrders || isMyBookings || isPosts
               ? `min-h-[70vh] bg-[var(--studio)] ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-7xl md:bg-transparent md:px-8 md:pt-8 md:pb-16`
               : isHome
-                ? `${pad} md:pb-0`
+                ? "pb-0"
                 : isListing
                   ? `min-h-[70vh] bg-[var(--studio)] ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-[1180px] md:px-6 md:py-8 md:pb-28`
                 : `mx-auto min-h-[70vh] max-w-[1180px] bg-[var(--studio)] px-5 py-8 ${pad} md:bg-transparent md:px-6 md:pb-28`
