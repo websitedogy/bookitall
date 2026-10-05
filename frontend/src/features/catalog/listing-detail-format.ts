@@ -102,7 +102,7 @@ export function parseStoredList(value: string): StoredList | null {
   if (list.every((item) => typeof item.state === "string" && Array.isArray(item.districts))) {
     const lines = list
       .map((item) => {
-        const districts = item.districts.map((part) => String(part).trim()).filter(Boolean);
+        const districts = (item.districts as unknown[]).map((part) => String(part).trim()).filter(Boolean);
         const state = String(item.state).trim();
         if (!districts.length || !state) return "";
         return `${districts.join(", ")} (${state})`;
