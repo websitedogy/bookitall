@@ -42,6 +42,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { VendorsModule } from './modules/vendors/vendors.module';
 import { VendorListingsModule } from './modules/vendor-listings/vendor-listings.module';
 import { PlatformServicesModule } from './modules/platform-services/platform-services.module';
+import { HeroBannersModule } from './modules/hero-banners/hero-banners.module';
 import { MailModule } from './modules/mail/mail.module';
 
 @Module({
@@ -60,6 +61,7 @@ import { MailModule } from './modules/mail/mail.module';
     AuthModule,
     VendorListingsModule,
     PlatformServicesModule,
+    HeroBannersModule,
     HotelsModule,
     ToursModule,
     CabsModule,

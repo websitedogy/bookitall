@@ -16,6 +16,7 @@ import { VendorListing } from '../../modules/vendor-listings/entities/vendor-lis
 import { SupportTicket } from '../../modules/admin/entities/support-ticket.entity';
 import { SupportMessage } from '../../modules/admin/entities/support-message.entity';
 import { PlatformService } from '../../modules/platform-services/entities/platform-service.entity';
+import { HeroBanner } from '../../modules/hero-banners/entities/hero-banner.entity';
 
 export const ALL_ENTITIES = [
   User,
@@ -39,4 +40,5 @@ export const ALL_ENTITIES = [
   SupportTicket,
   SupportMessage,
   PlatformService,
+  HeroBanner,
 ];

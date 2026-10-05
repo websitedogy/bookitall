@@ -14,6 +14,7 @@ import {
   FileCheck,
   Headphones,
   Layers,
+  Images,
   ArrowLeft,
   LayoutDashboard,
   LogOut,
@@ -32,6 +33,7 @@ import { api } from "@/shared/lib/api";
 const NAV: { href: string; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }[] = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/services", label: "Service management", icon: Layers },
+  { href: "/admin/banners", label: "Hero images", icon: Images },
   { href: "/admin/users", label: "All users", icon: Users },
   { href: "/admin/payments", label: "Pending payments", icon: CreditCard, superOnly: true },
   { href: "/admin/settlements", label: "Settlements", icon: Wallet, superOnly: true },
