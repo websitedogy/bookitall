@@ -222,7 +222,7 @@ export const VENDOR_FORMS: Record<string, VendorFormConfig> = {
   },
   "cloud-kitchen": {
     id: "cloud-kitchen",
-    title: "Cloud Kitchen",
+    title: "Local Market",
     subtitle: "",
     sections: [],
   },
