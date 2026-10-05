@@ -3,6 +3,7 @@ const OFFLINE_URL = "/offline.html";
 
 let ringToken = 0;
 let replacingNotice = false;
+let activeTag = "";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([OFFLINE_URL, "/icons/icon-192.png"])));
@@ -66,7 +67,7 @@ async function showVendorPush(event) {
   for (let i = 0; i < rings; i += 1) {
     if (token !== ringToken) return;
     if (i > 0 && (await appIsOpenNow())) return;
-    await notifyOnce(data);
+    await notifyOnce(data, i);
     if (i < rings - 1) await wait(3000);
   }
 }
@@ -80,14 +81,15 @@ async function appIsOpenNow() {
   return appIsOpen(windows);
 }
 
-async function notifyOnce(data) {
+async function notifyOnce(data, index) {
   const title = data.title || "New order";
+  const tag = `${data.tag || "vendor-order"}-${index}`;
   const options = {
     body: data.body || "Open Book It All to accept the order",
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
     data: { url: data.url || "/vendors/my-orders", ring: Boolean(data.ring) },
-    tag: data.tag || "vendor-order",
+    tag,
     renotify: true,
     requireInteraction: true,
     vibrate: [500, 150, 500, 150, 500, 150, 800],
@@ -96,6 +98,11 @@ async function notifyOnce(data) {
   };
   replacingNotice = true;
   try {
+    if (activeTag) {
+      const previous = await self.registration.getNotifications({ tag: activeTag });
+      previous.forEach((notice) => notice.close());
+    }
+    activeTag = tag;
     await self.registration.showNotification(title, options);
   } catch {
     delete options.renotify;
@@ -103,7 +110,7 @@ async function notifyOnce(data) {
   } finally {
     setTimeout(() => {
       replacingNotice = false;
-    }, 500);
+    }, 800);
   }
 }
 
