@@ -10,14 +10,17 @@ export function DashBox({
   label,
   count,
   icon: Icon,
+  artId,
 }: {
   href: string;
   label: string;
   count: number | string;
   hint?: string;
   icon?: LucideIcon;
+  artId?: string;
   tone?: string;
 }) {
+  const shown = count !== "" && count !== undefined;
   return (
     <Link
       href={href}
@@ -25,13 +28,15 @@ export function DashBox({
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-semibold leading-4 text-slate-600">{label}</p>
-        {Icon ? (
+        {artId ? (
+          <CategoryArt id={artId} size={22} className="h-5 w-5" />
+        ) : Icon ? (
           <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
             <Icon className="h-3.5 w-3.5" />
           </span>
         ) : null}
       </div>
-      <p className="break-words text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">{count}</p>
+      {shown ? <p className="break-words text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">{count}</p> : null}
     </Link>
   );
 }

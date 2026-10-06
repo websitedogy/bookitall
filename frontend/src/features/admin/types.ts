@@ -19,6 +19,7 @@ export type DashboardCounts = {
     pendingPayments: number;
     pendingPayouts: number;
     openTickets: number;
+    staff?: number;
   };
   vendors: {
     pending: number;
@@ -26,6 +27,7 @@ export type DashboardCounts = {
     rejected: number;
     blocked: number;
     pendingPosts: number;
+    rejectedPosts?: number;
     categories: { id: string; name: string; count: number }[];
   };
   customers: {

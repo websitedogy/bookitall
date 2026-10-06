@@ -112,6 +112,8 @@ export class AdminService {
       scheduled,
       categoryRows,
       pendingPosts,
+      rejectedPosts,
+      staff,
       serviceCounts,
       weeklyAmountRow,
     ] = await Promise.all([
@@ -150,6 +152,8 @@ export class AdminService {
         .groupBy('l.category')
         .getRawMany<{ category: string; count: string }>(),
       this.listings.count({ where: { status: ListingStatus.PENDING } }),
+      this.listings.count({ where: { status: ListingStatus.REJECTED } }),
+      this.userRepo.count({ where: { role: UserRole.SUB_EDITOR } }),
       this.platformServices.counts(),
       this.payments
         .createQueryBuilder('payment')
@@ -170,6 +174,7 @@ export class AdminService {
         pendingPayments,
         pendingPayouts,
         openTickets,
+        staff,
       },
       dailyVerified: {
         pendingUsers,
@@ -182,6 +187,7 @@ export class AdminService {
         rejected: rejectedVendors,
         blocked: blockedVendors,
         pendingPosts,
+        rejectedPosts,
         categories: CATEGORIES.map((id) => ({
           id,
           name: LABELS[id] ?? id,
