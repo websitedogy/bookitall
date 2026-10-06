@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Ban, CalendarClock, CheckCircle2, ChevronDown, ClipboardList, Wrench, type LucideIcon } from "lucide-react";
 import type { OrderCounts } from "@/features/admin/types";
+import { CategoryArt } from "@/features/home/components/category-art";
 
 export function DashBox({
   href,

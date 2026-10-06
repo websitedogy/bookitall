@@ -3,78 +3,25 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  BadgeCheck,
-  Ban,
-  CalendarCheck,
-  CalendarClock,
-  CheckCircle2,
-  ClipboardList,
-  CreditCard,
-  FileCheck,
-  Headphones,
-  Layers,
-  Images,
-  ArrowLeft,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Store,
-  UserCog,
-  Users,
-  Wallet,
-  Wrench,
-  X,
-} from "lucide-react";
+import { ArrowLeft, LayoutDashboard, LogOut, Menu, X } from "lucide-react";
 import { useAdminAuth, useAdminAuthHydrated, isPanelRole, isSuperAdmin } from "@/features/auth/store";
 import { AdminTopbar } from "@/features/admin/admin-topbar";
+import { visibleAdminMenu } from "@/features/admin/admin-menu";
+import { CategoryArt } from "@/features/home/components/category-art";
 import { api } from "@/shared/lib/api";
 
-const NAV: { href: string; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }[] = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/services", label: "Service management", icon: Layers },
-  { href: "/admin/banners", label: "Hero images", icon: Images },
-  { href: "/admin/users", label: "All users", icon: Users },
-  { href: "/admin/payments", label: "Pending payments", icon: CreditCard, superOnly: true },
-  { href: "/admin/settlements", label: "Settlements", icon: Wallet, superOnly: true },
-  { href: "/admin/staff", label: "Sub editors", icon: UserCog, superOnly: true },
-  { href: "/admin/support", label: "User support", icon: Headphones },
-  { href: "/admin/vendors?bucket=pending", label: "Pending vendors", icon: ClipboardList },
-  { href: "/admin/vendors?bucket=active", label: "Active vendors", icon: Store },
-  { href: "/admin/vendors?bucket=rejected", label: "Disabled vendors", icon: Ban },
-  { href: "/admin/vendors?bucket=blocked", label: "Blocked vendors", icon: BadgeCheck },
-  { href: "/admin/listings", label: "Pending posts", icon: FileCheck },
-  { href: "/admin/listings?status=REJECTED", label: "Rejected posts", icon: Ban },
-  { href: "/admin/customers", label: "Customers", icon: Users },
-  { href: "/admin/bookings", label: "Orders", icon: CalendarCheck },
-  { href: "/admin/bookings?bucket=pending", label: "Pending orders", icon: ClipboardList },
-  { href: "/admin/bookings?bucket=approved", label: "Approved", icon: CheckCircle2 },
-  { href: "/admin/bookings?bucket=rejected", label: "Rejected", icon: Ban },
-  { href: "/admin/bookings?bucket=working", label: "Processing", icon: Wrench },
-  { href: "/admin/bookings?bucket=worked", label: "Worked", icon: CheckCircle2 },
-  { href: "/admin/bookings?bucket=scheduled", label: "Scheduled", icon: CalendarClock },
-];
-
-function isActive(pathname: string, bucket: string | null, status: string | null, href: string) {
+function isActive(pathname: string, search: URLSearchParams, href: string) {
   const [path, query] = href.split("?");
   const params = query ? new URLSearchParams(query) : null;
-  const want = params?.get("bucket") ?? null;
-  const wantStatus = params?.get("status") ?? null;
   if (path === "/admin") return pathname === "/admin";
-  if (path === "/admin/vendors" && pathname.startsWith("/admin/vendors/")) {
-    return (bucket || "active") === want;
-  }
-  if (pathname !== path) return false;
-  if (path === "/admin/listings") {
-    return (status || null) === wantStatus;
-  }
-  if (path === "/admin/vendors") {
-    return (bucket || null) === want;
-  }
-  if (path === "/admin/bookings") {
-    const current = bucket === "processing" ? "working" : bucket;
-    const target = want === "processing" ? "working" : want;
-    return (current || null) === target;
+  const onVendorDetail = path === "/admin/vendors" && pathname.startsWith("/admin/vendors/");
+  if (pathname !== path && !onVendorDetail) return false;
+  for (const key of ["bucket", "status", "category"] as const) {
+    const want = params?.get(key) ?? null;
+    const raw = key === "bucket" ? search.get("bucket") || search.get("from") || (onVendorDetail ? "active" : null) : search.get(key);
+    const current = key === "bucket" && raw === "processing" ? "working" : raw;
+    const target = key === "bucket" && want === "processing" ? "working" : want;
+    if ((current || null) !== target) return false;
   }
   return true;
 }
@@ -82,28 +29,48 @@ function isActive(pathname: string, bucket: string | null, status: string | null
 function NavLinks({ onClick, superAdmin }: { onClick?: () => void; superAdmin: boolean }) {
   const pathname = usePathname();
   const search = useSearchParams();
-  const bucket = search.get("bucket") || search.get("from");
-  const status = search.get("status");
-  const items = NAV.filter((item) => superAdmin || !item.superOnly);
+  const sections = visibleAdminMenu(superAdmin);
+  const overviewActive = isActive(pathname, search, "/admin");
   return (
     <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-      {items.map((item) => {
-        const active = isActive(pathname, bucket, status, item.href);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onClick}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-              active ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {item.label}
-          </Link>
-        );
-      })}
+      <Link
+        href="/admin"
+        onClick={onClick}
+        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+          overviewActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+        }`}
+      >
+        <LayoutDashboard className="h-4 w-4 shrink-0" />
+        Overview
+      </Link>
+      {sections.map((section) => (
+        <div key={section.id} className="pt-3">
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{section.label}</p>
+          <div className="space-y-0.5">
+            {section.items.map((item) => {
+              const active = isActive(pathname, search, item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClick}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                    active ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  {item.artId ? (
+                    <CategoryArt id={item.artId} size={16} className="h-4 w-4" />
+                  ) : (
+                    <Icon className="h-4 w-4 shrink-0" />
+                  )}
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 }
