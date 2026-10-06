@@ -45,19 +45,19 @@ export function DashBox({
   return (
     <Link
       href={href}
-      className="flex min-h-[5.75rem] flex-col justify-between rounded-xl bg-white p-3 shadow-sm ring-1 ring-emerald-100 transition hover:-translate-y-0.5 hover:ring-emerald-300"
+      className="flex h-full min-h-[4.75rem] flex-col justify-between rounded-xl bg-[#f7fbf9] p-3 ring-1 ring-emerald-100 transition hover:bg-white hover:ring-emerald-300"
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold leading-4 text-slate-600">{label}</p>
+        <p className="text-xs font-semibold leading-4 text-slate-700">{label}</p>
         {artId ? (
           <CategoryArt id={artId} size={22} className="h-5 w-5" />
         ) : Icon ? (
-          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-emerald-700 ring-1 ring-emerald-100">
             <Icon className="h-3.5 w-3.5" />
           </span>
         ) : null}
       </div>
-      {shown ? <p className="break-words text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">{count}</p> : null}
+      <p className="text-lg font-semibold tracking-tight text-slate-900">{shown ? count : "—"}</p>
     </Link>
   );
 }

@@ -45,26 +45,27 @@ export default function AdminHomePage() {
   return (
     <div>
       <AdminHeader title={`Welcome${user?.fullName ? `, ${user.fullName.split(" ")[0]}` : ""}`} />
-      <div className="space-y-4">
-        {sections.map((section) => (
-          <section key={section.id}>
-            <h2 className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
-              {section.label}
-            </h2>
-            <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-              {section.items.map((item) => (
-                <DashBox
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                  count={item.count(data)}
-                  icon={item.icon}
-                  artId={item.artId}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+        {sections.map((section) => {
+          const wide = section.items.length >= 4 || section.id === "posts";
+          return (
+            <section key={section.id} className={`rounded-2xl bg-white p-3 ring-1 ring-emerald-100 ${wide ? "xl:col-span-2" : ""}`}>
+              <h2 className="mb-2.5 px-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-800">{section.label}</h2>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
+                {section.items.map((item) => (
+                  <DashBox
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    count={item.count(data)}
+                    icon={item.icon}
+                    artId={item.artId}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
