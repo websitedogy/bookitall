@@ -6,8 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, LayoutDashboard, LogOut, Menu, X } from "lucide-react";
 import { useAdminAuth, useAdminAuthHydrated, isPanelRole, isSuperAdmin } from "@/features/auth/store";
 import { AdminTopbar } from "@/features/admin/admin-topbar";
-import { visibleAdminMenu } from "@/features/admin/admin-menu";
 import { CategoryArt } from "@/features/home/components/category-art";
+import { visibleAdminMenu } from "@/features/admin/admin-ui";
 import { api } from "@/shared/lib/api";
 
 function isActive(pathname: string, search: URLSearchParams, href: string) {

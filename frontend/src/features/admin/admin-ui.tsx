@@ -2,9 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Ban, CalendarClock, CheckCircle2, ChevronDown, ClipboardList, Wrench, type LucideIcon } from "lucide-react";
-import type { OrderCounts } from "@/features/admin/types";
+import {
+  BadgeCheck,
+  Ban,
+  CalendarCheck,
+  CalendarClock,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  CreditCard,
+  FileCheck,
+  Headphones,
+  Images,
+  Layers,
+  Store,
+  UserCog,
+  Users,
+  Wallet,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
+import type { DashboardCounts, OrderCounts } from "@/features/admin/types";
 import { CategoryArt } from "@/features/home/components/category-art";
+import { SERVICE_NAV } from "@/features/home/service-nav";
 
 export function DashBox({
   href,
@@ -456,4 +476,105 @@ export function VendorEnableToggle({
       </button>
     </div>
   );
+}
+
+export type AdminMenuItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  superOnly?: boolean;
+  artId?: string;
+  count: (data: DashboardCounts) => number | string;
+};
+
+export type AdminMenuSection = {
+  id: string;
+  label: string;
+  items: AdminMenuItem[];
+};
+
+function menuCount(value: number | undefined) {
+  return value ?? 0;
+}
+
+export const ADMIN_MENU: AdminMenuSection[] = [
+  {
+    id: "catalog",
+    label: "Catalog",
+    items: [
+      { href: "/admin/services", label: "Service management", icon: Layers, count: (data) => menuCount(data.services?.enabled) },
+      { href: "/admin/banners", label: "Hero images", icon: Images, count: () => "" },
+    ],
+  },
+  {
+    id: "people",
+    label: "People",
+    items: [
+      { href: "/admin/users", label: "All users", icon: Users, count: (data) => menuCount(data.management.users) },
+      { href: "/admin/customers", label: "Customers", icon: Users, count: (data) => menuCount(data.customers.total) },
+      { href: "/admin/staff", label: "Sub editors", icon: UserCog, superOnly: true, count: (data) => menuCount(data.management.staff) },
+    ],
+  },
+  {
+    id: "money",
+    label: "Money",
+    items: [
+      { href: "/admin/payments", label: "Pending payments", icon: CreditCard, superOnly: true, count: (data) => menuCount(data.management.pendingPayments) },
+      { href: "/admin/settlements", label: "Settlements", icon: Wallet, superOnly: true, count: (data) => menuCount(data.management.pendingPayouts) },
+    ],
+  },
+  {
+    id: "support",
+    label: "Support",
+    items: [{ href: "/admin/support", label: "User support", icon: Headphones, count: (data) => menuCount(data.management.openTickets) }],
+  },
+  {
+    id: "vendors",
+    label: "Vendors",
+    items: [
+      { href: "/admin/vendors?bucket=pending", label: "Pending vendors", icon: ClipboardList, count: (data) => menuCount(data.vendors.pending) },
+      { href: "/admin/vendors?bucket=active", label: "Active vendors", icon: Store, count: (data) => menuCount(data.vendors.active) },
+      { href: "/admin/vendors?bucket=rejected", label: "Disabled vendors", icon: Ban, count: (data) => menuCount(data.vendors.rejected) },
+      { href: "/admin/vendors?bucket=blocked", label: "Blocked vendors", icon: BadgeCheck, count: (data) => menuCount(data.vendors.blocked) },
+    ],
+  },
+  {
+    id: "posts",
+    label: "Posts",
+    items: [
+      { href: "/admin/listings", label: "Pending posts", icon: FileCheck, count: (data) => menuCount(data.vendors.pendingPosts) },
+      { href: "/admin/listings?status=REJECTED", label: "Rejected posts", icon: Ban, count: (data) => menuCount(data.vendors.rejectedPosts) },
+    ],
+  },
+  {
+    id: "services",
+    label: "Services",
+    items: SERVICE_NAV.map((service) => ({
+      href: `/admin/listings?category=${service.id}&owner=active`,
+      label: service.name,
+      icon: Store,
+      artId: service.id,
+      count: (data: DashboardCounts) => data.vendors.categories.find((row) => row.id === service.id)?.count ?? 0,
+    })),
+  },
+  {
+    id: "orders",
+    label: "Orders",
+    items: [
+      { href: "/admin/bookings", label: "Orders", icon: CalendarCheck, count: (data) => menuCount(data.orders?.total) },
+      { href: "/admin/bookings?bucket=pending", label: "Pending orders", icon: ClipboardList, count: (data) => menuCount(data.orders?.pending) },
+      { href: "/admin/bookings?bucket=approved", label: "Approved", icon: CheckCircle2, count: (data) => menuCount(data.orders?.approved) },
+      { href: "/admin/bookings?bucket=rejected", label: "Rejected", icon: Ban, count: (data) => menuCount(data.orders?.rejected) },
+      { href: "/admin/bookings?bucket=working", label: "Processing", icon: Wrench, count: (data) => menuCount(data.orders?.processing) },
+      { href: "/admin/bookings?bucket=worked", label: "Worked", icon: CheckCircle2, count: (data) => menuCount(data.customers.worked) },
+      { href: "/admin/bookings?bucket=scheduled", label: "Scheduled", icon: CalendarClock, count: (data) => menuCount(data.customers.scheduled) },
+    ],
+  },
+];
+
+export function visibleAdminMenu(superAdmin: boolean) {
+  return ADMIN_MENU.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => superAdmin || !item.superOnly),
+  })).filter((section) => section.items.length > 0);
 }

@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/shared/lib/api";
 import { useAdminAuth, isSuperAdmin } from "@/features/auth/store";
 import { AdminHeader } from "@/features/admin/admin-shell";
-import { DashBox } from "@/features/admin/admin-ui";
-import { visibleAdminMenu } from "@/features/admin/admin-menu";
+import { DashBox, visibleAdminMenu } from "@/features/admin/admin-ui";
 import type { DashboardCounts } from "@/features/admin/types";
 
 const empty: DashboardCounts = {
