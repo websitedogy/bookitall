@@ -956,6 +956,7 @@ BookingSummary _bookingSummary(Map<String, dynamic> row) {
     address: _detailString(details, ['address', 'pickupAddress']),
     scheduledAt: row['scheduledAt']?.toString(),
     createdAt: row['createdAt']?.toString(),
+    completionOtp: row['completionOtp']?.toString(),
   );
 }
 

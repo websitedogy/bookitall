@@ -8,7 +8,7 @@ import { api, ApiError } from "@/shared/lib/api";
 import { inr } from "@/shared/lib/format";
 import type { Booking } from "@/shared/types/catalog";
 import { cn } from "@/shared/lib/cn";
-import { serviceLocationOf, vendorSeesCustomerLocation, customerNameOf, customerPhoneOf, serviceLabelOf, hotelStatusLabel } from "@/features/booking/components/bookings-list";
+import { serviceLocationOf, vendorSeesCustomerLocation, customerNameOf, customerPhoneOf, serviceLabelOf, hotelStatusLabel, serviceCanCloseWithCode, CustomerCompletionCode, VendorCompletionForm } from "@/features/booking/components/bookings-list";
 import { VendorRejectPanel } from "@/features/vendors/my-orders/vendor-reject-panel";
 import {
   emptyPayment,
@@ -34,9 +34,22 @@ export function BookingDetailPage({ id }: { id: string }) {
       router.replace(`/login?next=/my-bookings/${id}`);
       return;
     }
-    api<Booking>(`/bookings/${id}`, { token })
-      .then((res) => setBooking(res.data ?? null))
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : "Could not load booking"));
+    let stop = false;
+    function load() {
+      api<Booking>(`/bookings/${id}`, { token })
+        .then((res) => {
+          if (!stop) setBooking(res.data ?? null);
+        })
+        .catch((err: unknown) => {
+          if (!stop) setError(err instanceof Error ? err.message : "Could not load booking");
+        });
+    }
+    load();
+    const timer = window.setInterval(load, 4000);
+    return () => {
+      stop = true;
+      window.clearInterval(timer);
+    };
   }, [id, token, ready, router]);
 
   async function pay() {
@@ -264,6 +277,12 @@ export function BookingDetailPage({ id }: { id: string }) {
           >
             Guest vacated — room free
           </button>
+        ) : null}
+        {!isVendorView && serviceCanCloseWithCode(booking) && booking.completionOtp ? (
+          <CustomerCompletionCode code={booking.completionOtp} />
+        ) : null}
+        {isVendorView && serviceCanCloseWithCode(booking) ? (
+          <VendorCompletionForm bookingId={booking.id} busy={busy} onDone={(next) => setBooking(next)} />
         ) : null}
         {canCancel ? (
           <button type="button" disabled={busy} onClick={cancel} className="mt-3 inline-flex h-11 w-full items-center justify-center text-sm font-semibold text-[var(--error)]">

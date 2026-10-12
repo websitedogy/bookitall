@@ -109,6 +109,7 @@ class BookingSummary {
     this.address = '',
     this.scheduledAt,
     this.createdAt,
+    this.completionOtp,
   });
 
   final String id;
@@ -120,6 +121,13 @@ class BookingSummary {
   final String address;
   final String? scheduledAt;
   final String? createdAt;
+  final String? completionOtp;
+
+  bool get showCompletionCode {
+    final code = completionOtp ?? '';
+    if (code.length != 4 || type == 'HOTEL') return false;
+    return status == 'CONFIRMED' || status == 'ASSIGNED' || status == 'IN_PROGRESS';
+  }
 }
 
 String inr(num value) {

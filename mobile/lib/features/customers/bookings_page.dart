@@ -93,7 +93,7 @@ class _CustomerBookingsPageState extends State<CustomerBookingsPage> {
                     subtitle: Text(
                       [
                         booking.bookingNumber,
-                        booking.status.replaceAll('_', ' '),
+                        booking.showCompletionCode ? 'Code ${booking.completionOtp}' : booking.status.replaceAll('_', ' '),
                         if (booking.address.isNotEmpty) booking.address,
                       ].join(' · '),
                     ),

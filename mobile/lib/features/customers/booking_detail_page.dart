@@ -60,6 +60,28 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                     _row('Type', booking.type.replaceAll('_', ' ')),
                     if (booking.address.isNotEmpty) _row('Address', booking.address),
                     if ((booking.scheduledAt ?? '').isNotEmpty) _row('When', formatSlotLabel(booking.scheduledAt!)),
+                    if (booking.showCompletionCode) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3FAF7),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFD7EFE6)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('COMPLETION CODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: Color(0xFF0F766E))),
+                            const SizedBox(height: 6),
+                            Text(booking.completionOtp!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 8)),
+                            const SizedBox(height: 6),
+                            const Text('Tell this to the vendor when the work is finished.', style: TextStyle(color: Color(0xFF5B6E68), height: 1.35)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
     );

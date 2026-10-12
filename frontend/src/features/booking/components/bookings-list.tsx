@@ -405,4 +405,90 @@ export function BookingsList({
               disabled={page >= pages}
               onClick={() => setPage((value) => Math.min(pages, value + 1))}
               className="inline-flex h-8 cursor-pointer items-center rounded-full px-3 text-xs font-semibold ring-1 ring-slate-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-          
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {routeBooking ? (
+        <VendorRouteMap
+          destination={customerCoordinatesOf(routeBooking)!}
+          address={serviceLocationOf(routeBooking)}
+          externalUrl={customerRouteUrl(routeBooking)}
+          onClose={() => setRouteBooking(null)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+export function CustomerCompletionCode({ code }: { code: string }) {
+  return (
+    <div className="mt-3 rounded-2xl bg-[#f3faf7] px-3 py-3 ring-1 ring-[#d7efe6]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0f766e]">Completion code</p>
+      <p className="mt-1 font-mono text-2xl font-semibold tracking-[0.35em] text-[#12241f]">{code}</p>
+      <p className="mt-1 text-[12px] leading-5 text-[#5b6e68]">Tell this to the vendor when the work is finished.</p>
+    </div>
+  );
+}
+
+export function VendorCompletionForm({
+  bookingId,
+  busy = false,
+  onDone,
+}: {
+  bookingId: string;
+  busy?: boolean;
+  onDone: (booking: Booking) => void;
+}) {
+  const token = useAuth((s) => s.accessToken);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function submit() {
+    if (!token || code.length !== 4) return;
+    setSending(true);
+    setError("");
+    try {
+      const res = await api<Booking>(`/bookings/${bookingId}/complete`, {
+        method: "POST",
+        token,
+        body: JSON.stringify({ otp: code }),
+      });
+      if (res.data) onDone(res.data);
+    } catch (err) {
+      setError(err instanceof ApiError || err instanceof Error ? err.message : "Could not close this service");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-2xl bg-[#f6f1e8] px-3 py-3 ring-1 ring-[#eadfcd]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a6a52]">Customer code</p>
+      <p className="mt-1 text-[12px] leading-5 text-[#5b6e68]">Ask the customer for the 4-digit code when the work is finished.</p>
+      <div className="mt-2 flex gap-2">
+        <input
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          value={code}
+          maxLength={4}
+          onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 4))}
+          placeholder="0000"
+          className="h-10 w-24 rounded-xl border border-[#eadfcd] bg-white text-center font-mono text-lg font-semibold tracking-[0.28em] text-[#12241f]"
+        />
+        <button
+          type="button"
+          disabled={busy || sending || code.length !== 4}
+          onClick={() => void submit()}
+          className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-semibold text-white disabled:opacity-60"
+        >
+          {sending ? "Checking…" : "Service complete"}
+        </button>
+      </div>
+      {error ? <p className="mt-2 text-xs text-[var(--error)]">{error}</p> : null}
+    </div>
+  );
+}
