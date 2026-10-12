@@ -58,7 +58,6 @@ export function InstallAppPrompt() {
     if (window.__biaDeferredPrompt) show(window.__biaDeferredPrompt);
 
     const onPrompt = (event: Event) => {
-      event.preventDefault();
       const next = event as DeferredPrompt;
       window.__biaDeferredPrompt = next;
       show(next);

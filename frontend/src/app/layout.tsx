@@ -111,7 +111,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script id="pwa-install-capture" strategy="beforeInteractive">
           {`(function(){
             window.addEventListener('beforeinstallprompt', function(e){
-              e.preventDefault();
               window.__biaDeferredPrompt = e;
             });
             window.addEventListener('appinstalled', function(){

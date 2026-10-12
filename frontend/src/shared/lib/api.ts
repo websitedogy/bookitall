@@ -51,6 +51,27 @@ function errorMessage(json: ApiEnvelope<unknown> | { message?: string | string[]
   return Array.isArray(json.message) ? json.message.join(", ") : json.message ?? "Request failed";
 }
 
+function skipsSessionRefresh(path: string) {
+  return (
+    path.startsWith("/auth/refresh") ||
+    path.startsWith("/auth/login") ||
+    path.startsWith("/auth/register") ||
+    path.startsWith("/auth/phone") ||
+    path.startsWith("/auth/google")
+  );
+}
+
+function accessTokenStale(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return false;
+    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as { exp?: number };
+    return typeof json.exp === "number" && json.exp * 1000 <= Date.now() + 60_000;
+  } catch {
+    return false;
+  }
+}
+
 async function refreshAccessToken(failedToken?: string | null): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (refreshInFlight) return refreshInFlight;
@@ -87,20 +108,35 @@ export async function authFetch(path: string, init: RequestInit & { token?: stri
   const { token, ...rest } = init;
   const headers = new Headers(rest.headers);
   const stores = typeof window === "undefined" ? null : await import("@/features/auth/store");
-  const firstToken = token ?? stores?.useAuth.getState().accessToken ?? null;
+  let firstToken = token ?? stores?.useAuth.getState().accessToken ?? null;
+  const dropSession = () => {
+    if (!stores) return;
+    if (firstToken && firstToken === stores.useAdminAuth.getState().accessToken) {
+      stores.useAdminAuth.getState().logout();
+    } else {
+      stores.useAuth.getState().logout();
+    }
+  };
+  if (typeof window !== "undefined" && firstToken && !skipsSessionRefresh(path) && accessTokenStale(firstToken)) {
+    const renewed = await refreshAccessToken(firstToken);
+    if (renewed) firstToken = renewed;
+    else {
+      dropSession();
+      return new Response(JSON.stringify({ message: "Your session expired. Please sign in again." }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }
   if (firstToken) headers.set("Authorization", `Bearer ${firstToken}`);
   let res = await fetch(`${API_URL}${path}`, { ...rest, headers, cache: "no-store" });
-  if (res.status === 401 && !path.startsWith("/auth/")) {
+  if (res.status === 401 && !skipsSessionRefresh(path)) {
     const next = await refreshAccessToken(firstToken);
     if (next) {
       headers.set("Authorization", `Bearer ${next}`);
       res = await fetch(`${API_URL}${path}`, { ...rest, headers, cache: "no-store" });
-    } else if (stores) {
-      if (firstToken && firstToken === stores.useAdminAuth.getState().accessToken) {
-        stores.useAdminAuth.getState().logout();
-      } else {
-        stores.useAuth.getState().logout();
-      }
+    } else {
+      dropSession();
     }
   }
   return res;
@@ -134,7 +170,7 @@ export async function api<T>(
   const res = await authFetch(path, { ...init, headers });
   const json = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
   if (!res.ok) {
-    const message = res.status === 401 && !path.startsWith("/auth/")
+    const message = res.status === 401 && !skipsSessionRefresh(path)
       ? "Your session expired. Please sign in again."
       : errorMessage(json);
     throw new ApiError(message, res.status);
