@@ -12,8 +12,9 @@ class CategoryArt extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = expand ? double.infinity : size;
     final height = expand ? double.infinity : size;
+    final file = id == 'public-transport' ? 'cabs' : id;
     final image = Image.asset(
-      'assets/categories/$id.png',
+      'assets/categories/$file.png',
       width: width,
       height: height,
       fit: BoxFit.cover,

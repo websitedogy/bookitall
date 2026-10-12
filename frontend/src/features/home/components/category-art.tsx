@@ -1,10 +1,10 @@
 import { cn } from "@/shared/lib/cn";
 
-const VECTOR_ART = new Set(["public-transport", "goods-transport", "packers-movers", "cloud-kitchen"]);
+const VECTOR_ART = new Set(["goods-transport", "packers-movers", "cloud-kitchen"]);
 
 export function categoryArtSrc(id: string) {
-  const file = VECTOR_ART.has(id) ? `${id}.svg` : `${id}.png`;
-  const version = id === "public-transport" ? 3 : 2;
+  const file = id === "public-transport" ? "cabs.png" : VECTOR_ART.has(id) ? `${id}.svg` : `${id}.png`;
+  const version = id === "public-transport" ? 4 : 2;
   return `/categories/${file}?v=${version}`;
 }
 

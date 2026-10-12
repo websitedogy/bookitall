@@ -18,7 +18,8 @@ export { BANNERS } from "./banners";
 
 function art(id: string) {
   if (id === "hotels" || id === "tours" || id === "cabs") return `/banners/${id}.jpg`;
-  if (id === "public-transport" || id === "goods-transport" || id === "packers-movers" || id === "cloud-kitchen") {
+  if (id === "public-transport") return "/categories/cabs.png";
+  if (id === "goods-transport" || id === "packers-movers" || id === "cloud-kitchen") {
     return `/categories/${id}.svg`;
   }
   return `/categories/${id}.png`;

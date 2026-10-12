@@ -19,7 +19,7 @@ export const PLATFORM_SERVICE_CATALOG: ServiceSeed[] = [
   { slug: 'painting', name: 'Painting', icon: '/categories/painting.png' },
   { slug: 'carpenter', name: 'Carpenter', icon: '/categories/carpenter.png' },
   { slug: 'appliance', name: 'Appliance', icon: '/categories/appliance.png' },
-  { slug: 'public-transport', name: 'Cabs', icon: '/categories/public-transport.svg' },
+  { slug: 'public-transport', name: 'Cabs', icon: '/categories/cabs.png' },
   { slug: 'goods-transport', name: 'Goods Transport', icon: '/categories/goods-transport.svg' },
   { slug: 'packers-movers', name: 'Packers & Movers', icon: '/categories/packers-movers.svg' },
   { slug: 'cloud-kitchen', name: 'Local Market', icon: '/categories/cloud-kitchen.svg' },
