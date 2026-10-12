@@ -78,5 +78,6 @@ export type Booking = {
   vendorRespondBy?: string | null;
   escalatedToAdmin?: boolean;
   cancellationReason?: string | null;
+  completionOtp?: string | null;
   payment?: { status: string; method: string; amount: string; reference?: string };
 };

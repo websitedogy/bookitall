@@ -47,6 +47,9 @@ export class Booking extends BaseEntity {
   @Column({ type: 'timestamptz', nullable: true })
   scheduledAt!: Date | null;
 
+  @Column({ type: 'varchar', length: 4, nullable: true })
+  completionOtp!: string | null;
+
   @Column({ type: 'timestamptz', nullable: true })
   completedAt!: Date | null;
 

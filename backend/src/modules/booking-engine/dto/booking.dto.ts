@@ -144,6 +144,11 @@ export class RejectBookingDto {
   comment?: string;
 }
 
+export class CompleteBookingDto {
+  @IsString()
+  otp!: string;
+}
+
 export class ListBookingsQuery extends PaginationDto {
   @IsOptional()
   @IsIn(['mine', 'orders'])

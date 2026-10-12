@@ -58,7 +58,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     private readonly mail: MailService,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
+    await this.bookings.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "completionOtp" character varying(4)`);
+    await this.backfillCompletionCodes();
     this.logger.log('Vendor order window is 5 minutes, then admin decides');
     this.vendorWatch = setInterval(() => {
       void this.watchVendorOrders();
@@ -334,7 +336,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       await this.bookings.save(booking);
       await this.refundIfPaid(booking);
     }
-    return this.getById(bookingId);
+    return this.present(await this.getById(bookingId), actorId, role);
   }
 
   async acceptOrder(actorId: string, role: string, bookingId: string) {
@@ -344,10 +346,35 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     if (booking.status !== BookingStatus.PENDING) {
       throw new BadRequestException('This order is not waiting for accept');
     }
+    this.assignCompletionCode(booking);
     const next = this.afterVendorAccept(booking);
     const note = isPanelRole(role) ? 'Accepted by admin' : 'Accepted by vendor';
     await this.transition(booking, next, actorId, note);
-    return this.getById(bookingId);
+    return this.present(await this.getById(bookingId), actorId, role);
+  }
+
+  async completeWithCode(actorId: string, role: string, bookingId: string, otp: string) {
+    const booking = await this.getById(bookingId);
+    if (isPanelRole(role) || (booking.partnerId !== actorId && booking.assigneeId !== actorId)) {
+      throw new ForbiddenException('Only the vendor for this booking can close it');
+    }
+    if (booking.type === BookingType.HOTEL) {
+      throw new BadRequestException('Hotels close when the guest vacates');
+    }
+    const open = [BookingStatus.CONFIRMED, BookingStatus.ASSIGNED, BookingStatus.IN_PROGRESS];
+    if (!open.includes(booking.status)) {
+      throw new BadRequestException('This service is not open');
+    }
+    const given = otp.replace(/\D/g, '');
+    if (!booking.completionOtp) {
+      throw new BadRequestException('Ask the customer to open the booking. The code shows there.');
+    }
+    if (given !== booking.completionOtp) {
+      throw new BadRequestException('Code is wrong. Ask the customer again.');
+    }
+    await this.transition(booking, BookingStatus.COMPLETED, actorId, 'Closed with customer code');
+    await this.settle(booking);
+    return this.present(await this.getById(bookingId), actorId, role);
   }
 
   async rejectOrder(
@@ -379,7 +406,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     booking.cancellationReason = note;
     await this.bookings.save(booking);
     await this.refundIfPaid(booking);
-    return this.getById(bookingId);
+    return this.present(await this.getById(bookingId), actorId, role);
   }
 
   async listForUser(userId: string, role: string, page = 1, limit = 12, scope: 'mine' | 'orders' = 'mine') {
@@ -395,6 +422,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     }
     qb.skip((page - 1) * limit).take(limit);
     const [data, total] = await qb.getManyAndCount();
+    if (scope !== 'orders') {
+      for (const row of data) await this.ensureCompletionCode(row);
+    }
     return { data: data.map((row) => this.forViewer(row, userId, role)), total };
   }
 
@@ -408,7 +438,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     }
     qb.skip((page - 1) * limit).take(limit);
     const [data, total] = await qb.getManyAndCount();
-    return { data, total };
+    return { data: data.map((row) => this.hideCode(row)), total };
   }
 
   async getById(id: string) {
@@ -424,7 +454,10 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
 
   async getForUser(id: string, userId: string, role: string) {
     const booking = await this.getById(id);
-    if (isPanelRole(role)) return booking;
+    if (booking.customerId === userId && !isPanelRole(role)) {
+      await this.ensureCompletionCode(booking);
+    }
+    if (isPanelRole(role)) return this.hideCode(booking);
     if (booking.customerId === userId || booking.partnerId === userId || booking.assigneeId === userId) {
       return this.forViewer(booking, userId, role);
     }
@@ -432,13 +465,68 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   }
 
   private forViewer(booking: Booking, userId: string, role: string) {
-    if (this.maySeeCustomerAddress(booking, userId, role)) return booking;
+    const showCode = booking.customerId === userId && !isPanelRole(role);
+    if (this.maySeeCustomerAddress(booking, userId, role)) {
+      return showCode ? booking : this.hideCode(booking);
+    }
     const details = { ...(booking.details ?? {}) };
     delete details.address;
     delete details.pickupAddress;
     delete details.dropAddress;
     delete details.location;
-    return Object.assign(Object.create(Object.getPrototypeOf(booking)) as Booking, booking, { details });
+    const view = Object.assign(Object.create(Object.getPrototypeOf(booking)) as Booking, booking, { details });
+    return showCode ? view : this.hideCode(view);
+  }
+
+  private newCompletionCode() {
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  private codeIsOpen(booking: Booking) {
+    return (
+      booking.type !== BookingType.HOTEL &&
+      (booking.status === BookingStatus.CONFIRMED ||
+        booking.status === BookingStatus.ASSIGNED ||
+        booking.status === BookingStatus.IN_PROGRESS)
+    );
+  }
+
+  private assignCompletionCode(booking: Booking) {
+    if (booking.type === BookingType.HOTEL || booking.completionOtp) return;
+    booking.completionOtp = this.newCompletionCode();
+  }
+
+  private async ensureCompletionCode(booking: Booking) {
+    if (!this.codeIsOpen(booking) || booking.completionOtp) return booking;
+    booking.completionOtp = this.newCompletionCode();
+    await this.bookings.save(booking);
+    return booking;
+  }
+
+  private async backfillCompletionCodes() {
+    const open = await this.bookings.find({
+      where: [
+        { status: BookingStatus.CONFIRMED },
+        { status: BookingStatus.ASSIGNED },
+        { status: BookingStatus.IN_PROGRESS },
+      ],
+    });
+    for (const booking of open) {
+      if (booking.type === BookingType.HOTEL || booking.completionOtp) continue;
+      booking.completionOtp = this.newCompletionCode();
+      await this.bookings.save(booking);
+    }
+  }
+
+  private hideCode(booking: Booking) {
+    const copy = Object.assign(Object.create(Object.getPrototypeOf(booking)) as Booking, booking);
+    delete (copy as { completionOtp?: string | null }).completionOtp;
+    return copy;
+  }
+
+  private present(booking: Booking, userId: string, role: string) {
+    if (booking.customerId === userId && !isPanelRole(role)) return booking;
+    return this.hideCode(booking);
   }
 
   private maySeeCustomerAddress(booking: Booking, userId: string, role: string) {

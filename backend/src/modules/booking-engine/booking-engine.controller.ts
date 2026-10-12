@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { BookingEngineService } from './booking-engine.service';
-import { CheckoutDto, CreateBookingDto, ListBookingsQuery, PayBookingDto, RejectBookingDto, UpdateBookingStatusDto } from './dto/booking.dto';
+import { CheckoutDto, CompleteBookingDto, CreateBookingDto, ListBookingsQuery, PayBookingDto, RejectBookingDto, UpdateBookingStatusDto } from './dto/booking.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { paginateMeta } from '../../common/dto/pagination.dto';
 import { BookingStatus } from '../../common/enums/booking.enum';
@@ -42,6 +42,16 @@ export class BookingEngineController {
     @Body() dto: RejectBookingDto,
   ) {
     return this.engine.rejectOrder(userId, role, id, dto);
+  }
+
+  @Post(':id/complete')
+  complete(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: string,
+    @Param('id') id: string,
+    @Body() dto: CompleteBookingDto,
+  ) {
+    return this.engine.completeWithCode(userId, role, id, dto.otp);
   }
 
   @Patch(':id/status')

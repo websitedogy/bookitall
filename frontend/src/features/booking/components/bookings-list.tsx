@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPinned, Star } from "lucide-react";
-import { api } from "@/shared/lib/api";
+import { api, ApiError } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
 import type { Booking } from "@/shared/types/catalog";
@@ -49,11 +49,21 @@ export function stayDatesOf(booking: Booking) {
 }
 
 export function hotelStatusLabel(booking: Booking) {
-  if (booking.type !== "HOTEL") return "";
+  if (booking.type !== "HOTEL") {
+    if (booking.status === "COMPLETED") return "Service completed";
+    return "";
+  }
   if (booking.status === "CONFIRMED") return "Stay booked";
   if (booking.status === "IN_PROGRESS") return "Guest staying";
   if (booking.status === "COMPLETED") return "Vacated · room free";
   return "";
+}
+
+export function serviceCanCloseWithCode(booking: Booking) {
+  return (
+    booking.type !== "HOTEL" &&
+    (booking.status === "CONFIRMED" || booking.status === "ASSIGNED" || booking.status === "IN_PROGRESS")
+  );
 }
 
 export function serviceLocationOf(booking: Booking) {
@@ -362,6 +372,12 @@ export function BookingsList({
                   Guest vacated — room free
                 </button>
               ) : null}
+              {scope === "mine" && serviceCanCloseWithCode(booking) && booking.completionOtp ? (
+                <CustomerCompletionCode code={booking.completionOtp} />
+              ) : null}
+              {scope === "orders" && serviceCanCloseWithCode(booking) ? (
+                <VendorCompletionForm bookingId={booking.id} busy={busy === booking.id} onDone={() => void load(page)} />
+              ) : null}
             </div>
           </li>
         );
@@ -389,20 +405,4 @@ export function BookingsList({
               disabled={page >= pages}
               onClick={() => setPage((value) => Math.min(pages, value + 1))}
               className="inline-flex h-8 cursor-pointer items-center rounded-full px-3 text-xs font-semibold ring-1 ring-slate-200 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      ) : null}
-      {routeBooking ? (
-        <VendorRouteMap
-          destination={customerCoordinatesOf(routeBooking)!}
-          address={serviceLocationOf(routeBooking)}
-          externalUrl={customerRouteUrl(routeBooking)}
-          onClose={() => setRouteBooking(null)}
-        />
-      ) : null}
-    </div>
-  );
-}
+          
