@@ -23,7 +23,7 @@ const CATEGORY_WORDS: Record<string, string[]> = {
   painting: ["painting", "painter"],
   carpenter: ["carpenter", "furniture", "wood"],
   appliance: ["appliance", "fridge", "washing machine"],
-  "public-transport": ["bus", "auto", "public transport"],
+  "public-transport": ["bus", "auto", "cab", "cabs", "public transport", "packer", "movers"],
   "goods-transport": ["goods", "freight", "lorry", "truck"],
   "packers-movers": ["packer", "movers", "shifting", "relocation"],
   "cloud-kitchen": ["kitchen", "catering", "tiffin", "food"],

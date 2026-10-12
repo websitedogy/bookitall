@@ -354,8 +354,8 @@ const professionalMeta = <String, ProfessionalMeta>{
     ],
   ),
   'public-transport': ProfessionalMeta(
-    bookingTitle: 'Public Transport Booking',
-    categoryLabel: 'Public Transport',
+    bookingTitle: 'Cabs',
+    categoryLabel: 'Cabs',
     highlights: ['Seat booking', 'Verified operator'],
     tint: 0xFFFEF3C7,
     names: [

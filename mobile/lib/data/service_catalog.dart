@@ -14,8 +14,9 @@ class ServiceCatalog {
   static Set<String> get enabledSlugs =>
       _enabled ?? {for (final service in services) service.id};
 
-  static List<ServiceItem> get visible =>
-      services.where((service) => isEnabled(service.id)).toList(growable: false);
+  static List<ServiceItem> get visible => services
+      .where((service) => service.id != 'packers-movers' && isEnabled(service.id))
+      .toList(growable: false);
 
   static List<BannerSlide> get visibleBanners => banners
       .where((banner) => banner.id == 'home' || isEnabled(banner.id))

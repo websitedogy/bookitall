@@ -198,10 +198,10 @@ export const CATEGORY_SEO: Record<string, CategorySeo> = {
   "public-transport": {
     id: "public-transport",
     path: publicBrowsePath("public-transport"),
-    title: "Public Transport in Hyderabad | Auto, Share Cab, Bus | Book It All",
-    description: "Book listed autos, share cabs and intercity buses in Hyderabad. See accepted operators, seats and prices, then reserve.",
-    h1: "Public transport in Hyderabad",
-    serviceType: "Public transport booking",
+    title: "Cabs in Hyderabad | Auto, Car, Bus, Packers | Book It All",
+    description: "Book listed autos, cars, buses and packers & movers in Hyderabad. See accepted operators, seats and prices, then reserve.",
+    h1: "Cabs in Hyderabad",
+    serviceType: "Cab booking",
     faqs: [
       {
         question: "What public transport can I book?",

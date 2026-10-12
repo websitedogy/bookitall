@@ -142,7 +142,7 @@ export const SERVICES: ServiceItem[] = [
   },
   {
     id: "public-transport",
-    name: "Public Transport",
+    name: "Cabs",
     href: "/public-transport/hyderabad",
     image: art("public-transport"),
     features: ["City auto & share", "Intercity buses", "Airport drops", "Seat booking"],

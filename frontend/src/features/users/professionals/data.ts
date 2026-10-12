@@ -322,8 +322,8 @@ export const PROFESSIONAL_META: Record<string, ProfessionalMeta> = {
     ],
   },
   "public-transport": {
-    bookingTitle: "Public Transport Booking",
-    categoryLabel: "Public Transport",
+    bookingTitle: "Cabs",
+    categoryLabel: "Cabs",
     highlights: ["Seat booking", "Verified operator"],
     tint: "#FEF3C7",
     names: [

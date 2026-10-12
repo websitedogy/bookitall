@@ -480,7 +480,7 @@ const services = [
   ),
   ServiceItem(
     id: 'public-transport',
-    name: 'Public Transport',
+    name: 'Cabs',
     route: '/public-transport',
     icon: Icons.airport_shuttle_outlined,
     tint: Color(0xFFFEF3C7),

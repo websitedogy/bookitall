@@ -13,7 +13,7 @@ export const SERVICE_NAV = [
   { id: "painting", name: "Painting", href: publicBrowsePath("painting") },
   { id: "carpenter", name: "Carpenter", href: publicBrowsePath("carpenter") },
   { id: "appliance", name: "Appliance", href: publicBrowsePath("appliance") },
-  { id: "public-transport", name: "Public Transport", href: publicBrowsePath("public-transport") },
+  { id: "public-transport", name: "Cabs", href: publicBrowsePath("public-transport") },
   { id: "goods-transport", name: "Goods Transport", href: publicBrowsePath("goods-transport") },
   { id: "packers-movers", name: "Packers & Movers", href: publicBrowsePath("packers-movers") },
   { id: "cloud-kitchen", name: "Local Market", href: publicBrowsePath("cloud-kitchen") },

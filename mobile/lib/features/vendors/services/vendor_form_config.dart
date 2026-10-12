@@ -355,7 +355,7 @@ final vendorForms = <String, VendorFormConfig>{
   ),
   'public-transport': const VendorFormConfig(
     id: 'public-transport',
-    title: 'Public Transport',
+    title: 'Cabs',
     subtitle: 'These stay on your listing. Customers see them after admin accepts.',
     sections: [
       VendorFormSection(

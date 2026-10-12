@@ -549,7 +549,7 @@ export const ADMIN_MENU: AdminMenuSection[] = [
   {
     id: "services",
     label: "Services",
-    items: SERVICE_NAV.filter((service) => !["cabs", "jobs", "cloud-kitchen"].includes(service.id)).map((service) => ({
+    items: SERVICE_NAV.filter((service) => !["cabs", "jobs", "cloud-kitchen", "packers-movers"].includes(service.id)).map((service) => ({
       href: `/admin/listings?category=${service.id}&owner=active`,
       label: service.name,
       icon: Store,

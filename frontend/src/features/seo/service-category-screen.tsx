@@ -56,13 +56,13 @@ export function ServiceCategoryScreen({
         </>
       ) : null}
       <InnerPageShell title={badge} titleStyle="badge">
-        {hasListings && serviceId === "public-transport" ? (
+        {serviceId === "public-transport" ? (
           <PublicTransportTypePicker
             baseHref={seo?.path || "/public-transport/hyderabad"}
             selected={publicVehicle?.id}
             compact={Boolean(vehicleType)}
-            title="Choose a vehicle"
-            subtitle="Auto, Car, Mini Bus, Bus or Van. Local and Outstation only."
+            title="Choose a ride"
+            subtitle="Auto, Car, Mini Bus, Bus, Van, or Packers & Movers."
           />
         ) : null}
         {hasListings && serviceId === "goods-transport" ? (

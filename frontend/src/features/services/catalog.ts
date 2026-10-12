@@ -61,6 +61,7 @@ export function catalogMap(catalog: PlatformService[] | null) {
 }
 
 const FORCED_OFF = new Set(["cabs", "jobs", "cloud-kitchen"]);
+const HIDDEN_NAV = new Set(["packers-movers"]);
 
 export function isServiceEnabled(catalog: PlatformService[] | null, slug: string) {
   const key = slug === "local-shops" ? "cloud-kitchen" : slug;
@@ -71,8 +72,7 @@ export function isServiceEnabled(catalog: PlatformService[] | null, slug: string
 }
 
 export function visibleServiceNav(catalog: PlatformService[] | null): ServiceNavItem[] {
-  if (!catalog) return [...SERVICE_NAV];
-  return SERVICE_NAV.filter((item) => isServiceEnabled(catalog, item.id));
+  return SERVICE_NAV.filter((item) => isServiceEnabled(catalog, item.id) && !HIDDEN_NAV.has(item.id));
 }
 
 export async function getServiceCatalog(): Promise<PlatformService[]> {

@@ -227,8 +227,8 @@ export const VENDOR_SERVICE_SPECS: Record<string, VendorServiceSpec> = {
   },
   "public-transport": {
     id: "public-transport",
-    title: "Public Transport",
-    navLabel: "Public Transport",
+    title: "Cabs",
+    navLabel: "Cabs",
     browseHref: publicBrowsePath("public-transport"),
     fields: [
       { kind: "text", name: "operatorName", label: "Operator / service name", required: true, placeholder: "City Auto Hub", wide: true },
