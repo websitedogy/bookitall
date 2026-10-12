@@ -21,9 +21,8 @@ type HeroBanner = {
 const DESTINATIONS = [
   { name: "Hotels", href: "/hotels" },
   { name: "Tours", href: "/tours" },
-  { name: "Cabs", href: "/cabs" },
   { name: "Home services", href: "/home-services" },
-  ...SERVICE_NAV.filter((item) => !["hotels", "tours", "cabs"].includes(item.id)).map((item) => ({
+  ...SERVICE_NAV.filter((item) => !["hotels", "tours", "cabs", "jobs", "cloud-kitchen"].includes(item.id)).map((item) => ({
     name: item.name,
     href: item.href,
   })),

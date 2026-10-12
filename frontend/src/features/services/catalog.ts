@@ -62,7 +62,8 @@ export function catalogMap(catalog: PlatformService[] | null) {
 
 export function isServiceEnabled(catalog: PlatformService[] | null, slug: string) {
   if (!catalog) return true;
-  const row = catalog.find((item) => item.slug === slug || item.id === slug);
+  const key = slug === "local-shops" ? "cloud-kitchen" : slug;
+  const row = catalog.find((item) => item.slug === key || item.id === key);
   return row ? row.isEnabled : true;
 }
 

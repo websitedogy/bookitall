@@ -13,7 +13,6 @@ const quickLinks = [
 const serviceLinks = [
   { label: "Hotels", href: "/hotels" },
   { label: "Tours", href: "/tours" },
-  { label: "Cabs", href: "/cabs" },
   { label: "Home Services", href: "/home-services" },
   { label: "Travel Services", href: "/services" },
 ];
@@ -30,7 +29,7 @@ export function SiteFooter() {
               Book It All
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/90">
-              Hotels, tours, cabs and home services — booked from the same desk.
+              Hotels, tours and home services — booked from the same desk.
             </p>
           </div>
 

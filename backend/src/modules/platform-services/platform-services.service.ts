@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { timingSafeEqual } from 'crypto';
 import { Repository } from 'typeorm';
 import { PlatformService } from './entities/platform-service.entity';
-import { PLATFORM_SERVICE_CATALOG } from './catalog';
+import { DISABLED_SERVICE_SLUGS, PLATFORM_SERVICE_CATALOG } from './catalog';
 
 const DEFAULT_SECRET = 'zealstar_02';
 
@@ -28,20 +28,22 @@ export class PlatformServicesService implements OnModuleInit {
 
     for (const item of PLATFORM_SERVICE_CATALOG) {
       const row = bySlug.get(item.slug);
+      const enabled = !DISABLED_SERVICE_SLUGS.has(item.slug);
       if (!row) {
         writes.push(
           this.services.create({
             name: item.name,
             slug: item.slug,
             icon: item.icon,
-            isEnabled: true,
+            isEnabled: enabled,
           }),
         );
         continue;
       }
-      if (row.name !== item.name || row.icon !== item.icon) {
+      if (row.name !== item.name || row.icon !== item.icon || row.isEnabled !== enabled) {
         row.name = item.name;
         row.icon = item.icon;
+        row.isEnabled = enabled;
         writes.push(row);
       }
     }

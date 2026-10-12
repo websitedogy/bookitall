@@ -4,6 +4,8 @@ export type ServiceSeed = {
   icon: string;
 };
 
+export const DISABLED_SERVICE_SLUGS = new Set(['cabs', 'jobs', 'cloud-kitchen']);
+
 export const PLATFORM_SERVICE_CATALOG: ServiceSeed[] = [
   { slug: 'hotels', name: 'Hotels', icon: '/categories/hotels.png' },
   { slug: 'tours', name: 'Tours', icon: '/categories/tours.png' },
