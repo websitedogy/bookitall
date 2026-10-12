@@ -86,8 +86,7 @@ export function HeroBanners() {
               key={item.id}
               src={item.image}
               alt={index === 0 || index === active ? item.title : ""}
-              fetchPriority={index === 0 ? "high" : "low"}
-              loading={index === 0 ? "eager" : "lazy"}
+              {...(index === 0 ? {} : { loading: "lazy" as const })}
               className={cn(
                 "h-[10.5rem] w-full object-cover sm:h-[13rem] md:h-[200px] lg:h-[240px]",
                 index === active ? "relative opacity-100" : "absolute inset-0 opacity-0",

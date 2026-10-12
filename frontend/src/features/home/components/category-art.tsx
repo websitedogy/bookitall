@@ -30,8 +30,7 @@ export function CategoryArt({
         height={size}
         draggable={false}
         decoding="async"
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        {...(priority ? {} : { loading: "lazy" as const })}
         className={cn("object-contain", className)}
       />
     </span>

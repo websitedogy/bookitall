@@ -16,8 +16,8 @@ export const metadata: Metadata = publicPageMeta({
 export default function Page() {
   return (
     <>
-      {visibleServiceNav(null).map((service, index) => (
-        <link key={service.id} rel="preload" as="image" href={categoryArtSrc(service.id)} fetchPriority={index < 4 ? "high" : "low"} />
+      {visibleServiceNav(null).map((service) => (
+        <link key={service.id} rel="preload" as="image" href={categoryArtSrc(service.id)} />
       ))}
       <HomePage />
     </>

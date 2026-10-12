@@ -21,8 +21,8 @@ type CatalogContextValue = {
 const CatalogContext = createContext<CatalogContextValue | null>(null);
 
 export function ServiceCatalogProvider({ children }: { children: ReactNode }) {
-  const [catalog, setCatalog] = useState<PlatformService[] | null>(() => readCachedCatalog());
-  const [ready, setReady] = useState(() => Boolean(readCachedCatalog()));
+  const [catalog, setCatalog] = useState<PlatformService[] | null>(null);
+  const [ready, setReady] = useState(false);
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -40,6 +40,8 @@ export function ServiceCatalogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const cached = readCachedCatalog();
+    if (cached) setCatalog(cached);
     const controller = new AbortController();
     void load(controller.signal);
     const timer = window.setInterval(() => void load(), 20000);
