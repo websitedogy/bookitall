@@ -11,7 +11,7 @@ export function MyOrdersPage() {
 
   return (
     <DesktopServicesLayout>
-      <InnerPageShell kicker="Vendor" title="My Orders" subtitle="Accept the booking. For hotels, mark guest checked in, then vacated.">
+      <InnerPageShell kicker="Vendor" title="My Orders" subtitle="Accept the booking. Hotels close when the guest vacates. Other services close when you enter the customer's code.">
         <div className="px-1 pb-4 md:px-2">
           {!user ? (
             <div className="px-4 py-6">
