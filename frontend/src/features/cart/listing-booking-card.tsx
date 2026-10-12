@@ -74,6 +74,8 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const guestFilled = useRef(false);
   const [formError, setFormError] = useState("");
   const [phase, setPhase] = useState<"idle" | "ask" | "locating" | "map" | "choose" | "schedule">("idle");
+  const [pickingTime, setPickingTime] = useState(false);
+  const bookingMode = useRef<"now" | "schedule">("now");
   const [gpsState, setGpsState] = useState<"idle" | "detecting" | "detected">("idle");
   const [customerLat, setCustomerLat] = useState<number | null>(null);
   const [customerLng, setCustomerLng] = useState<number | null>(null);
@@ -200,6 +202,43 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
     setPhase("ask");
   }
 
+  function startHotel(mode: "now" | "schedule") {
+    setFormError("");
+    if (mode === "now") {
+      setCheckIn(defaultDate(0));
+      setCheckOut(defaultDate(1));
+    }
+    setHotelStep("guest");
+  }
+
+  function startTimed(mode: "now" | "schedule") {
+    setFormError("");
+    if (mode === "schedule" && !pickingTime) {
+      setPickingTime(true);
+      setScheduledAt(defaultSlot(1));
+      return;
+    }
+    if (mode === "schedule") {
+      const when = new Date(scheduledAt);
+      if (!scheduledAt || Number.isNaN(when.getTime())) {
+        setFormError(isTour ? "Pick a travel date." : "Pick a date and time.");
+        return;
+      }
+      if (!isTour && when.getTime() < Date.now() + 15 * 60 * 1000) {
+        setFormError("Pick a time at least 15 minutes from now.");
+        return;
+      }
+    } else if (isTour) {
+      setScheduledAt(`${defaultDate(0)}T10:00`);
+    }
+    bookingMode.current = mode;
+    openLocationPopup();
+  }
+
+  function finishService() {
+    goCheckout(bookingMode.current === "schedule" ? scheduledAt : soonSlot());
+  }
+
   function bookHotel() {
     setFormError("");
     if (!checkIn || !checkOut || !stayQuote) {
@@ -286,7 +325,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
         stayCheckout();
         return;
       }
-      setPhase("choose");
+      finishService();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Could not book");
     }
@@ -429,37 +468,26 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 })}
               </div>
             ) : null}
-            {isHotel ? null : (
+            {!isHotel && pickingTime ? (
               <Field label="Travel date">
                 <input
                   type="date"
                   value={scheduledAt.slice(0, 10)}
+                  min={defaultDate(0)}
                   onChange={(e) => setScheduledAt(`${e.target.value}T10:00`)}
                   className={stayInput}
                 />
               </Field>
-            )}
+            ) : null}
             {isHotel ? null : (
               <Field label="Notes">
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
               </Field>
             )}
             {isHotel ? null : <p className="text-[13px] text-[#7a6a52]">Estimated {inr(estimate)} before tax.</p>}
-            {formError && !isHotel && phase === "idle" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
-            <button
-              type="button"
-              onClick={() => {
-                if (!isHotel) {
-                  openLocationPopup();
-                  return;
-                }
-                setFormError("");
-                setHotelStep("guest");
-              }}
-              className={stayBtn}
-            >
-              Book now
-            </button>
+            {formError && phase === "idle" ? <p className="text-sm text-[var(--error)]">{formError}</p> : null}
+            <BookActions onNow={() => (isHotel ? startHotel("now") : startTimed("now"))} onSchedule={() => (isHotel ? startHotel("schedule") : startTimed("schedule"))} />
+            <p className="text-center text-[12px] text-[#7a6a52]">Book now starts today. Schedule is for a later time.</p>
           </>
         )}
         {!isHotel && (phase === "ask" || phase === "locating") ? (
@@ -522,9 +550,21 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       <PriceLine unitPrice={unitPrice} priceUnit={listing.priceUnit} />
 
       {phase === "idle" || phase === "ask" || phase === "locating" ? (
-        <button type="button" onClick={() => setPhase("ask")} className={primaryBtn}>
-          Book now
-        </button>
+        <>
+          {pickingTime ? (
+            <Field label="When">
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                min={soonSlot()}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          ) : null}
+          <BookActions onNow={() => startTimed("now")} onSchedule={() => startTimed("schedule")} />
+          <p className="text-center text-[12px] text-[#7a6a52]">Book now starts today. Schedule is for a later time.</p>
+        </>
       ) : null}
 
       {phase === "ask" || phase === "locating" ? (
@@ -562,7 +602,7 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
             setFormError("");
             if (isCab) setPickupAddress(value);
             setAddress(value);
-            setPhase("choose");
+            finishService();
           }}
         />
       ) : null}
@@ -677,6 +717,19 @@ const primaryBtn =
   "inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-60";
 const secondaryBtn =
   "inline-flex h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold text-slate-900";
+
+function BookActions({ onNow, onSchedule }: { onNow: () => void; onSchedule: () => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <button type="button" onClick={onNow} className={primaryBtn}>
+        Book now
+      </button>
+      <button type="button" onClick={onSchedule} className={secondaryBtn}>
+        Schedule
+      </button>
+    </div>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

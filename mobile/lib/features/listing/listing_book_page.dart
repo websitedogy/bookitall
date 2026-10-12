@@ -450,27 +450,29 @@ class _ListingBookPageState extends State<ListingBookPage> {
           ),
           const SizedBox(height: 20),
           if (_isStay) ...[
-            if (widget.draft.isHotel)
-              Row(
-                children: [
-                  Expanded(child: _tapField('Check-in', _checkIn, () => _pickDate(checkIn: true))),
-                  const SizedBox(width: 12),
-                  Expanded(child: _tapField('Check-out', _checkOut, () => _pickDate(checkIn: false))),
-                ],
-              )
-            else
-              _tapField('Travel date', _scheduledAt.substring(0, 10), () async {
-                final parsed = DateTime.tryParse(_scheduledAt) ?? DateTime.now().add(const Duration(days: 1));
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: parsed,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (picked == null) return;
-                setState(() => _scheduledAt = '${picked.year}-${pad2(picked.month)}-${pad2(picked.day)}T10:00');
-              }),
-            const SizedBox(height: 12),
+            if (_schedule) ...[
+              if (widget.draft.isHotel)
+                Row(
+                  children: [
+                    Expanded(child: _tapField('Check-in', _checkIn, () => _pickDate(checkIn: true))),
+                    const SizedBox(width: 12),
+                    Expanded(child: _tapField('Check-out', _checkOut, () => _pickDate(checkIn: false))),
+                  ],
+                )
+              else
+                _tapField('Travel date', _scheduledAt.substring(0, 10), () async {
+                  final parsed = DateTime.tryParse(_scheduledAt) ?? DateTime.now().add(const Duration(days: 1));
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: parsed,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked == null) return;
+                  setState(() => _scheduledAt = '${picked.year}-${pad2(picked.month)}-${pad2(picked.day)}T10:00');
+                }),
+              const SizedBox(height: 12),
+            ],
             TextField(controller: _notes, decoration: _dec('Any special request')),
             const SizedBox(height: 8),
             const Text('Estimated before tax. Tax is added at checkout.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
@@ -482,7 +484,7 @@ class _ListingBookPageState extends State<ListingBookPage> {
                 children: [
                   Icon(Icons.location_on_outlined, color: Color(0xFF0F766E)),
                   SizedBox(width: 10),
-                  Expanded(child: Text('Your service location will be added after you tap Book now.', style: TextStyle(color: Color(0xFF5B6E68), height: 1.35))),
+                  Expanded(child: Text('Your service location is added after you choose Book now or Schedule.', style: TextStyle(color: Color(0xFF5B6E68), height: 1.35))),
                 ],
               ),
             ),
@@ -499,51 +501,40 @@ class _ListingBookPageState extends State<ListingBookPage> {
             const SizedBox(height: 12),
             Text(_error, style: const TextStyle(color: Color(0xFFB91C1C))),
           ],
-          const SizedBox(height: 20),
-          if (_isStay)
-            FilledButton(
-              onPressed: _openLocationSheet,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                minimumSize: const Size.fromHeight(48),
-                shape: const StadiumBorder(),
+          const SizedBox(height: 8),
+          const Text(
+            'Book now starts today. Schedule is for a later time.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF7A6A52), fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: _bookNow,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: const Text('Book now'),
+                ),
               ),
-              child: const Text('Book now'),
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _openLocationSheet,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size.fromHeight(48),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text('Book now'),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _scheduleTap,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: const StadiumBorder(),
+                    foregroundColor: AppColors.text,
                   ),
+                  child: const Text('Schedule'),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      if (!_schedule) {
-                        setState(() => _schedule = true);
-                      } else {
-                        _openLocationSheet();
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      shape: const StadiumBorder(),
-                      foregroundColor: AppColors.text,
-                    ),
-                    child: Text(_schedule ? 'Confirm' : 'Schedule'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ],
       ),
     );
