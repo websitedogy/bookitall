@@ -59,7 +59,8 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
-    await this.bookings.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "completionOtp" character varying(4)`);
+    await this.bookings.query(`ALTER TABLE bookings DROP COLUMN IF EXISTS "completionOtp"`);
+    await this.bookings.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_otp character varying(4)`);
     await this.backfillCompletionCodes();
     this.logger.log('Vendor order window is 5 minutes, then admin decides');
     this.vendorWatch = setInterval(() => {
