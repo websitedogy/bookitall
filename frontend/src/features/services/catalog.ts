@@ -60,9 +60,12 @@ export function catalogMap(catalog: PlatformService[] | null) {
   return new Map((catalog ?? []).map((row) => [row.slug, row]));
 }
 
+const FORCED_OFF = new Set(["cabs", "jobs", "cloud-kitchen"]);
+
 export function isServiceEnabled(catalog: PlatformService[] | null, slug: string) {
-  if (!catalog) return true;
   const key = slug === "local-shops" ? "cloud-kitchen" : slug;
+  if (FORCED_OFF.has(key)) return false;
+  if (!catalog) return true;
   const row = catalog.find((item) => item.slug === key || item.id === key);
   return row ? row.isEnabled : true;
 }
