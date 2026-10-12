@@ -429,9 +429,9 @@ export function professionalFallbackImage(serviceId: string) {
   if (serviceId === "hotels" || serviceId === "tours" || serviceId === "cabs") {
     return `/banners/${serviceId}.webp`;
   }
+  if (serviceId === "public-transport") return "/categories/cabs.webp?v=5";
   if (serviceId === "appliance") return "/categories/appliance.webp?v=5";
   if (
-    serviceId === "public-transport" ||
     serviceId === "goods-transport" ||
     serviceId === "packers-movers" ||
     serviceId === "cloud-kitchen"
@@ -442,13 +442,19 @@ export function professionalFallbackImage(serviceId: string) {
 }
 
 function imagePool(serviceId: string) {
+  const category =
+    serviceId === "public-transport"
+      ? "/categories/cabs.webp?v=5"
+      : serviceId === "goods-transport" || serviceId === "packers-movers" || serviceId === "cloud-kitchen"
+        ? `/categories/${serviceId}.svg`
+        : `/categories/${serviceId}.webp?v=5`;
   return [
     professionalFallbackImage(serviceId),
     "/banners/hotels.webp",
     "/banners/tours.webp",
     "/banners/cabs.webp",
     "/banners/home.webp",
-    `/categories/${serviceId}.webp?v=5`,
+    category,
   ];
 }
 
