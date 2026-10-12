@@ -30,6 +30,7 @@ export type CartItem = {
   guestName?: string;
   guestPhone?: string;
   guests?: number;
+  children?: number;
   roomName?: string;
   includedGuests?: number;
   extraGuestCharge?: number;

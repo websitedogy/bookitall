@@ -28,6 +28,10 @@ function bookHref(ad: PublicListingPost) {
   return `${listingHref(ad)}#book`;
 }
 
+function stayKindOf(ad: PublicListingPost) {
+  return String(ad.stayKind || "").toLowerCase() === "homestay" ? "homestay" : "hotel";
+}
+
 function matchesVehicle(ad: PublicListingPost, vehicleType?: string, category?: string) {
   if (!vehicleType) return true;
   if (category === "goods-transport") return matchesGoodsType(ad.vehicleType, vehicleType);
@@ -50,6 +54,7 @@ export function NearbyProfessionals({
   const [ads, setAds] = useState<PublicListingPost[]>(() =>
     vehicleType ? initialAds.filter((ad) => matchesVehicle(ad, vehicleType, category)) : initialAds,
   );
+  const [stayTab, setStayTab] = useState<"hotel" | "homestay">("hotel");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -109,13 +114,46 @@ export function NearbyProfessionals({
     );
   }
 
+  const visible = category === "hotels" ? ads.filter((ad) => stayKindOf(ad) === stayTab) : ads;
+  const stayTabs =
+    category === "hotels" ? (
+      <div className="flex gap-2 px-3 pt-3 md:px-7" role="tablist" aria-label="Stay type">
+        {(
+          [
+            ["hotel", "Hotels"],
+            ["homestay", "Home stays"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={stayTab === id}
+            onClick={() => setStayTab(id)}
+            className={`h-9 rounded-full px-4 text-sm font-semibold ${
+              stayTab === id ? "bg-[var(--primary)] text-white" : "bg-white text-[var(--studio-ink)] ring-1 ring-[var(--studio-line)]"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
   if (!ads.length) {
     return <ComingSoonServices category={category} />;
   }
 
   return (
+    <>
+      {stayTabs}
+      {!visible.length ? (
+        <p className="px-3 py-6 text-sm text-[var(--studio-muted)] md:px-7">
+          {stayTab === "homestay" ? "No home stays listed yet." : "No hotels listed yet."}
+        </p>
+      ) : null}
     <ul className="space-y-2.5 px-3 py-3 md:px-7 md:pb-7">
-      {ads.map((ad) => {
+      {visible.map((ad) => {
         const href = listingHref(ad);
         const book = category === "hotels" ? href : bookHref(ad);
         return (
@@ -168,5 +206,6 @@ export function NearbyProfessionals({
         );
       })}
     </ul>
+    </>
   );
 }

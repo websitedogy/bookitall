@@ -799,6 +799,10 @@ export class VendorListingsService {
       vehicleType: fields.vehicleType || '',
       serviceType: fields.serviceType || '',
       loadCapacity: fields.loadCapacity || '',
+      stayKind:
+        String(fields.stayKind || '').toLowerCase() === 'homestay' || String(fields.hotelType || '').toLowerCase() === 'homestay'
+          ? 'homestay'
+          : 'hotel',
     };
   }
 

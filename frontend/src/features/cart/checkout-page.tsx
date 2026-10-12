@@ -223,6 +223,9 @@ export function CheckoutPage() {
           <p className="mt-2 text-sm">{guest?.guestName?.trim() || user?.fullName}</p>
           <p className="text-sm text-[var(--text-muted)]">{guest?.guestPhone?.trim() || user?.phone}</p>
           {guest?.guests ? <p className="mt-1 text-sm text-[var(--text-muted)]">{guest.guests} member{guest.guests === 1 ? "" : "s"}</p> : null}
+          {guest?.children != null ? (
+            <p className="text-sm text-[var(--text-muted)]">{guest.children > 0 ? `${guest.children} child${guest.children === 1 ? "" : "ren"}` : "No children"}</p>
+          ) : null}
         </section>
 
         {stayLocation ? (
@@ -332,6 +335,7 @@ export function CheckoutPage() {
                     {item.roomName ? `${item.roomName} · ` : ""}
                     {nightsBetween(item.checkIn, item.checkOut)} night{nightsBetween(item.checkIn, item.checkOut) === 1 ? "" : "s"}
                     {item.guests ? ` · ${item.guests} member${item.guests === 1 ? "" : "s"}` : ""}
+                    {item.children != null ? (item.children > 0 ? ` · ${item.children} child${item.children === 1 ? "" : "ren"}` : " · No children") : ""}
                   </span>
                 ) : (
                   <span className="block text-xs text-[var(--text-muted)]">× {item.quantity}</span>

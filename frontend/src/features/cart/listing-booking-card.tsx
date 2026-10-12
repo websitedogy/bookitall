@@ -68,6 +68,8 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guests, setGuests] = useState("1");
+  const [hasChildren, setHasChildren] = useState<"" | "yes" | "no">("");
+  const [childrenCount, setChildrenCount] = useState("");
   const [hotelStep, setHotelStep] = useState<"rooms" | "guest">("rooms");
   const guestFilled = useRef(false);
   const [formError, setFormError] = useState("");
@@ -121,10 +123,15 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
       quantity: 1,
       scheduledAt: isHotel ? undefined : when,
       address: isHotel ? extras?.address || exactAddress() : isTour ? undefined : exactAddress(),
-      notes: [selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} members · ${selectedRoom.available} available` : "", notes].filter(Boolean).join("\n"),
+      notes: [
+        selectedRoom ? `${selectedRoom.name} · ${selectedRoom.guests} members · ${selectedRoom.available} available` : "",
+        isHotel ? (hasChildren === "yes" ? `Children: ${Math.max(1, Number(childrenCount) || 1)}` : "Children: none") : "",
+        notes,
+      ].filter(Boolean).join("\n"),
       guestName: isHotel ? guestName.trim() : undefined,
       guestPhone: isHotel ? guestPhone.replace(/\D/g, "").slice(-10) : undefined,
       guests: isHotel ? Math.max(1, Number(guests) || 1) : undefined,
+      children: isHotel ? (hasChildren === "yes" ? Math.max(1, Number(childrenCount) || 1) : 0) : undefined,
       roomName: isHotel ? selectedRoom?.name : undefined,
       includedGuests: isHotel ? Number(selectedRoom?.guests) || undefined : undefined,
       extraGuestCharge: isHotel ? listing.extraGuestCharge || 0 : undefined,
@@ -211,6 +218,19 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
     const count = Math.max(1, Number(guests) || 1);
     if (count > 20) {
       setFormError("Enter up to 20 members.");
+      return;
+    }
+    if (hasChildren !== "yes" && hasChildren !== "no") {
+      setFormError("Say if any children are staying.");
+      return;
+    }
+    const childCount = hasChildren === "yes" ? Number(childrenCount) : 0;
+    if (hasChildren === "yes" && (!Number.isFinite(childCount) || childCount < 1)) {
+      setFormError("Enter how many children.");
+      return;
+    }
+    if (childCount > 20) {
+      setFormError("Enter up to 20 children.");
       return;
     }
     try {
@@ -321,6 +341,42 @@ export function ListingBookingCard({ listing }: { listing: BookableListing }) {
                 className={stayInput}
               />
             </Field>
+            <div>
+              <p className="text-[12px] font-medium text-[#5b6e68]">Children staying?</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                {(
+                  [
+                    ["no", "No"],
+                    ["yes", "Yes"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setHasChildren(id);
+                      if (id === "no") setChildrenCount("");
+                    }}
+                    className={`h-11 rounded-xl text-sm font-semibold ring-1 ${
+                      hasChildren === id ? "bg-[#f3faf7] text-[#0f3d38] ring-[#0f766e]" : "bg-white text-[#12241f] ring-[#eadfcd]"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {hasChildren === "yes" ? (
+              <Field label="How many children">
+                <input
+                  inputMode="numeric"
+                  value={childrenCount}
+                  onChange={(e) => setChildrenCount(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                  placeholder="Number of children"
+                  className={stayInput}
+                />
+              </Field>
+            ) : null}
             <Field label="Notes">
               <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Any special request" className={stayInput} />
             </Field>

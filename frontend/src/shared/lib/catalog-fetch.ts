@@ -32,6 +32,7 @@ export type PublicListingPost = {
   vehicleType?: string;
   serviceType?: string;
   loadCapacity?: string;
+  stayKind?: "hotel" | "homestay" | string;
 };
 
 export const getHotels = cache(async (city?: string) => {

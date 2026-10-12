@@ -16,6 +16,7 @@ export function toCheckoutItems(items: CartItem[], address?: string) {
       dropAddress: item.dropAddress,
       quantity: item.quantity,
       guests: item.guests,
+      children: item.children,
       roomName: item.roomName,
       customerName: item.guestName,
       customerPhone: item.guestPhone,
