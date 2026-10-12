@@ -1,8 +1,8 @@
 import { categoryMetadata } from "@/features/seo/category-copy";
-import { BrowseServicePage } from "@/features/seo/browse-service-page";
+import { CabBookingFlow } from "@/features/users/cabs/components/cab-quote-form";
 
 export const generateMetadata = () => categoryMetadata("cabs");
 
-export default function Page({ searchParams }: { searchParams: Promise<{ pro?: string }> }) {
-  return <BrowseServicePage serviceId="cabs" searchParams={searchParams} />;
+export default function Page() {
+  return <CabBookingFlow />;
 }

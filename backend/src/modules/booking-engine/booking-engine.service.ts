@@ -668,6 +668,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         details: { ...details, tourName: tour.name, travelers, quantity: travelers },
       };
     }
+    if (dto.type === BookingType.CAB && details.fareClass && !details.listingId) {
+      return this.priceCabRide(details);
+    }
     if (dto.type === BookingType.CAB) {
       const vehicle = await this.cabs.getById(String(details.vehicleId ?? ''));
       const pickupLat = Number(details.pickupLat);
@@ -706,6 +709,69 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       scheduledAt: details.scheduledAt ? new Date(String(details.scheduledAt)) : new Date(),
       lockKey: `${service.id}:${String(details.scheduledAt ?? '')}`,
       details: { ...details, serviceName: service.name, category: service.category, quantity },
+    };
+  }
+
+  private async priceCabRide(details: Record<string, unknown>) {
+    const tripType = String(details.tripType ?? 'now');
+    if (tripType !== 'now' && tripType !== 'schedule') {
+      throw new BadRequestException('Ride Now and Schedule a Ride are available for this launch');
+    }
+    const pickupLat = Number(details.pickupLat);
+    const pickupLng = Number(details.pickupLng);
+    const dropLat = Number(details.dropLat);
+    const dropLng = Number(details.dropLng);
+    if (![pickupLat, pickupLng, dropLat, dropLng].every((value) => Number.isFinite(value))) {
+      throw new BadRequestException('Add pickup and destination');
+    }
+    let scheduledAt = new Date();
+    if (tripType === 'schedule') {
+      scheduledAt = new Date(String(details.scheduledAt ?? ''));
+      if (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() < Date.now() - 60_000) {
+        throw new BadRequestException('Choose a future date and time');
+      }
+    }
+    const stops = Array.isArray(details.stops)
+      ? details.stops
+          .map((stop) => {
+            const point = stop as { lat?: unknown; lng?: unknown };
+            return { lat: Number(point.lat), lng: Number(point.lng) };
+          })
+          .filter((stop) => Number.isFinite(stop.lat) && Number.isFinite(stop.lng))
+      : [];
+    const priced = await this.cabs.priceSavedRide({
+      fareClass: String(details.fareClass),
+      pickupLat,
+      pickupLng,
+      dropLat,
+      dropLng,
+      stops,
+      vehicleId: details.vehicleId ? String(details.vehicleId) : undefined,
+    });
+    if (!priced) {
+      throw new BadRequestException('Choose a vehicle');
+    }
+    const nearby = await this.cabs.nearbyDrivers(pickupLat, pickupLng);
+    return {
+      partnerId: priced.partnerId,
+      assigneeId: priced.assigneeId ?? nearby[0]?.id ?? null,
+      subtotal: priced.option.subtotal,
+      tax: priced.option.tax,
+      scheduledAt,
+      lockKey: `cab:${priced.option.fareClass}:${pickupLat.toFixed(3)}:${dropLat.toFixed(3)}`,
+      details: {
+        ...details,
+        vehicleName: priced.option.name,
+        fareClass: priced.option.fareClass,
+        seats: priced.option.seats,
+        distanceKm: priced.distanceKm,
+        durationMinutes: priced.durationMinutes,
+        baseFare: priced.option.baseFare,
+        distanceCharge: priced.option.distanceCharge,
+        timeCharge: priced.option.timeCharge,
+        toll: priced.option.toll,
+        fareKind: priced.option.fareKind,
+      },
     };
   }
 

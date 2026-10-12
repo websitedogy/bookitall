@@ -176,6 +176,11 @@ export function BookingDetailPage({ id }: { id: string }) {
           ) : waitingAdmin && booking.partnerId === userId ? (
             <Row label="Customer location" value="Visible after admin accepts this order." />
           ) : null}
+          {booking.details?.pickupLabel ? <Row label="Pickup" value={String(booking.details.pickupLabel)} /> : null}
+          {booking.details?.dropLabel ? <Row label="Destination" value={String(booking.details.dropLabel)} /> : null}
+          {booking.details?.vehicleName ? <Row label="Vehicle" value={String(booking.details.vehicleName)} /> : null}
+          {booking.details?.distanceKm != null ? <Row label="Estimated distance" value={`${booking.details.distanceKm} km`} /> : null}
+          {booking.details?.fareKind === "estimated" ? <Row label="Fare" value="Estimated" /> : null}
           {!isVendorView && booking.details?.vendorName ? <Row label="Vendor" value={String(booking.details.vendorName)} /> : null}
           {booking.status === "CANCELLED" && booking.cancellationReason ? (
             <Row label="Reject reason" value={booking.cancellationReason.replace(/^Rejected by (vendor|admin):\s*/i, "")} />
