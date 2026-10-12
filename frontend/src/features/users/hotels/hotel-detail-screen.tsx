@@ -7,7 +7,7 @@ export function HotelDetailScreen({ hotel }: { hotel: Hotel }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
       <article>
-        <CoverImage src={hotel.coverImageUrl} alt={hotel.name} fallback="/banners/hotels.jpg" />
+        <CoverImage src={hotel.coverImageUrl} alt={hotel.name} fallback="/banners/hotels.webp" />
         <p className="mt-6 text-xs uppercase tracking-[0.2em] text-[var(--teal)]">
           {hotel.city}, {hotel.state}
         </p>

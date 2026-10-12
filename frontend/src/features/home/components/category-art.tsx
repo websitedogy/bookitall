@@ -3,9 +3,9 @@ import { cn } from "@/shared/lib/cn";
 const VECTOR_ART = new Set(["goods-transport", "packers-movers", "cloud-kitchen"]);
 
 export function categoryArtSrc(id: string) {
-  const file = id === "public-transport" ? "cabs.png" : VECTOR_ART.has(id) ? `${id}.svg` : `${id}.png`;
-  const version = id === "public-transport" ? 4 : 2;
-  return `/categories/${file}?v=${version}`;
+  if (VECTOR_ART.has(id)) return `/categories/${id}.svg?v=2`;
+  const file = id === "public-transport" ? "cabs.webp" : `${id}.webp`;
+  return `/categories/${file}?v=5`;
 }
 
 export function CategoryArt({
@@ -29,7 +29,8 @@ export function CategoryArt({
         width={size}
         height={size}
         draggable={false}
-        decoding={priority ? "sync" : "async"}
+        decoding="async"
+        loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
         className={cn("object-contain brightness-110 saturate-125", className)}
       />

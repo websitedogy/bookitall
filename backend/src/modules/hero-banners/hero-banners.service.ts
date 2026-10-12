@@ -40,9 +40,24 @@ export class HeroBannersService implements OnModuleInit {
       )
     `);
     const count = await this.banners.count();
-    if (count > 0) return;
-    await this.banners.save(DEFAULT_HERO_BANNERS.map((item) => this.banners.create({ ...item, isEnabled: true })));
-    this.logger.log(`Seeded ${DEFAULT_HERO_BANNERS.length} hero banners`);
+    if (count === 0) {
+      await this.banners.save(DEFAULT_HERO_BANNERS.map((item) => this.banners.create({ ...item, isEnabled: true })));
+      this.logger.log(`Seeded ${DEFAULT_HERO_BANNERS.length} hero banners`);
+      return;
+    }
+    const lighter: Array<[string, string]> = [
+      ['/banners/hotels.png', '/banners/hotels.webp'],
+      ['/banners/hotels.jpg', '/banners/hotels.webp'],
+      ['/banners/tours.jpg', '/banners/tours.webp'],
+      ['/banners/tours.png', '/banners/tours.webp'],
+      ['/banners/cabs.png', '/banners/cabs.webp'],
+      ['/banners/cabs.jpg', '/banners/cabs.webp'],
+      ['/banners/home.jpg', '/banners/home.webp'],
+      ['/banners/home.png', '/banners/home.webp'],
+    ];
+    for (const [from, to] of lighter) {
+      await this.banners.update({ image: from }, { image: to });
+    }
   }
 
   async listPublic() {

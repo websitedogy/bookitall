@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BANNERS } from "@/features/home/banners";
+import { lightStaticSrc } from "@/shared/lib/static-media";
 import { useServiceCatalog } from "@/features/services/service-catalog-provider";
 import { API_URL } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/cn";
@@ -44,7 +45,7 @@ export function HeroBanners() {
             id: String(row.slug || row.id),
             href: String(row.href),
             title: String(row.title),
-            image: String(row.image),
+            image: lightStaticSrc(String(row.image)),
           }));
         if (next.length) setRemote(next);
       })

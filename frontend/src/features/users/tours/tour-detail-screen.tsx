@@ -7,7 +7,7 @@ export function TourDetailScreen({ tour }: { tour: Tour }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
       <article>
-        <CoverImage src={tour.coverImageUrl} alt={tour.name} fallback="/banners/tours.jpg" />
+        <CoverImage src={tour.coverImageUrl} alt={tour.name} fallback="/banners/tours.webp" />
         <h1 className="serif mt-6 text-5xl">{tour.name}</h1>
         <p className="mt-3 text-lg leading-8">{tour.description}</p>
         <p className="mt-4 font-medium">{inr(tour.pricePerPerson)} per person · {tour.durationDays} days</p>

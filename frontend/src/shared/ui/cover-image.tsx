@@ -1,11 +1,12 @@
 "use client";
 
 import { stableImage } from "@/shared/lib/stable-image";
+import { lightStaticSrc } from "@/shared/lib/static-media";
 
 export function CoverImage({
   src,
   alt,
-  fallback = "/banners/hotels.jpg",
+  fallback = "/banners/hotels.webp",
   className = "h-[min(72vh,560px)] w-full rounded-[2rem] bg-[#12241f]",
   fit = "contain",
   priority = true,
@@ -17,7 +18,7 @@ export function CoverImage({
   fit?: "cover" | "contain";
   priority?: boolean;
 }) {
-  const url = stableImage(src, fallback);
+  const url = lightStaticSrc(stableImage(src, fallback));
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}

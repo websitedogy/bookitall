@@ -36,6 +36,14 @@ const nextConfig: NextConfig = {
       ],
     };
   },
+  async headers() {
+    const year = "public, max-age=31536000, immutable";
+    return [
+      { source: "/_next/static/:path*", headers: [{ key: "Cache-Control", value: year }] },
+      { source: "/categories/:path*", headers: [{ key: "Cache-Control", value: year }] },
+      { source: "/banners/:path*", headers: [{ key: "Cache-Control", value: year }] },
+    ];
+  },
   async redirects() {
     return [
       { source: "/users/hotels", destination: "/hotels", statusCode: 301 },

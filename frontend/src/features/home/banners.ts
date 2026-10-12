@@ -8,7 +8,7 @@ export const BANNERS = [
     title: "Hotels & Resorts",
     text: "Rooms you can actually trust.",
     className: "bg-[#0f766e]",
-    image: "/banners/hotels.png",
+    image: "/banners/hotels.webp",
   },
   {
     id: "tours",
@@ -17,7 +17,7 @@ export const BANNERS = [
     title: "Tours & Packages",
     text: "Pilgrimage to weekend getaways.",
     className: "bg-[#0b5f59]",
-    image: "/banners/tours.jpg",
+    image: "/banners/tours.webp",
   },
   {
     id: "cabs",
@@ -26,7 +26,7 @@ export const BANNERS = [
     title: "Cabs & Rentals",
     text: "Local, outstation, live tracking.",
     className: "bg-[#134e4a]",
-    image: "/banners/cabs.png",
+    image: "/banners/cabs.webp",
   },
   {
     id: "home",
@@ -35,6 +35,6 @@ export const BANNERS = [
     title: "Experts near you",
     text: "Electrician to carpenter, booked in minutes.",
     className: "bg-[#0f766e]",
-    image: "/banners/home.jpg",
+    image: "/banners/home.webp",
   },
 ] as const;

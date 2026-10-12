@@ -45,7 +45,7 @@ export async function CatalogDetailPage({
         <CoverImage
           src={service.coverImageUrl}
           alt={service.name}
-          fallback={`/categories/${vertical.id}.png`}
+          fallback={`/categories/${vertical.id}.webp?v=5`}
           className="h-[min(72vh,560px)] w-full rounded-[2rem] bg-[#12241f]"
         />
         <h1 className="serif mt-6 text-5xl">{service.name}</h1>

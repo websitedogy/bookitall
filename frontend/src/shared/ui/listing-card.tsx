@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { stableImage } from "@/shared/lib/stable-image";
+import { lightStaticSrc } from "@/shared/lib/static-media";
 
 export function ListingCard({
   href,
   image,
-  fallback = "/banners/hotels.jpg",
+  fallback = "/banners/hotels.webp",
   eyebrow,
   title,
   meta,
@@ -27,7 +28,7 @@ export function ListingCard({
       <div className="relative h-52 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={stableImage(image, fallback)}
+          src={lightStaticSrc(stableImage(image, fallback))}
           alt={title}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />

@@ -427,9 +427,9 @@ const RATINGS = [4.5, 4.7, 4.9, 4.6, 4.8, 4.5, 4.7, 4.9];
 
 export function professionalFallbackImage(serviceId: string) {
   if (serviceId === "hotels" || serviceId === "tours" || serviceId === "cabs") {
-    return `/banners/${serviceId}.jpg`;
+    return `/banners/${serviceId}.webp`;
   }
-  if (serviceId === "appliance") return "/categories/appliance.png";
+  if (serviceId === "appliance") return "/categories/appliance.webp?v=5";
   if (
     serviceId === "public-transport" ||
     serviceId === "goods-transport" ||
@@ -438,17 +438,17 @@ export function professionalFallbackImage(serviceId: string) {
   ) {
     return `/categories/${serviceId}.svg`;
   }
-  return `/categories/${serviceId}.png`;
+  return `/categories/${serviceId}.webp?v=5`;
 }
 
 function imagePool(serviceId: string) {
   return [
     professionalFallbackImage(serviceId),
-    "/banners/hotels.jpg",
-    "/banners/tours.jpg",
-    "/banners/cabs.jpg",
-    "/banners/home.jpg",
-    `/categories/${serviceId}.png`,
+    "/banners/hotels.webp",
+    "/banners/tours.webp",
+    "/banners/cabs.webp",
+    "/banners/home.webp",
+    `/categories/${serviceId}.webp?v=5`,
   ];
 }
 
