@@ -482,9 +482,9 @@ const services = [
     id: 'public-transport',
     name: 'Cabs',
     route: '/public-transport',
-    icon: Icons.airport_shuttle_outlined,
-    tint: Color(0xFFFEF3C7),
-    iconColor: Color(0xFFB45309),
+    icon: Icons.directions_car_filled,
+    tint: Color(0xFFDBEAFE),
+    iconColor: Color(0xFF0369A1),
     listings: const [],
   ),
   ServiceItem(
