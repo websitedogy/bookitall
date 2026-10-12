@@ -45,11 +45,12 @@ class _ListingDetailPageState extends State<ListingDetailPage> {
     }
   }
 
-  void _book(CustomerAd ad, ListingDetailData? detail) {
+  void _book(CustomerAd ad, ListingDetailData? detail, {bool schedule = false}) {
     final unitPrice = detail?.unitPrice ?? 0;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ListingBookPage(
+          startScheduled: schedule,
           draft: BookingDraft(
             listingId: ad.id,
             title: ad.title,
@@ -216,17 +217,32 @@ class _ListingDetailPageState extends State<ListingDetailPage> {
                               if (live) ...[
                                 const SizedBox(height: 14),
                                 if (canBook)
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      style: FilledButton.styleFrom(
-                                        backgroundColor: const Color(0xFF0F3D38),
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
-                                        shape: const StadiumBorder(),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor: const Color(0xFF0F3D38),
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: const StadiumBorder(),
+                                          ),
+                                          onPressed: () => _book(ad, _detail),
+                                          child: const Text('Book now'),
+                                        ),
                                       ),
-                                      onPressed: () => _book(ad, _detail),
-                                      child: const Text('Book now'),
-                                    ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: const StadiumBorder(),
+                                            foregroundColor: const Color(0xFF12241F),
+                                          ),
+                                          onPressed: () => _book(ad, _detail, schedule: true),
+                                          child: const Text('Schedule'),
+                                        ),
+                                      ),
+                                    ],
                                   )
                                 else
                                   const Text('This listing has no bookable price yet.', style: TextStyle(color: Color(0xFF7A6A52))),

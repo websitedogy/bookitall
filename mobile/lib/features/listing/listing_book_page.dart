@@ -9,9 +9,10 @@ import 'checkout_page.dart';
 import 'pickup_map_page.dart';
 
 class ListingBookPage extends StatefulWidget {
-  const ListingBookPage({super.key, required this.draft});
+  const ListingBookPage({super.key, required this.draft, this.startScheduled = false});
 
   final BookingDraft draft;
+  final bool startScheduled;
 
   @override
   State<ListingBookPage> createState() => _ListingBookPageState();
@@ -42,6 +43,7 @@ class _ListingBookPageState extends State<ListingBookPage> {
     _checkIn = widget.draft.checkIn ?? localDate(1);
     _checkOut = widget.draft.checkOut ?? localDate(2);
     _scheduledAt = widget.draft.scheduledAt ?? '${localDate(1)}T10:00';
+    _schedule = widget.startScheduled;
   }
 
   @override
@@ -363,6 +365,47 @@ class _ListingBookPageState extends State<ListingBookPage> {
         _error = error.toString().replaceFirst('Exception: ', '');
       });
     }
+  }
+
+  String _today() {
+    final now = DateTime.now();
+    return '${now.year}-${pad2(now.month)}-${pad2(now.day)}';
+  }
+
+  void _bookNow() {
+    setState(() {
+      _error = '';
+      _schedule = false;
+      if (widget.draft.isHotel) {
+        _checkIn = _today();
+        _checkOut = localDate(1);
+      } else if (widget.draft.isTour) {
+        _scheduledAt = '${_today()}T10:00';
+      } else {
+        final soon = DateTime.now().add(const Duration(minutes: 30));
+        _scheduledAt = '${soon.year}-${pad2(soon.month)}-${pad2(soon.day)}T${pad2(soon.hour)}:${pad2(soon.minute)}';
+      }
+    });
+    _openLocationSheet();
+  }
+
+  void _scheduleTap() {
+    if (!_schedule) {
+      setState(() {
+        _schedule = true;
+        _error = '';
+      });
+      return;
+    }
+    if (widget.draft.isHotel) {
+      final inn = DateTime.tryParse(_checkIn);
+      final out = DateTime.tryParse(_checkOut);
+      if (inn == null || out == null || !out.isAfter(inn)) {
+        setState(() => _error = 'Check-out must be after check-in');
+        return;
+      }
+    }
+    _openLocationSheet();
   }
 
   Future<void> _pickDate({required bool checkIn}) async {
