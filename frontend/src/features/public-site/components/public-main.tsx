@@ -31,7 +31,7 @@ export function PublicMain({ children }: { children: React.ReactNode }) {
           : isSupportChat
             ? "h-[100dvh] overflow-hidden bg-[#efeae2] p-0 md:h-[calc(100dvh-4rem)] md:px-6 md:py-4"
           : isProfessionals
-          ? `min-h-[100dvh] bg-[var(--studio)] p-0 ${pad} md:mx-auto md:min-h-[70vh] md:max-w-7xl md:bg-transparent md:px-8 md:py-8 md:pb-16`
+          ? `min-h-[100dvh] bg-white p-0 ${pad} md:mx-auto md:min-h-[70vh] md:max-w-7xl md:bg-transparent md:px-8 md:py-8 md:pb-16`
           : fullBleed
             ? `bg-white md:mx-auto md:max-w-[1180px] md:px-6 md:py-8 md:pb-28 max-md:h-[100dvh] max-md:overflow-hidden max-md:p-0 ${hideTabs ? "" : pad}`
             : isAddServicePicker
@@ -39,12 +39,12 @@ export function PublicMain({ children }: { children: React.ReactNode }) {
               : isAddServiceForm
               ? `min-h-[70vh] bg-white ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-[1180px] md:bg-transparent md:px-6 md:pt-0 md:pb-28`
               : isMyOrders || isMyBookings || isPosts
-              ? `min-h-[70vh] bg-[var(--studio)] ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-7xl md:bg-transparent md:px-8 md:pt-8 md:pb-16`
+              ? `min-h-[70vh] bg-white ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-7xl md:bg-transparent md:px-8 md:pt-8 md:pb-16`
               : isHome
                 ? "pb-0"
                 : isListing
-                  ? `min-h-[70vh] bg-[var(--studio)] ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-[1180px] md:px-6 md:py-8 md:pb-28`
-                : `mx-auto min-h-[70vh] max-w-[1180px] bg-[var(--studio)] px-5 py-8 ${pad} md:bg-transparent md:px-6 md:pb-28`
+                  ? `min-h-[70vh] bg-white ${pad} max-md:px-0 max-md:pt-0 md:mx-auto md:max-w-[1180px] md:px-6 md:py-8 md:pb-28`
+                : `mx-auto min-h-[70vh] max-w-[1180px] bg-white px-5 py-8 ${pad} md:bg-transparent md:px-6 md:pb-28`
       }
     >
       {children}

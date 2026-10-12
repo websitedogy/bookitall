@@ -32,7 +32,7 @@ export function CategoryArt({
         decoding="async"
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
-        className={cn("object-contain brightness-110 saturate-125", className)}
+        className={cn("object-contain", className)}
       />
     </span>
   );

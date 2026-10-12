@@ -184,9 +184,9 @@ body {
   overflow-x: clip;
 }
 
-/* iPhone Safari paints a dim full-page veil when a fixed bar uses
-   backdrop-filter. Keep those bars solid so the page stays bright. */
-@supports (-webkit-touch-callout: none) {
+/* A fixed bar with backdrop-filter paints a dim color veil over the
+   whole mobile page. Keep those bars solid so the site stays bright. */
+@media (max-width: 767px) {
   .backdrop-blur,
   .backdrop-blur-sm,
   .backdrop-blur-md,

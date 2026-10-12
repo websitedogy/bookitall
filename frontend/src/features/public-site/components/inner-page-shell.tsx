@@ -24,14 +24,14 @@ export function InnerPageShell({
   return (
     <div
       className={cn(
-        "min-h-full bg-[var(--studio)] md:bg-white md:ring-1 md:ring-[var(--studio-line)]",
+        "min-h-full bg-white md:ring-1 md:ring-[var(--studio-line)]",
         className,
       )}
     >
       {breadcrumbs}
       <header
         className={cn(
-          "sticky top-0 z-20 border-b border-[var(--studio-line)] bg-[var(--studio)]/92 pl-12 pr-4 backdrop-blur-md md:static md:border-0 md:bg-transparent md:px-7",
+          "sticky top-0 z-20 border-b border-[var(--border)] bg-white pl-12 pr-4 md:static md:border-0 md:bg-transparent md:px-7",
           badge ? "md:pt-4 md:pb-1" : "md:pt-3 md:pb-3",
         )}
       >
