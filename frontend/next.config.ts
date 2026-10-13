@@ -37,9 +37,11 @@ const nextConfig: NextConfig = {
     };
   },
   async headers() {
+    if (process.env.NODE_ENV !== "production") {
+      return [{ source: "/((?!_next|api).*)", headers: [{ key: "Clear-Site-Data", value: '"cache"' }] }];
+    }
     const year = "public, max-age=31536000, immutable";
     return [
-      { source: "/_next/static/:path*", headers: [{ key: "Cache-Control", value: year }] },
       { source: "/categories/:path*", headers: [{ key: "Cache-Control", value: year }] },
       { source: "/banners/:path*", headers: [{ key: "Cache-Control", value: year }] },
     ];
