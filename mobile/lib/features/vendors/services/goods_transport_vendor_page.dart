@@ -9,6 +9,8 @@ import '../../listing/listing_detail_page.dart';
 import 'goods_transport_data.dart';
 import 'goods_transport_registration_page.dart';
 import 'goods_transport_type_picker.dart';
+import 'packers_movers_registration_page.dart';
+import 'packers_movers_vendor_page.dart';
 
 class GoodsTransportVendorPage extends StatelessWidget {
   const GoodsTransportVendorPage({super.key});
@@ -23,14 +25,29 @@ class GoodsTransportVendorPage extends StatelessWidget {
         foregroundColor: AppColors.text,
         elevation: 0,
       ),
-      body: GoodsTransportTypePicker(
-        title: 'Register a vehicle',
-        subtitle: 'Tata Ace to Heavy Truck, or Other. Same form for every type. Submit for verification.',
-        onSelect: (vehicle) {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => GoodsTransportRegistrationPage(vehicle: vehicle)),
-          );
-        },
+      body: ListView(
+        children: [
+          GoodsTransportTypePicker(
+            title: 'Register a vehicle',
+            subtitle: 'Tata Ace to Heavy Truck, Other, or Packers & Movers. Submit for verification.',
+            onSelect: (vehicle) {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => GoodsTransportRegistrationPage(vehicle: vehicle)),
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const PackersMoversRegistrationPage()),
+                );
+              },
+              child: const Text('Packers & Movers'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -87,20 +104,34 @@ class _GoodsTransportBrowsePageState extends State<GoodsTransportBrowsePage> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : !_hasListings
-                    ? const ComingSoonServices(category: 'goods-transport')
-                    : Column(
-                        children: [
-                          GoodsTransportTypePicker(
-                            selectedId: _selected?.id,
-                            compact: _selected != null,
-                            title: 'Choose a vehicle',
-                            subtitle: 'Pick Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, or Other to see listings.',
-                            onSelect: (vehicle) => setState(() => _selected = vehicle),
+                : Column(
+                    children: [
+                      if (_hasListings)
+                        GoodsTransportTypePicker(
+                          selectedId: _selected?.id,
+                          compact: _selected != null,
+                          title: 'Choose a vehicle',
+                          subtitle: 'Pick Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, Other, or Packers & Movers.',
+                          onSelect: (vehicle) => setState(() => _selected = vehicle),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(builder: (_) => const PackersMoversBrowsePage()),
+                              );
+                            },
+                            child: const Text('Packers & Movers'),
                           ),
-                          if (_selected != null) Expanded(child: _GoodsTransportList(vehicle: _selected!)),
-                        ],
+                        ),
                       ),
+                      if (!_hasListings) const Expanded(child: ComingSoonServices(category: 'goods-transport')),
+                      if (_hasListings && _selected != null) Expanded(child: _GoodsTransportList(vehicle: _selected!)),
+                    ],
+                  ),
           ),
         ],
       ),

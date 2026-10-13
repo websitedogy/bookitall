@@ -6,8 +6,6 @@ import '../../../data/catalog.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/coming_soon_services.dart';
 import '../../listing/listing_detail_page.dart';
-import 'packers_movers_registration_page.dart';
-import 'packers_movers_vendor_page.dart';
 import 'public_transport_data.dart';
 import 'public_transport_registration_page.dart';
 import 'public_transport_type_picker.dart';
@@ -25,29 +23,14 @@ class PublicTransportVendorPage extends StatelessWidget {
         foregroundColor: AppColors.text,
         elevation: 0,
       ),
-      body: ListView(
-        children: [
-          PublicTransportTypePicker(
-            title: 'Register a vehicle',
-            subtitle: 'Auto, Car, Mini Bus, Bus, Van, or Packers & Movers.',
-            onSelect: (vehicle) {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => PublicTransportRegistrationPage(vehicle: vehicle)),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const PackersMoversRegistrationPage()),
-                );
-              },
-              child: const Text('Packers & Movers'),
-            ),
-          ),
-        ],
+      body: PublicTransportTypePicker(
+        title: 'Register a vehicle',
+        subtitle: 'Auto, Car, Mini Bus, Bus, or Van.',
+        onSelect: (vehicle) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => PublicTransportRegistrationPage(vehicle: vehicle)),
+          );
+        },
       ),
     );
   }
@@ -111,23 +94,9 @@ class _PublicTransportBrowsePageState extends State<PublicTransportBrowsePage> {
                           selectedId: _selected?.id,
                           compact: _selected != null,
                           title: 'Choose a ride',
-                          subtitle: 'Auto, Car, Mini Bus, Bus, Van, or Packers & Movers.',
+                          subtitle: 'Auto, Car, Mini Bus, Bus, or Van.',
                           onSelect: (vehicle) => setState(() => _selected = vehicle),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(builder: (_) => const PackersMoversBrowsePage()),
-                              );
-                            },
-                            child: const Text('Packers & Movers'),
-                          ),
-                        ),
-                      ),
                       if (!_hasListings) const Expanded(child: ComingSoonServices(category: 'public-transport')),
                       if (_hasListings && _selected != null) Expanded(child: _PublicTransportList(vehicle: _selected!)),
                     ],

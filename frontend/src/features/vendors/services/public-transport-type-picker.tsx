@@ -1,19 +1,14 @@
 import Link from "next/link";
-import { CategoryArt } from "@/features/home/components/category-art";
 import { PUBLIC_TRANSPORT_TYPES, publicTransportTypeHref } from "./public-transport-data";
 import { PublicTransportIcon } from "./public-transport-icons";
 import { cn } from "@/shared/lib/cn";
-
-function packersHref(baseHref: string) {
-  return baseHref.includes("/vendors/") ? "/vendors/services/packers-movers" : "/packers-movers/hyderabad";
-}
 
 export function PublicTransportTypePicker({
   baseHref,
   selected,
   compact = false,
   title = "Cabs",
-  subtitle = "Auto, Car, Mini Bus, Bus, Van, or Packers & Movers.",
+  subtitle = "Auto, Car, Mini Bus, Bus, or Van.",
   kicker = "Cabs",
 }: {
   baseHref: string;
@@ -57,20 +52,6 @@ export function PublicTransportTypePicker({
             </li>
           );
         })}
-        <li>
-          <Link
-            href={packersHref(baseHref)}
-            prefetch
-            className="flex h-full flex-col items-center gap-1.5 rounded-2xl bg-white px-1 py-2 text-center ring-1 ring-[var(--border)] transition hover:bg-[#f8fafc] md:rounded-3xl md:px-2 md:py-3"
-          >
-            <span className={cn("overflow-hidden rounded-2xl", compact ? "h-12 w-12 md:h-16 md:w-16" : "h-14 w-14 md:h-20 md:w-20")}>
-              <CategoryArt id="packers-movers" size={80} className="h-full w-full object-contain" />
-            </span>
-            <span className={cn("font-medium leading-tight text-[var(--text)]", compact ? "text-[10px] md:text-xs" : "text-[11px] md:text-sm")}>
-              Packers & Movers
-            </span>
-          </Link>
-        </li>
       </ul>
     </section>
   );

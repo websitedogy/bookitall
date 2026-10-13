@@ -62,16 +62,16 @@ export function ServiceCategoryScreen({
             selected={publicVehicle?.id}
             compact={Boolean(vehicleType)}
             title="Choose a ride"
-            subtitle="Auto, Car, Mini Bus, Bus, Van, or Packers & Movers."
+            subtitle="Auto, Car, Mini Bus, Bus, or Van."
           />
         ) : null}
-        {hasListings && serviceId === "goods-transport" ? (
+        {serviceId === "goods-transport" ? (
           <GoodsTransportTypePicker
             baseHref={seo?.path || "/goods-transport/hyderabad"}
             selected={goodsVehicle?.id}
             compact={Boolean(vehicleType)}
             title="Choose a vehicle"
-            subtitle="Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, or Other."
+            subtitle="Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, Other, or Packers & Movers."
           />
         ) : null}
         {hasListings && serviceId === "packers-movers" ? (
