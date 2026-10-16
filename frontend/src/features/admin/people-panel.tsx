@@ -37,7 +37,12 @@ export function AdminPeoplePanel({
   const [busy, setBusy] = useState("");
   const [note, setNote] = useState("");
   const [localStatus, setLocalStatus] = useState<Record<string, string>>({});
+  const [localCredits, setLocalCredits] = useState<Record<string, number>>({});
   const [sticky, setSticky] = useState<AdminUser[]>([]);
+  const [creditsVendor, setCreditsVendor] = useState<AdminUser | null>(null);
+  const [creditAmount, setCreditAmount] = useState("");
+  const [creditBusy, setCreditBusy] = useState(false);
+  const [creditError, setCreditError] = useState("");
   const limit = rowLimit(rowsKey);
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export function AdminPeoplePanel({
   useEffect(() => {
     const timer = setTimeout(() => {
       setLocalStatus({});
+      setLocalCredits({});
       setSticky([]);
       setNote("");
     }, 0);
@@ -66,11 +72,19 @@ export function AdminPeoplePanel({
   const displayed = (() => {
     const byId = new Map<string, AdminUser>();
     for (const row of rows) {
-      byId.set(row.id, localStatus[row.id] ? { ...row, status: localStatus[row.id] } : row);
+      byId.set(row.id, {
+        ...row,
+        ...(localStatus[row.id] ? { status: localStatus[row.id] } : {}),
+        ...(localCredits[row.id] !== undefined ? { creditPoints: localCredits[row.id] } : {}),
+      });
     }
     for (const row of sticky) {
       if (!byId.has(row.id)) {
-        byId.set(row.id, localStatus[row.id] ? { ...row, status: localStatus[row.id] } : row);
+        byId.set(row.id, {
+          ...row,
+          ...(localStatus[row.id] ? { status: localStatus[row.id] } : {}),
+          ...(localCredits[row.id] !== undefined ? { creditPoints: localCredits[row.id] } : {}),
+        });
       }
     }
     return [...byId.values()];
@@ -89,6 +103,40 @@ export function AdminPeoplePanel({
       setNote(status === "ACTIVE" ? `${user.fullName} enabled.` : status === "INACTIVE" ? `${user.fullName} disabled.` : `${user.fullName} blocked.`);
     } finally {
       setBusy("");
+    }
+  }
+
+  async function addCredits(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || !creditsVendor) return;
+    const points = Number(creditAmount);
+    if (!Number.isInteger(points) || points < 1 || points > 1000000) {
+      setCreditError("Enter a whole number between 1 and 1,000,000.");
+      return;
+    }
+    setCreditBusy(true);
+    setCreditError("");
+    try {
+      const result = await api<{ creditPoints: number }>(`/admin/users/${creditsVendor.id}/credits`, {
+        method: "POST",
+        token,
+        body: JSON.stringify({ points }),
+      });
+      const data = result.data;
+      if (!data) {
+        throw new Error("Credits were added, but the updated balance was not returned.");
+      }
+      setLocalCredits((current) => ({
+        ...current,
+        [creditsVendor.id]: data.creditPoints,
+      }));
+      setNote(`${points} credits added to ${creditsVendor.fullName}.`);
+      setCreditsVendor(null);
+      setCreditAmount("");
+    } catch (err) {
+      setCreditError(err instanceof Error ? err.message : "Could not add credits.");
+    } finally {
+      setCreditBusy(false);
     }
   }
 
@@ -230,6 +278,21 @@ export function AdminPeoplePanel({
                           items={[
                             ...(canManage && vendor
                               ? [
+                                  ...(showCredits && user.status === "ACTIVE"
+                                    ? [
+                                        {
+                                          id: "add-credits",
+                                          label: "Add credits",
+                                          disabled: creditBusy,
+                                          onClick: () => {
+                                            setCreditsVendor(user);
+                                            setCreditAmount("");
+                                            setCreditError("");
+                                          },
+                                          tone: "primary" as const,
+                                        },
+                                      ]
+                                    : []),
                                   {
                                     id: "enable",
                                     label: "Enable",
@@ -278,6 +341,66 @@ export function AdminPeoplePanel({
           </div>
         )}
       </AdminCard>
+      {creditsVendor ? (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center p-3 sm:items-center">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/40"
+            aria-label="Close add credits dialog"
+            onClick={() => {
+              if (!creditBusy) setCreditsVendor(null);
+            }}
+          />
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-vendor-credits-title"
+            className="relative w-full max-w-sm rounded-t-2xl bg-white p-5 shadow-xl ring-1 ring-emerald-100 sm:rounded-2xl"
+          >
+            <h2 id="add-vendor-credits-title" className="text-base font-semibold text-slate-900">
+              Add credits
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {creditsVendor.fullName} · Current balance {creditsVendor.creditPoints ?? 0}
+            </p>
+            <form onSubmit={addCredits} className="mt-4 space-y-3">
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600">Credits to add</span>
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  value={creditAmount}
+                  onChange={(event) => {
+                    setCreditAmount(event.target.value.replace(/\D/g, "").slice(0, 7));
+                    setCreditError("");
+                  }}
+                  aria-label="Credits to add"
+                  placeholder="Enter points"
+                  className="mt-1 h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200"
+                />
+              </label>
+              {creditError ? <p className="text-sm text-rose-600">{creditError}</p> : null}
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={creditBusy || !creditAmount}
+                  className="h-10 flex-1 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {creditBusy ? "Adding…" : "Add credits"}
+                </button>
+                <button
+                  type="button"
+                  disabled={creditBusy}
+                  onClick={() => setCreditsVendor(null)}
+                  className="h-10 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }
