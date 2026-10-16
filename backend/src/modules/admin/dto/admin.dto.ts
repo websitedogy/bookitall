@@ -3,6 +3,7 @@ import { IsBoolean, IsEmail, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { UserRole, UserStatus } from '../../../common/enums/user-role.enum';
 import { BookingStatus } from '../../../common/enums/booking.enum';
+import { VendorCreditService } from '../../../common/enums/vendor-credit-service.enum';
 import { PaymentStatus, PayoutStatus } from '../../../common/enums/finance.enum';
 import { SupportTicketStatus } from '../../../common/enums/support.enum';
 
@@ -96,6 +97,10 @@ export class SetVendorCreditsDto {
 }
 
 export class SetCreditsPerOrderDto {
+  @IsOptional()
+  @IsEnum(VendorCreditService)
+  serviceType!: VendorCreditService;
+
   @Type(() => Number)
   @IsInt()
   @Min(0)

@@ -14,6 +14,7 @@ import { SupportTicket } from './entities/support-ticket.entity';
 import { SupportMessage } from './entities/support-message.entity';
 import { UserRole, UserStatus, isPanelRole } from '../../common/enums/user-role.enum';
 import { BookingStatus } from '../../common/enums/booking.enum';
+import { VendorCreditService } from '../../common/enums/vendor-credit-service.enum';
 import { PaymentStatus, PayoutStatus } from '../../common/enums/finance.enum';
 import { SupportMessageSender, SupportTicketStatus } from '../../common/enums/support.enum';
 import { paginateMeta } from '../../common/dto/pagination.dto';
@@ -320,12 +321,16 @@ export class AdminService {
     return { creditPoints: wallet.creditPoints };
   }
 
-  getCreditsPerOrder() {
-    return this.wallets.creditsPerOrder();
+  async getCreditsPerOrder() {
+    const [creditsPerOrder, creditRates] = await Promise.all([
+      this.wallets.creditsPerOrder(),
+      this.wallets.creditRates(),
+    ]);
+    return { creditsPerOrder, creditRates };
   }
 
-  setCreditsPerOrder(points: number) {
-    return this.wallets.setCreditsPerOrder(points);
+  setCreditsPerOrder(points: number, serviceType: VendorCreditService) {
+    return this.wallets.setCreditsPerOrder(points, serviceType);
   }
 
   async vendorReport(id: string) {

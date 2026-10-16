@@ -14,6 +14,7 @@ type WalletInfo = {
   pendingBalance: string;
   creditPoints: number;
   creditsPerOrder: number;
+  creditRates?: Partial<Record<string, number>>;
 };
 
 type WalletTx = {
@@ -130,9 +131,7 @@ export function VendorWallet() {
           {loading ? "…" : wallet ? wallet.creditPoints.toLocaleString("en-IN") : "—"}
         </p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          {wallet?.creditsPerOrder
-            ? `${wallet.creditsPerOrder} credits are deducted when an order is assigned.`
-            : "Credits assigned by the Book It All admin."}
+          Credits are deducted when an order is completed. The rate depends on the service type.
         </p>
         {walletError ? (
           <div className="mt-2 flex items-center justify-between gap-3">

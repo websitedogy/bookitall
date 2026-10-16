@@ -979,13 +979,6 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
           throw new BadRequestException('This order has already been assigned or updated.');
         }
         current.completionOtp = booking.completionOtp;
-        const creditsPerOrder = await this.wallet.creditsPerOrder(manager);
-        if (creditsPerOrder > 0) {
-          const vendorId = current.partnerId ?? current.assigneeId;
-          if (!vendorId) throw new BadRequestException('No vendor is assigned to this order.');
-          await this.wallet.debitCreditsForOrder(vendorId, creditsPerOrder, manager);
-          current.vendorCreditsCharged = creditsPerOrder;
-        }
         current.status = to;
         await bookingRepo.save(current);
         const historyRepo = manager.getRepository(BookingStatusHistory);
@@ -1000,11 +993,42 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         );
         Object.assign(booking, current);
       });
+    } else if (to === BookingStatus.COMPLETED) {
+      await this.dataSource.transaction(async (manager) => {
+        const bookingRepo = manager.getRepository(Booking);
+        const current = await bookingRepo.findOne({
+          where: { id: booking.id },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!current) throw new NotFoundException('Order not found');
+        if (current.status !== from) {
+          throw new BadRequestException('This order has already been updated.');
+        }
+        if (current.vendorCreditsCharged === 0) {
+          const creditsPerOrder = await this.wallet.creditsPerOrderForBooking(current.type, current.details, manager);
+          if (creditsPerOrder > 0) {
+            const vendorId = current.partnerId ?? current.assigneeId;
+            if (!vendorId) throw new BadRequestException('No vendor is assigned to this order.');
+            await this.wallet.debitCreditsForOrder(vendorId, creditsPerOrder, manager);
+            current.vendorCreditsCharged = creditsPerOrder;
+          }
+        }
+        current.status = BookingStatus.COMPLETED;
+        current.completedAt = new Date();
+        await bookingRepo.save(current);
+        await manager.getRepository(BookingStatusHistory).save(
+          manager.getRepository(BookingStatusHistory).create({
+            bookingId: current.id,
+            fromStatus: from,
+            toStatus: BookingStatus.COMPLETED,
+            changedById: actorId,
+            note: note ?? null,
+          }),
+        );
+        Object.assign(booking, current);
+      });
     } else {
       booking.status = to;
-      if (to === BookingStatus.COMPLETED) {
-        booking.completedAt = new Date();
-      }
       await this.bookings.save(booking);
       await this.addHistory(booking.id, from, to, actorId, note);
     }

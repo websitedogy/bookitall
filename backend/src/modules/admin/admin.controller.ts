@@ -130,7 +130,7 @@ export class AdminController {
   @Patch('admin/vendor-credits/settings')
   @Roles(UserRole.SUPER_ADMIN)
   setVendorCreditSettings(@Body() dto: SetCreditsPerOrderDto) {
-    return this.admin.setCreditsPerOrder(dto.points);
+    return this.admin.setCreditsPerOrder(dto.points, dto.serviceType);
   }
 
   @Get('admin/staff')

@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
+import { BookingType } from '../../common/enums/booking.enum';
+import { VendorCreditService } from '../../common/enums/vendor-credit-service.enum';
 import { Wallet, WalletTransaction } from './entities/wallet.entity';
 import { VendorCreditSetting } from './entities/vendor-credit-setting.entity';
 import { WalletTransactionReason, WalletTransactionType } from '../../common/enums/finance.enum';
@@ -122,10 +124,10 @@ export class WalletService implements OnModuleInit {
       .getCount();
   }
 
-  async setCreditsPerOrder(points: number) {
+  async setCreditsPerOrder(points: number, serviceType: VendorCreditService) {
     await this.ensureCreditSchema();
-    await this.creditSettings.upsert({ id: 'default', creditsPerOrder: points }, ['id']);
-    return { creditsPerOrder: points };
+    await this.creditSettings.upsert({ id: serviceType, creditsPerOrder: points }, ['id']);
+    return { serviceType, creditsPerOrder: points };
   }
 
   async debitCreditsForOrder(userId: string, points: number, manager: EntityManager) {
@@ -144,17 +146,49 @@ export class WalletService implements OnModuleInit {
       );
     }
     if (wallet.creditPoints < points) {
-      throw new BadRequestException('Vendor has insufficient credits. Please add credits before assigning this order.');
+      throw new BadRequestException('Vendor has insufficient credits. Please add credits before completing this order.');
     }
     wallet.creditPoints -= points;
     await manager.getRepository(Wallet).save(wallet);
   }
 
-  async creditsPerOrder(manager?: EntityManager) {
+  async creditsPerOrder(serviceType?: VendorCreditService, manager?: EntityManager) {
     await this.ensureCreditSchema();
     const repository = manager?.getRepository(VendorCreditSetting) ?? this.creditSettings;
-    const setting = await repository.findOneBy({ id: 'default' });
-    return setting?.creditsPerOrder ?? 0;
+    const setting = await repository.findOneBy({ id: serviceType ?? 'default' });
+    if (setting || !serviceType) return setting?.creditsPerOrder ?? 0;
+    const legacyDefault = await repository.findOneBy({ id: 'default' });
+    return legacyDefault?.creditsPerOrder ?? 0;
+  }
+
+  async creditRates() {
+    await this.ensureCreditSchema();
+    const settings = await this.creditSettings.find();
+    const byId = new Map(settings.map((setting) => [setting.id, setting.creditsPerOrder]));
+    const legacyDefault = byId.get('default') ?? 0;
+    return Object.fromEntries(
+      Object.values(VendorCreditService).map((serviceType) => [
+        serviceType,
+        byId.get(serviceType) ?? legacyDefault,
+      ]),
+    ) as Record<VendorCreditService, number>;
+  }
+
+  async creditsPerOrderForBooking(type: BookingType, details: Record<string, unknown>, manager?: EntityManager) {
+    let serviceType: VendorCreditService;
+    if (type === BookingType.HOTEL) {
+      serviceType = VendorCreditService.HOTELS;
+    } else if (type === BookingType.TOUR) {
+      serviceType = VendorCreditService.TOURS;
+    } else if (type === BookingType.CAB) {
+      serviceType = VendorCreditService.CABS;
+    } else {
+      const rawCategory = details.category ?? details.listingCategory;
+      const category = typeof rawCategory === 'string' ? rawCategory.toLowerCase() : '';
+      const supportedService = Object.values(VendorCreditService).find((service) => service === category);
+      serviceType = supportedService ?? VendorCreditService.HOME_SERVICES;
+    }
+    return this.creditsPerOrder(serviceType, manager);
   }
 
   async transactions(userId: string, page = 1, limit = 20) {
