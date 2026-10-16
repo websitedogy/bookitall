@@ -1,16 +1,33 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Wallet, WalletTransaction } from './entities/wallet.entity';
+import { VendorCreditSetting } from './entities/vendor-credit-setting.entity';
 import { WalletTransactionReason, WalletTransactionType } from '../../common/enums/finance.enum';
+import { User } from '../users/entities/user.entity';
+import { UserRole, UserStatus } from '../../common/enums/user-role.enum';
+import { VENDOR_LOW_CREDIT_THRESHOLD } from '../../common/constants/app.constants';
 
 @Injectable()
-export class WalletService {
+export class WalletService implements OnModuleInit {
   constructor(
     @InjectRepository(Wallet) private readonly wallets: Repository<Wallet>,
     @InjectRepository(WalletTransaction) private readonly txs: Repository<WalletTransaction>,
+    @InjectRepository(VendorCreditSetting) private readonly creditSettings: Repository<VendorCreditSetting>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit() {
+    await this.dataSource.query(
+      `ALTER TABLE wallets ADD COLUMN IF NOT EXISTS credit_points integer NOT NULL DEFAULT 0`,
+    );
+    await this.dataSource.query(
+      `CREATE TABLE IF NOT EXISTS vendor_credit_settings (
+        id varchar(32) PRIMARY KEY,
+        credits_per_order integer NOT NULL DEFAULT 0
+      )`,
+    );
+  }
 
   async ensureWallet(userId: string) {
     const existing = await this.wallets.findOne({ where: { user: { id: userId } } });
@@ -44,6 +61,79 @@ export class WalletService {
       await walletRepo.increment({ id: wallet.id }, 'creditPoints', points);
       return walletRepo.findOneByOrFail({ id: wallet.id });
     });
+  }
+
+  async setCreditPoints(userId: string, points: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const walletRepo = manager.getRepository(Wallet);
+      let wallet = await walletRepo.findOne({
+        where: { user: { id: userId } },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!wallet) {
+        wallet = await walletRepo.save(
+          walletRepo.create({ user: { id: userId }, availableBalance: '0', pendingBalance: '0' }),
+        );
+      }
+      wallet.creditPoints = points;
+      return walletRepo.save(wallet);
+    });
+  }
+
+  async creditBalances(userIds: string[]) {
+    if (!userIds.length) return {};
+    const rows = await this.wallets
+      .createQueryBuilder('wallet')
+      .innerJoin('wallet.user', 'user')
+      .select('user.id', 'userId')
+      .addSelect('wallet.creditPoints', 'creditPoints')
+      .where('user.id IN (:...userIds)', { userIds })
+      .getRawMany<{ userId: string; creditPoints: number }>();
+    return Object.fromEntries(rows.map((row) => [row.userId, Number(row.creditPoints)]));
+  }
+
+  async lowCreditVendors() {
+    return this.dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoin('user.wallet', 'wallet')
+      .where('user.status = :active', { active: UserStatus.ACTIVE })
+      .andWhere('user.role IN (:...roles)', { roles: [UserRole.PARTNER, UserRole.DRIVER, UserRole.TECHNICIAN] })
+      .andWhere('COALESCE(wallet.creditPoints, 0) < :threshold', { threshold: VENDOR_LOW_CREDIT_THRESHOLD })
+      .getCount();
+  }
+
+  async setCreditsPerOrder(points: number) {
+    await this.creditSettings.upsert({ id: 'default', creditsPerOrder: points }, ['id']);
+    return { creditsPerOrder: points };
+  }
+
+  async debitCreditsForOrder(userId: string, points: number, manager: EntityManager) {
+    if (points <= 0) return;
+    let wallet = await manager.getRepository(Wallet).findOne({
+      where: { user: { id: userId } },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!wallet) {
+      wallet = await manager.getRepository(Wallet).save(
+        manager.getRepository(Wallet).create({
+          user: { id: userId },
+          availableBalance: '0',
+          pendingBalance: '0',
+        }),
+      );
+    }
+    if (wallet.creditPoints < points) {
+      throw new BadRequestException('Vendor has insufficient credits. Please add credits before assigning this order.');
+    }
+    wallet.creditPoints -= points;
+    await manager.getRepository(Wallet).save(wallet);
+  }
+
+  async creditsPerOrder(manager?: EntityManager) {
+    const repository = manager?.getRepository(VendorCreditSetting) ?? this.creditSettings;
+    const setting = await repository.findOneBy({ id: 'default' });
+    return setting?.creditsPerOrder ?? 0;
   }
 
   async transactions(userId: string, page = 1, limit = 20) {

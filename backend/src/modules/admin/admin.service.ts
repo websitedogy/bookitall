@@ -24,6 +24,7 @@ import { PlatformServicesService } from '../platform-services/platform-services.
 import { WalletService } from '../wallet/wallet.service';
 import { NotificationType } from '../../common/enums/notification.enum';
 import { publicEmail } from '../../common/utils/email';
+import { VENDOR_LOW_CREDIT_THRESHOLD } from '../../common/constants/app.constants';
 
 const VENDOR_ROLES = [UserRole.PARTNER, UserRole.DRIVER, UserRole.TECHNICIAN];
 const CATEGORIES = [
@@ -105,6 +106,7 @@ export class AdminService {
       openTickets,
       pendingVendors,
       activeVendors,
+      lowCreditVendors,
       rejectedVendors,
       blockedVendors,
       customers,
@@ -124,6 +126,7 @@ export class AdminService {
       this.tickets.count({ where: { status: In([SupportTicketStatus.OPEN, SupportTicketStatus.IN_PROGRESS]) } }),
       this.applyVendorBucket(this.vendorQb(), 'pending').getCount(),
       this.vendorQb().andWhere('user.status = :active', { active: UserStatus.ACTIVE }).getCount(),
+      this.wallets.lowCreditVendors(),
       this.vendorQb().andWhere('user.status = :rejected', { rejected: UserStatus.INACTIVE }).getCount(),
       this.vendorQb().andWhere('user.status = :blocked', { blocked: UserStatus.SUSPENDED }).getCount(),
       this.userRepo.count({ where: { role: UserRole.CUSTOMER } }),
@@ -184,6 +187,7 @@ export class AdminService {
       vendors: {
         pending: pendingVendors,
         active: activeVendors,
+        lowCredits: lowCreditVendors,
         rejected: rejectedVendors,
         blocked: blockedVendors,
         pendingPosts,
@@ -232,6 +236,7 @@ export class AdminService {
       .take(query.limit);
     const [data, total] = await qb.getManyAndCount();
     const ids = data.map((u) => u.id);
+    const creditBalances = await this.wallets.creditBalances(ids);
     const listingCounts = ids.length
       ? await this.listings
           .createQueryBuilder('l')
@@ -271,6 +276,7 @@ export class AdminService {
     return {
       data: data.map((u) => ({
         ...this.users.toSafe(u),
+        creditPoints: creditBalances[u.id] ?? 0,
         listings: byUser[u.id]?.listings ?? 0,
         pendingPosts: byUser[u.id]?.pendingPosts ?? 0,
         activePosts: byUser[u.id]?.activePosts ?? 0,
@@ -303,6 +309,23 @@ export class AdminService {
     }
     const wallet = await this.wallets.addCreditPoints(id, points);
     return { creditPoints: wallet.creditPoints };
+  }
+
+  async setVendorCredits(id: string, points: number) {
+    const user = await this.users.getOrFail(id);
+    if (!VENDOR_ROLES.includes(user.role)) {
+      throw new BadRequestException('Credits can only be assigned to vendors');
+    }
+    const wallet = await this.wallets.setCreditPoints(id, points);
+    return { creditPoints: wallet.creditPoints };
+  }
+
+  getCreditsPerOrder() {
+    return this.wallets.creditsPerOrder();
+  }
+
+  setCreditsPerOrder(points: number) {
+    return this.wallets.setCreditsPerOrder(points);
   }
 
   async vendorReport(id: string) {
@@ -879,6 +902,12 @@ export class AdminService {
   }
 
   private applyVendorBucket(qb: ReturnType<AdminService['vendorQb']>, bucket: string) {
+    if (bucket === 'low-credits') {
+      return qb
+        .leftJoin('user.wallet', 'wallet')
+        .andWhere('user.status = :active', { active: UserStatus.ACTIVE })
+        .andWhere('COALESCE(wallet.creditPoints, 0) < :threshold', { threshold: VENDOR_LOW_CREDIT_THRESHOLD });
+    }
     if (bucket === 'blocked') {
       return qb.andWhere('user.status = :blocked', { blocked: UserStatus.SUSPENDED });
     }

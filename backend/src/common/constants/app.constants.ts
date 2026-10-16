@@ -1,5 +1,6 @@
 export const APP_NAME = 'Book It All';
 export const API_PREFIX = 'api/v1';
+export const VENDOR_LOW_CREDIT_THRESHOLD = 5;
 
 export const REDIS_KEYS = {
   refreshToken: (userId: string) => `auth:refresh:${userId}`,

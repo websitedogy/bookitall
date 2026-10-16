@@ -9,7 +9,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Booking, BookingStatusHistory } from './entities/booking.entity';
 import { BookingStatus, BookingType } from '../../common/enums/booking.enum';
 import { PaymentMethod, PaymentStatus, WalletTransactionReason } from '../../common/enums/finance.enum';
@@ -43,6 +43,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectRepository(Booking) private readonly bookings: Repository<Booking>,
     @InjectRepository(BookingStatusHistory) private readonly history: Repository<BookingStatusHistory>,
+    private readonly dataSource: DataSource,
     private readonly locks: LockService,
     private readonly hotels: HotelsService,
     private readonly tours: ToursService,
@@ -61,6 +62,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     await this.bookings.query(`ALTER TABLE bookings DROP COLUMN IF EXISTS "completionOtp"`);
     await this.bookings.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_otp character varying(4)`);
+    await this.bookings.query(
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS vendor_credits_charged integer NOT NULL DEFAULT 0`,
+    );
     await this.backfillCompletionCodes();
     this.logger.log('Vendor order window is 5 minutes, then admin decides');
     this.vendorWatch = setInterval(() => {
@@ -960,12 +964,50 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
 
   private async transition(booking: Booking, to: BookingStatus, actorId: string, note?: string) {
     const from = booking.status;
-    booking.status = to;
-    if (to === BookingStatus.COMPLETED) {
-      booking.completedAt = new Date();
+    const assigningVendor =
+      [BookingStatus.PENDING, BookingStatus.AWAITING_PAYMENT].includes(from) &&
+      [BookingStatus.CONFIRMED, BookingStatus.ASSIGNED].includes(to);
+    if (assigningVendor) {
+      await this.dataSource.transaction(async (manager) => {
+        const bookingRepo = manager.getRepository(Booking);
+        const current = await bookingRepo.findOne({
+          where: { id: booking.id },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!current) throw new NotFoundException('Order not found');
+        if (current.status !== from) {
+          throw new BadRequestException('This order has already been assigned or updated.');
+        }
+        current.completionOtp = booking.completionOtp;
+        const creditsPerOrder = await this.wallet.creditsPerOrder(manager);
+        if (creditsPerOrder > 0) {
+          const vendorId = current.partnerId ?? current.assigneeId;
+          if (!vendorId) throw new BadRequestException('No vendor is assigned to this order.');
+          await this.wallet.debitCreditsForOrder(vendorId, creditsPerOrder, manager);
+          current.vendorCreditsCharged = creditsPerOrder;
+        }
+        current.status = to;
+        await bookingRepo.save(current);
+        const historyRepo = manager.getRepository(BookingStatusHistory);
+        await historyRepo.save(
+          historyRepo.create({
+            bookingId: current.id,
+            fromStatus: from,
+            toStatus: to,
+            changedById: actorId,
+            note: note ?? null,
+          }),
+        );
+        Object.assign(booking, current);
+      });
+    } else {
+      booking.status = to;
+      if (to === BookingStatus.COMPLETED) {
+        booking.completedAt = new Date();
+      }
+      await this.bookings.save(booking);
+      await this.addHistory(booking.id, from, to, actorId, note);
     }
-    await this.bookings.save(booking);
-    await this.addHistory(booking.id, from, to, actorId, note);
     await this.notify(
       booking.customerId,
       NotificationType.BOOKING_STATUS,

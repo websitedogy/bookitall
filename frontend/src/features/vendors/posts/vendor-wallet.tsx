@@ -13,6 +13,7 @@ type WalletInfo = {
   availableBalance: string;
   pendingBalance: string;
   creditPoints: number;
+  creditsPerOrder: number;
 };
 
 type WalletTx = {
@@ -110,7 +111,11 @@ export function VendorWallet() {
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Available credits</p>
         <p className="mt-2 text-3xl font-semibold tracking-tight">{loading ? "…" : (wallet?.creditPoints ?? 0).toLocaleString("en-IN")}</p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">Credits assigned by the Book It All admin.</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          {wallet?.creditsPerOrder
+            ? `${wallet.creditsPerOrder} credits are deducted when an order is assigned.`
+            : "Credits assigned by the Book It All admin."}
+        </p>
       </section>
 
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">

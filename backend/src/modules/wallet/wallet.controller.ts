@@ -10,7 +10,11 @@ export class WalletController {
 
   @Get()
   async me(@CurrentUser('id') userId: string) {
-    return this.wallet.getByUser(userId);
+    const [wallet, creditsPerOrder] = await Promise.all([
+      this.wallet.getByUser(userId),
+      this.wallet.creditsPerOrder(),
+    ]);
+    return { ...wallet, creditsPerOrder };
   }
 
   @Post('topup')

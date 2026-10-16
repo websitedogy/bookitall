@@ -96,6 +96,7 @@ export function AdminPeoplePanel({
   const registeredVendors = bucket === "registered";
   const showPosts = !customersOnly;
   const showReport = bucket === "active";
+  const showCredits = bucket === "active" || bucket === "low-credits";
 
   return (
     <div>
@@ -148,6 +149,7 @@ export function AdminPeoplePanel({
                   <th className="whitespace-nowrap px-3 py-2">Contact</th>
                   <th className="whitespace-nowrap px-3 py-2">Role</th>
                   <th className="whitespace-nowrap px-3 py-2">Joined</th>
+                  {showCredits ? <th className="whitespace-nowrap px-3 py-2">Credits</th> : null}
                   {showPosts ? <th className="whitespace-nowrap px-3 py-2">Posts</th> : null}
                   {showReport ? <th className="whitespace-nowrap px-3 py-2">Report</th> : null}
                   <th className="whitespace-nowrap px-3 py-2 text-right">Actions</th>
@@ -192,6 +194,14 @@ export function AdminPeoplePanel({
                         {user.businessName ? <p className="text-[11px] text-slate-400">{user.businessName}</p> : null}
                       </td>
                       <td data-label="Joined" className="whitespace-nowrap px-3 py-2 text-xs text-slate-500">{joined}</td>
+                      {showCredits ? (
+                        <td data-label="Credits" className="whitespace-nowrap px-3 py-2 text-xs">
+                          <span className={(user.creditPoints ?? 0) < 5 ? "font-semibold text-rose-700" : "text-slate-600"}>
+                            {user.creditPoints ?? 0}
+                            {(user.creditPoints ?? 0) < 5 ? " · Low" : ""}
+                          </span>
+                        </td>
+                      ) : null}
                       {showPosts ? (
                         <td data-label="Posts" className="whitespace-nowrap px-3 py-2">
                           <button

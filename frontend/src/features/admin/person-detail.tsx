@@ -131,6 +131,32 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
     }
   }
 
+  async function setCredits() {
+    if (!token || creditAmount === "") return;
+    const points = Number(creditAmount);
+    if (!Number.isInteger(points) || points < 0 || points > 1000000) {
+      setCreditError("Enter a whole number between 0 and 1,000,000.");
+      return;
+    }
+    setBusyCredits(true);
+    setCreditError("");
+    setNote("");
+    try {
+      const res = await api<{ creditPoints: number }>(`/admin/users/${id}/credits`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify({ points }),
+      });
+      setPerson((current) => current ? { ...current, creditPoints: res.data?.creditPoints ?? points } : current);
+      setCreditAmount("");
+      setNote(`Credit balance updated to ${points}.`);
+    } catch (err) {
+      setCreditError(err instanceof Error ? err.message : "Could not update credits.");
+    } finally {
+      setBusyCredits(false);
+    }
+  }
+
   if (loading) {
     return <p className="py-16 text-center text-sm text-slate-500">Loading profile…</p>;
   }
@@ -252,7 +278,7 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">Vendor credits</p>
               <p className="mt-1 text-2xl font-semibold text-slate-900">{person.creditPoints ?? 0} points</p>
-              <p className="mt-1 text-xs text-slate-500">Assign credits after accepting this vendor.</p>
+              <p className="mt-1 text-xs text-slate-500">Use the same field to add credits or set the exact balance.</p>
             </div>
             <form
               className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
@@ -268,16 +294,25 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
                   setCreditAmount(event.target.value.replace(/\D/g, "").slice(0, 7));
                   setCreditError("");
                 }}
-                aria-label="Credits to add"
-                placeholder="Points to add"
+                aria-label="Credits to add or set"
+                placeholder="Add amount / new balance"
                 className="h-10 rounded-lg border border-emerald-100 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200"
               />
               <button
-                type="submit"
+                type="button"
                 disabled={busyCredits || !creditAmount}
+                onClick={() => void addCredits()}
                 className="h-10 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white disabled:opacity-60"
               >
-                {busyCredits ? "Adding…" : "Add credits"}
+                {busyCredits ? "Saving…" : "Add credits"}
+              </button>
+              <button
+                type="button"
+                disabled={busyCredits || creditAmount === ""}
+                onClick={() => void setCredits()}
+                className="h-10 rounded-lg border border-emerald-200 px-4 text-sm font-semibold text-emerald-800 disabled:opacity-60"
+              >
+                Set balance
               </button>
             </form>
           </div>

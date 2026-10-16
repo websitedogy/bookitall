@@ -24,6 +24,7 @@ export type DashboardCounts = {
   vendors: {
     pending: number;
     active: number;
+    lowCredits?: number;
     rejected: number;
     blocked: number;
     pendingPosts: number;

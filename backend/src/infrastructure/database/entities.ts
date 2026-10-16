@@ -7,6 +7,7 @@ import { HomeService } from '../../modules/home-services/entities/home-service.e
 import { Booking, BookingStatusHistory } from '../../modules/booking-engine/entities/booking.entity';
 import { Payment } from '../../modules/payments/entities/payment.entity';
 import { Wallet, WalletTransaction } from '../../modules/wallet/entities/wallet.entity';
+import { VendorCreditSetting } from '../../modules/wallet/entities/vendor-credit-setting.entity';
 import { CommissionLedger, CommissionRule } from '../../modules/commission/entities/commission.entity';
 import { Payout } from '../../modules/payout/entities/payout.entity';
 import { LocationPing } from '../../modules/gps/entities/location-ping.entity';
@@ -31,6 +32,7 @@ export const ALL_ENTITIES = [
   Payment,
   Wallet,
   WalletTransaction,
+  VendorCreditSetting,
   CommissionRule,
   CommissionLedger,
   Payout,

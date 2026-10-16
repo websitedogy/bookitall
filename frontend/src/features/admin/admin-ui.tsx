@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ClipboardList,
+  Coins,
   CreditCard,
   FileCheck,
   Headphones,
@@ -534,6 +535,8 @@ export const ADMIN_MENU: AdminMenuSection[] = [
     items: [
       { href: "/admin/vendors?bucket=pending", label: "Pending vendors", icon: ClipboardList, count: (data) => menuCount(data.vendors.pending) },
       { href: "/admin/vendors?bucket=active", label: "Active vendors", icon: Store, count: (data) => menuCount(data.vendors.active) },
+      { href: "/admin/vendors?bucket=low-credits", label: "Low credits (<5)", icon: Coins, count: (data) => menuCount(data.vendors.lowCredits) },
+      { href: "/admin/finance", label: "Credit rules", icon: Coins, superOnly: true, count: () => "" },
       { href: "/admin/vendors?bucket=rejected", label: "Disabled vendors", icon: Ban, count: (data) => menuCount(data.vendors.rejected) },
       { href: "/admin/vendors?bucket=blocked", label: "Blocked vendors", icon: BadgeCheck, count: (data) => menuCount(data.vendors.blocked) },
     ],

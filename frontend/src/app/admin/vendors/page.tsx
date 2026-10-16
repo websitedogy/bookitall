@@ -6,6 +6,7 @@ import { AdminPeoplePanel } from "@/features/admin/people-panel";
 const BUCKETS = [
   { id: "pending", label: "Pending" },
   { id: "active", label: "Active" },
+  { id: "low-credits", label: "Low credits" },
   { id: "rejected", label: "Disabled" },
   { id: "blocked", label: "Blocked" },
 ];

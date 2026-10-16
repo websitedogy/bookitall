@@ -38,6 +38,9 @@ export class Booking extends BaseEntity {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   commissionAmount!: string;
 
+  @Column({ type: 'integer', default: 0 })
+  vendorCreditsCharged!: number;
+
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   total!: string;
 

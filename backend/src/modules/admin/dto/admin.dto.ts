@@ -87,6 +87,22 @@ export class AddVendorCreditsDto {
   points!: number;
 }
 
+export class SetVendorCreditsDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(1000000)
+  points!: number;
+}
+
+export class SetCreditsPerOrderDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(1000000)
+  points!: number;
+}
+
 export class PatchBookingStatusDto {
   @IsEnum(BookingStatus)
   status!: BookingStatus;

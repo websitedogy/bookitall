@@ -14,6 +14,8 @@ import {
   AddVendorCreditsDto,
   CreateStaffDto,
   CreateSupportTicketDto,
+  SetCreditsPerOrderDto,
+  SetVendorCreditsDto,
   PatchBookingStatusDto,
   PatchSupportDto,
   PatchUserStatusDto,
@@ -111,6 +113,24 @@ export class AdminController {
   @Roles(UserRole.SUPER_ADMIN)
   addVendorCredits(@Param('id') id: string, @Body() dto: AddVendorCreditsDto) {
     return this.admin.addVendorCredits(id, dto.points);
+  }
+
+  @Patch('admin/users/:id/credits')
+  @Roles(UserRole.SUPER_ADMIN)
+  setVendorCredits(@Param('id') id: string, @Body() dto: SetVendorCreditsDto) {
+    return this.admin.setVendorCredits(id, dto.points);
+  }
+
+  @Get('admin/vendor-credits/settings')
+  @Roles(UserRole.SUPER_ADMIN)
+  vendorCreditSettings() {
+    return this.admin.getCreditsPerOrder();
+  }
+
+  @Patch('admin/vendor-credits/settings')
+  @Roles(UserRole.SUPER_ADMIN)
+  setVendorCreditSettings(@Body() dto: SetCreditsPerOrderDto) {
+    return this.admin.setCreditsPerOrder(dto.points);
   }
 
   @Get('admin/staff')
