@@ -10,6 +10,8 @@ import { VENDOR_LOW_CREDIT_THRESHOLD } from '../../common/constants/app.constant
 
 @Injectable()
 export class WalletService implements OnModuleInit {
+  private creditSchemaReady?: Promise<void>;
+
   constructor(
     @InjectRepository(Wallet) private readonly wallets: Repository<Wallet>,
     @InjectRepository(WalletTransaction) private readonly txs: Repository<WalletTransaction>,
@@ -18,15 +20,27 @@ export class WalletService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.dataSource.query(
-      `ALTER TABLE wallets ADD COLUMN IF NOT EXISTS credit_points integer NOT NULL DEFAULT 0`,
-    );
-    await this.dataSource.query(
-      `CREATE TABLE IF NOT EXISTS vendor_credit_settings (
-        id varchar(32) PRIMARY KEY,
-        credits_per_order integer NOT NULL DEFAULT 0
-      )`,
-    );
+    await this.ensureCreditSchema();
+  }
+
+  private ensureCreditSchema() {
+    if (!this.creditSchemaReady) {
+      this.creditSchemaReady = (async () => {
+        await this.dataSource.query(
+          `ALTER TABLE wallets ADD COLUMN IF NOT EXISTS credit_points integer NOT NULL DEFAULT 0`,
+        );
+        await this.dataSource.query(
+          `CREATE TABLE IF NOT EXISTS vendor_credit_settings (
+            id varchar(32) PRIMARY KEY,
+            credits_per_order integer NOT NULL DEFAULT 0
+          )`,
+        );
+      })().catch((error: unknown) => {
+        this.creditSchemaReady = undefined;
+        throw error;
+      });
+    }
+    return this.creditSchemaReady;
   }
 
   async ensureWallet(userId: string) {
@@ -42,6 +56,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async getCreditPoints(userId: string) {
+    await this.ensureCreditSchema();
     const wallet = await this.wallets.findOne({
       where: { user: { id: userId } },
       select: { creditPoints: true },
@@ -50,6 +65,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async addCreditPoints(userId: string, points: number) {
+    await this.ensureCreditSchema();
     return this.dataSource.transaction(async (manager) => {
       const walletRepo = manager.getRepository(Wallet);
       let wallet = await walletRepo.findOne({ where: { user: { id: userId } } });
@@ -64,6 +80,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async setCreditPoints(userId: string, points: number) {
+    await this.ensureCreditSchema();
     return this.dataSource.transaction(async (manager) => {
       const walletRepo = manager.getRepository(Wallet);
       let wallet = await walletRepo.findOne({
@@ -81,6 +98,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async creditBalances(userIds: string[]) {
+    await this.ensureCreditSchema();
     if (!userIds.length) return {};
     const rows = await this.wallets
       .createQueryBuilder('wallet')
@@ -93,6 +111,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async lowCreditVendors() {
+    await this.ensureCreditSchema();
     return this.dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -104,6 +123,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async setCreditsPerOrder(points: number) {
+    await this.ensureCreditSchema();
     await this.creditSettings.upsert({ id: 'default', creditsPerOrder: points }, ['id']);
     return { creditsPerOrder: points };
   }
@@ -131,6 +151,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async creditsPerOrder(manager?: EntityManager) {
+    await this.ensureCreditSchema();
     const repository = manager?.getRepository(VendorCreditSetting) ?? this.creditSettings;
     const setting = await repository.findOneBy({ id: 'default' });
     return setting?.creditsPerOrder ?? 0;
