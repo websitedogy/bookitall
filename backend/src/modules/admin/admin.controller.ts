@@ -11,6 +11,7 @@ import {
   AdminPayoutsQuery,
   AdminSupportQuery,
   AdminUsersQuery,
+  AddVendorCreditsDto,
   CreateStaffDto,
   CreateSupportTicketDto,
   PatchBookingStatusDto,
@@ -104,6 +105,12 @@ export class AdminController {
   @Roles(UserRole.SUPER_ADMIN)
   setStatus(@Param('id') id: string, @Body() dto: PatchUserStatusDto) {
     return this.admin.setUserStatus(id, dto.status);
+  }
+
+  @Post('admin/users/:id/credits')
+  @Roles(UserRole.SUPER_ADMIN)
+  addVendorCredits(@Param('id') id: string, @Body() dto: AddVendorCreditsDto) {
+    return this.admin.addVendorCredits(id, dto.points);
   }
 
   @Get('admin/staff')

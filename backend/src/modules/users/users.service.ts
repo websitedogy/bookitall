@@ -291,9 +291,15 @@ export class UsersService {
 
   private async mergeWallets(manager: { query: (sql: string, params?: unknown[]) => Promise<unknown> }, keeperId: string, duplicateId: string) {
     const wallets = (await manager.query(
-      `SELECT id, user_id, available_balance, pending_balance FROM wallets WHERE user_id IN ($1, $2)`,
+      `SELECT id, user_id, available_balance, pending_balance, credit_points FROM wallets WHERE user_id IN ($1, $2)`,
       [keeperId, duplicateId],
-    )) as Array<{ id: string; user_id: string; available_balance: string; pending_balance: string }>;
+    )) as Array<{
+      id: string;
+      user_id: string;
+      available_balance: string;
+      pending_balance: string;
+      credit_points: number;
+    }>;
     const keeperWallet = wallets.find((row) => row.user_id === keeperId);
     const extraWallet = wallets.find((row) => row.user_id === duplicateId);
     if (!extraWallet) return;
@@ -303,10 +309,11 @@ export class UsersService {
     }
     await manager.query(`UPDATE wallet_transactions SET wallet_id = $1 WHERE wallet_id = $2`, [keeperWallet.id, extraWallet.id]);
     await manager.query(
-      `UPDATE wallets SET available_balance = $1, pending_balance = $2 WHERE id = $3`,
+      `UPDATE wallets SET available_balance = $1, pending_balance = $2, credit_points = $3 WHERE id = $4`,
       [
         (Number(keeperWallet.available_balance) + Number(extraWallet.available_balance)).toFixed(2),
         (Number(keeperWallet.pending_balance) + Number(extraWallet.pending_balance)).toFixed(2),
+        Number(keeperWallet.credit_points) + Number(extraWallet.credit_points),
         keeperWallet.id,
       ],
     );

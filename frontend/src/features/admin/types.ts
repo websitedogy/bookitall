@@ -58,6 +58,7 @@ export type AdminUser = {
   lastSeenAt?: string | null;
   isOnline?: boolean;
   verificationStatus?: string | null;
+  creditPoints?: number;
 };
 
 export type AdminBooking = {

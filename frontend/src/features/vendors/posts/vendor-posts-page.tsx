@@ -19,7 +19,7 @@ export function VendorPostsPage() {
       <InnerPageShell
         kicker="Vendor"
         title="My Services"
-        subtitle="Your live listings and wallet."
+        subtitle="Your live listings, credits and wallet."
         tabs={
           isVendor ? (
             <div className="flex flex-wrap gap-1 px-3 pt-2 md:px-7">
@@ -27,7 +27,7 @@ export function VendorPostsPage() {
                 My Services
               </TabButton>
               <TabButton active={tab === "wallet"} onClick={() => setTab("wallet")}>
-                Wallet
+                Credits
               </TabButton>
               <TabButton active={tab === "history"} onClick={() => setTab("history")}>
                 Wallet History

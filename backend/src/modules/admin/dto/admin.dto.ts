@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { UserRole, UserStatus } from '../../../common/enums/user-role.enum';
 import { BookingStatus } from '../../../common/enums/booking.enum';
@@ -77,6 +77,14 @@ export class AdminSupportQuery extends PaginationDto {
 export class PatchUserStatusDto {
   @IsEnum(UserStatus)
   status!: UserStatus;
+}
+
+export class AddVendorCreditsDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000000)
+  points!: number;
 }
 
 export class PatchBookingStatusDto {

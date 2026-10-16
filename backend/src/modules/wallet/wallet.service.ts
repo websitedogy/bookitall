@@ -24,6 +24,28 @@ export class WalletService {
     return this.ensureWallet(userId);
   }
 
+  async getCreditPoints(userId: string) {
+    const wallet = await this.wallets.findOne({
+      where: { user: { id: userId } },
+      select: { creditPoints: true },
+    });
+    return wallet?.creditPoints ?? 0;
+  }
+
+  async addCreditPoints(userId: string, points: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const walletRepo = manager.getRepository(Wallet);
+      let wallet = await walletRepo.findOne({ where: { user: { id: userId } } });
+      if (!wallet) {
+        wallet = await walletRepo.save(
+          walletRepo.create({ user: { id: userId }, availableBalance: '0', pendingBalance: '0' }),
+        );
+      }
+      await walletRepo.increment({ id: wallet.id }, 'creditPoints', points);
+      return walletRepo.findOneByOrFail({ id: wallet.id });
+    });
+  }
+
   async transactions(userId: string, page = 1, limit = 20) {
     const wallet = await this.ensureWallet(userId);
     const [data, total] = await this.txs.findAndCount({

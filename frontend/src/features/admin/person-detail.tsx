@@ -49,7 +49,10 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [busyCredits, setBusyCredits] = useState(false);
   const [busyListing, setBusyListing] = useState("");
+  const [creditAmount, setCreditAmount] = useState("");
+  const [creditError, setCreditError] = useState("");
   const [note, setNote] = useState("");
   const [postTab, setPostTab] = useState<"accepted" | "rejected">("accepted");
 
@@ -99,6 +102,32 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
       setNote(status === "ACTIVE" ? "Enabled." : status === "INACTIVE" ? "Disabled." : "Blocked.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function addCredits() {
+    if (!token || !creditAmount) return;
+    const points = Number(creditAmount);
+    if (!Number.isInteger(points) || points < 1 || points > 1000000) {
+      setCreditError("Enter a whole number between 1 and 1,000,000.");
+      return;
+    }
+    setBusyCredits(true);
+    setCreditError("");
+    setNote("");
+    try {
+      const res = await api<{ creditPoints: number }>(`/admin/users/${id}/credits`, {
+        method: "POST",
+        token,
+        body: JSON.stringify({ points }),
+      });
+      setPerson((current) => current ? { ...current, creditPoints: res.data?.creditPoints ?? current.creditPoints } : current);
+      setCreditAmount("");
+      setNote(`${points} credits added.`);
+    } catch (err) {
+      setCreditError(err instanceof Error ? err.message : "Could not add credits.");
+    } finally {
+      setBusyCredits(false);
     }
   }
 
@@ -216,6 +245,45 @@ export function AdminPersonDetail({ id, backHref, backLabel }: { id: string; bac
           </table>
         </div>
       </AdminCard>
+
+      {canManage && person.role !== "CUSTOMER" && person.status === "ACTIVE" ? (
+        <AdminCard className="mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">Vendor credits</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-900">{person.creditPoints ?? 0} points</p>
+              <p className="mt-1 text-xs text-slate-500">Assign credits after accepting this vendor.</p>
+            </div>
+            <form
+              className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void addCredits();
+              }}
+            >
+              <input
+                inputMode="numeric"
+                value={creditAmount}
+                onChange={(event) => {
+                  setCreditAmount(event.target.value.replace(/\D/g, "").slice(0, 7));
+                  setCreditError("");
+                }}
+                aria-label="Credits to add"
+                placeholder="Points to add"
+                className="h-10 rounded-lg border border-emerald-100 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200"
+              />
+              <button
+                type="submit"
+                disabled={busyCredits || !creditAmount}
+                className="h-10 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {busyCredits ? "Adding…" : "Add credits"}
+              </button>
+            </form>
+          </div>
+          {creditError ? <p className="mt-3 text-sm text-rose-600">{creditError}</p> : null}
+        </AdminCard>
+      ) : null}
 
       {listings.length === 0 ? (
         <>

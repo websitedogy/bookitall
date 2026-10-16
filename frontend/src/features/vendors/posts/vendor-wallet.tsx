@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { History, Wallet } from "lucide-react";
+import { Coins, History, Wallet } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api, ApiError } from "@/shared/lib/api";
 import { inr } from "@/shared/lib/format";
@@ -12,6 +12,7 @@ const PRESETS = [500, 1000, 2000, 5000];
 type WalletInfo = {
   availableBalance: string;
   pendingBalance: string;
+  creditPoints: number;
 };
 
 type WalletTx = {
@@ -102,12 +103,21 @@ export function VendorWallet() {
   return (
     <div className="px-1 pb-6">
       <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
-        <Wallet className="h-3.5 w-3.5" aria-hidden />
-        Wallet
+        <Coins className="h-3.5 w-3.5" aria-hidden />
+        Credits
       </p>
 
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Current wallet amount</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Available credits</p>
+        <p className="mt-2 text-3xl font-semibold tracking-tight">{loading ? "…" : (wallet?.creditPoints ?? 0).toLocaleString("en-IN")}</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">Credits assigned by the Book It All admin.</p>
+      </section>
+
+      <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
+        <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+          <Wallet className="h-3.5 w-3.5" aria-hidden />
+          Wallet balance
+        </p>
         <p className="mt-2 text-3xl font-semibold tracking-tight">{loading ? "…" : inr(available)}</p>
         {pending > 0 ? (
           <p className="mt-1 text-sm text-[var(--text-muted)]">{inr(pending)} pending from bookings</p>

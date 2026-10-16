@@ -15,6 +15,9 @@ export class Wallet extends BaseEntity {
   @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
   pendingBalance!: string;
 
+  @Column({ type: 'integer', default: 0 })
+  creditPoints!: number;
+
   @Column({ type: 'varchar', length: 8, default: 'INR' })
   currency!: string;
 

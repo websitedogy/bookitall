@@ -282,8 +282,27 @@ export class AdminService {
 
   async getUser(id: string) {
     const user = await this.users.getOrFail(id);
-    const listings = await this.listingService.listForUser(id);
-    return { ...this.users.toSafe(user), listings: await this.withListingOrders(listings) };
+    const [listings, creditPoints] = await Promise.all([
+      this.listingService.listForUser(id),
+      this.wallets.getCreditPoints(id),
+    ]);
+    return {
+      ...this.users.toSafe(user),
+      listings: await this.withListingOrders(listings),
+      creditPoints,
+    };
+  }
+
+  async addVendorCredits(id: string, points: number) {
+    const user = await this.users.getOrFail(id);
+    if (!VENDOR_ROLES.includes(user.role)) {
+      throw new BadRequestException('Credits can only be assigned to vendors');
+    }
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new BadRequestException('Accept the vendor before assigning credits');
+    }
+    const wallet = await this.wallets.addCreditPoints(id, points);
+    return { creditPoints: wallet.creditPoints };
   }
 
   async vendorReport(id: string) {
