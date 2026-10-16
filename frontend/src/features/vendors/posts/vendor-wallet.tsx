@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Coins, History, Wallet } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api, ApiError } from "@/shared/lib/api";
@@ -46,25 +46,41 @@ export function VendorWallet() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [walletError, setWalletError] = useState("");
   const [saved, setSaved] = useState("");
+
+  const refreshWallet = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await api<WalletInfo>("/wallet", { token });
+      if (!res.data || !Number.isFinite(res.data.creditPoints)) {
+        throw new Error("Wallet response did not include a valid credit balance");
+      }
+      setWallet(res.data);
+      setWalletError("");
+    } catch {
+      setWalletError("Could not load your credits. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
-    let live = true;
-    api<WalletInfo>("/wallet", { token })
-      .then((res) => {
-        if (live && res.data) setWallet(res.data);
-      })
-      .catch(() => {
-        if (live) setError("Could not load wallet");
-      })
-      .finally(() => {
-        if (live) setLoading(false);
-      });
-    return () => {
-      live = false;
+    const initialRefresh = window.setTimeout(() => void refreshWallet(), 0);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refreshWallet();
     };
-  }, [token]);
+    const interval = window.setInterval(refreshWhenVisible, 15_000);
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      window.clearTimeout(initialRefresh);
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [token, refreshWallet]);
 
   async function addMoney(value: number) {
     if (!token || busy) return;
@@ -110,12 +126,26 @@ export function VendorWallet() {
 
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Available credits</p>
-        <p className="mt-2 text-3xl font-semibold tracking-tight">{loading ? "…" : (wallet?.creditPoints ?? 0).toLocaleString("en-IN")}</p>
+        <p className="mt-2 text-3xl font-semibold tracking-tight">
+          {loading ? "…" : wallet ? wallet.creditPoints.toLocaleString("en-IN") : "—"}
+        </p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
           {wallet?.creditsPerOrder
             ? `${wallet.creditsPerOrder} credits are deducted when an order is assigned.`
             : "Credits assigned by the Book It All admin."}
         </p>
+        {walletError ? (
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="text-sm text-rose-600">{walletError}</p>
+            <button
+              type="button"
+              onClick={() => void refreshWallet()}
+              className="shrink-0 text-sm font-semibold text-[var(--primary)]"
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
       </section>
 
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
