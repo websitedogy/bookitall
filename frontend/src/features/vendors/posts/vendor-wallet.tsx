@@ -339,7 +339,7 @@ export function VendorWalletHistory() {
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
         <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
           <Wallet className="h-3.5 w-3.5" aria-hidden />
-          Wallet balance
+          Wallet balance (₹)
         </p>
         <p className="mt-2 text-3xl font-semibold tracking-tight">{wallet ? inr(wallet.availableBalance) : "—"}</p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">

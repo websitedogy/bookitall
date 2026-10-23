@@ -98,7 +98,7 @@ export class WalletService implements OnModuleInit {
         amount: amountInPaise,
         currency: 'INR',
         receipt,
-        notes: { userId, credits: String(credits) },
+        notes: { credits: String(credits) },
       }),
     });
     if (!order.id || order.amount !== amountInPaise || order.currency !== 'INR') {
@@ -248,6 +248,7 @@ export class WalletService implements OnModuleInit {
           'Content-Type': 'application/json',
           ...init.headers,
         },
+        signal: AbortSignal.timeout(10_000),
       });
     } catch (error) {
       this.logger.error('Could not reach Razorpay', error instanceof Error ? error.stack : undefined);
