@@ -114,7 +114,8 @@ export function NearbyProfessionals({
     );
   }
 
-  const visible = category === "hotels" ? ads.filter((ad) => stayKindOf(ad) === stayTab) : ads;
+  const vehicleFilteredAds = vehicleType ? ads.filter((ad) => matchesVehicle(ad, vehicleType, category)) : ads;
+  const visible = category === "hotels" ? vehicleFilteredAds.filter((ad) => stayKindOf(ad) === stayTab) : vehicleFilteredAds;
   const stayTabs =
     category === "hotels" ? (
       <div className="flex gap-2 px-3 pt-3 md:px-7" role="tablist" aria-label="Stay type">
@@ -140,7 +141,7 @@ export function NearbyProfessionals({
       </div>
     ) : null;
 
-  if (!ads.length) {
+  if (!vehicleFilteredAds.length) {
     return <ComingSoonServices category={category} />;
   }
 
