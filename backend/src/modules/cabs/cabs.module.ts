@@ -4,10 +4,13 @@ import { Vehicle } from './entities/vehicle.entity';
 import { CabsService } from './cabs.service';
 import { CabsController } from './cabs.controller';
 import { User } from '../users/entities/user.entity';
+import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
+import { CabTripRequest } from './entities/cab-trip-request.entity';
+import { CabSchedulesService } from './cab-schedules.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vehicle, User])],
-  providers: [CabsService],
+  imports: [TypeOrmModule.forFeature([Vehicle, User, CabTripSchedule, CabTripRequest])],
+  providers: [CabsService, CabSchedulesService],
   controllers: [CabsController],
   exports: [CabsService],
 })

@@ -3,6 +3,8 @@ import { Hotel } from '../../modules/hotels/entities/hotel.entity';
 import { HotelRoomType } from '../../modules/hotels/entities/hotel-room-type.entity';
 import { Tour } from '../../modules/tours/entities/tour.entity';
 import { Vehicle } from '../../modules/cabs/entities/vehicle.entity';
+import { CabTripSchedule } from '../../modules/cabs/entities/cab-trip-schedule.entity';
+import { CabTripRequest } from '../../modules/cabs/entities/cab-trip-request.entity';
 import { HomeService } from '../../modules/home-services/entities/home-service.entity';
 import { Booking, BookingStatusHistory } from '../../modules/booking-engine/entities/booking.entity';
 import { Payment } from '../../modules/payments/entities/payment.entity';
@@ -25,6 +27,8 @@ export const ALL_ENTITIES = [
   HotelRoomType,
   Tour,
   Vehicle,
+  CabTripSchedule,
+  CabTripRequest,
   HomeService,
   VendorListing,
   Booking,
