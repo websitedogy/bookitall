@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { Coins, History, Wallet } from "lucide-react";
+import { Coins, History } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
-import { inr } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 
 const CREDIT_PRESETS = [500, 1000, 2000, 5000];
@@ -328,7 +327,7 @@ export function VendorWalletHistory() {
         setCreditPoints(result.data?.creditPoints ?? null);
       })
       .catch(() => {
-        if (live) setError("Could not load wallet history");
+        if (live) setError("Could not load credits history");
       })
       .finally(() => {
         if (live) setLoading(false);
@@ -363,35 +362,32 @@ export function VendorWalletHistory() {
           <p className="px-5 py-8 text-sm text-[var(--text-muted)]">No credit activity yet.</p>
         ) : (
           <ul className="divide-y divide-[var(--border)]">
-            {rows.map((row) => (
-              <li key={row.id} className="flex items-start justify-between gap-3 px-5 py-3.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{creditEventTitle(row)}</p>
-                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                    {[
-                      row.bookingNumber ? `Booking ${row.bookingNumber}` : "",
-                      row.source === "SERVICE" ? serviceLabel(row.serviceType) : row.note ?? "",
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                    {[
-                      row.bookingNumber,
-                      row.source === "SERVICE" ? serviceLabel(row.serviceType) : row.note,
-                    ].some(Boolean) ? " · " : ""}
-                    {new Date(row.createdAt).toLocaleString("en-IN")}
-                  </p>
-                  {row.balanceAfter != null ? (
+            {rows.map((row) => {
+              const context = [
+                row.bookingNumber ? `Booking ${row.bookingNumber}` : "",
+                row.source === "SERVICE" ? serviceLabel(row.serviceType) : row.note ?? "",
+              ].filter(Boolean);
+              return (
+                <li key={row.id} className="flex items-start justify-between gap-3 px-5 py-3.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{creditEventTitle(row)}</p>
                     <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                      Balance {row.balanceAfter.toLocaleString("en-IN")} credits
+                      {context.length ? `${context.join(" · ")} · ` : ""}
+                      {new Date(row.createdAt).toLocaleString("en-IN")}
                     </p>
-                  ) : null}
-                </div>
-                <p className={cn("shrink-0 text-sm font-semibold", row.type === "CREDIT" ? "text-emerald-700" : "text-rose-600")}>
-                  {row.type === "CREDIT" ? "+" : "−"}
-                  {row.amount.toLocaleString("en-IN")} credits
-                </p>
-              </li>
-            ))}
+                    {row.balanceAfter != null ? (
+                      <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                        Balance {row.balanceAfter.toLocaleString("en-IN")} credits
+                      </p>
+                    ) : null}
+                  </div>
+                  <p className={cn("shrink-0 text-sm font-semibold", row.type === "CREDIT" ? "text-emerald-700" : "text-rose-600")}>
+                    {row.type === "CREDIT" ? "+" : "−"}
+                    {row.amount.toLocaleString("en-IN")} credits
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

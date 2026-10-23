@@ -319,7 +319,10 @@ export class WalletService implements OnModuleInit {
     await this.ensureCreditSchema();
     return this.dataSource.transaction(async (manager) => {
       const walletRepo = manager.getRepository(Wallet);
-      let wallet = await walletRepo.findOne({ where: { user: { id: userId } } });
+      let wallet = await walletRepo.findOne({
+        where: { user: { id: userId } },
+        lock: { mode: 'pessimistic_write' },
+      });
       if (!wallet) {
         wallet = await walletRepo.save(
           walletRepo.create({ user: { id: userId }, availableBalance: '0', pendingBalance: '0' }),
