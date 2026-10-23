@@ -60,7 +60,7 @@ export function catalogMap(catalog: PlatformService[] | null) {
   return new Map((catalog ?? []).map((row) => [row.slug, row]));
 }
 
-const FORCED_OFF = new Set(["cabs", "jobs", "cloud-kitchen"]);
+const FORCED_OFF = new Set(["jobs", "cloud-kitchen"]);
 const HIDDEN_NAV = new Set(["packers-movers"]);
 
 export function isServiceEnabled(catalog: PlatformService[] | null, slug: string) {
