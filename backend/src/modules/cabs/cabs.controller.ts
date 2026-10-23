@@ -23,7 +23,8 @@ export class CabsController {
 
   @Public()
   @Get('schedules')
-  listSchedules() {
+  async listSchedules() {
+    if (!(await this.platformServices.isEnabled('cabs'))) return [];
     return this.schedules.listOpen();
   }
 
