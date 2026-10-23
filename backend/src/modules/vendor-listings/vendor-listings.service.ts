@@ -789,6 +789,7 @@ export class VendorListingsService {
       status: hold && row.status === ListingStatus.ACCEPTED ? 'HOLD' : row.status ?? ListingStatus.PENDING,
       latitude: row.latitude,
       longitude: row.longitude,
+      updatedAt: row.updatedAt,
       distanceKm: distanceKm != null ? Number(distanceKm.toFixed(1)) : null,
       createdAt: row.createdAt,
       priceLabel: this.priceLabel(row),

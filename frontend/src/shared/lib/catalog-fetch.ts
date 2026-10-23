@@ -20,6 +20,8 @@ export type PublicListingPost = {
   href: string;
   canonicalPath?: string;
   status?: string;
+  createdAt?: string;
+  updatedAt?: string;
   distanceKm?: number | null;
   priceLabel?: string;
   unitPrice?: number | null;

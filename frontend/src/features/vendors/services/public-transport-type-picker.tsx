@@ -28,7 +28,7 @@ export function PublicTransportTypePicker({
         </div>
       )}
       <ul className={cn("grid grid-cols-3 md:grid-cols-6", compact ? "gap-1.5 md:gap-3" : "gap-2 md:gap-4")}>
-        {PUBLIC_TRANSPORT_TYPES.map((item) => {
+        {PUBLIC_TRANSPORT_TYPES.filter((item) => !selected || item.id === selected).map((item) => {
           const active = selected === item.id;
           return (
             <li key={item.id}>
