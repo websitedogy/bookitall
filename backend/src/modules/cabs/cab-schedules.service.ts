@@ -68,14 +68,18 @@ export class CabSchedulesService {
     );
   }
 
-  async listOpen() {
-    const rows = await this.schedules
+  async listOpen(partnerId?: string) {
+    const query = this.schedules
       .createQueryBuilder('schedule')
       .leftJoinAndSelect('schedule.vehicle', 'vehicle')
       .where('schedule.status = :status', { status: 'OPEN' })
       .andWhere('schedule.departureAt > :now', { now: new Date() })
       .andWhere('vehicle.isActive = true')
-      .andWhere('vehicle.deletedAt IS NULL')
+      .andWhere('vehicle.deletedAt IS NULL');
+    if (partnerId) {
+      query.andWhere('schedule.partnerId = :partnerId', { partnerId });
+    }
+    const rows = await query
       .orderBy('schedule.departureAt', 'ASC')
       .take(100)
       .getMany();

@@ -23,9 +23,9 @@ export class CabsController {
 
   @Public()
   @Get('schedules')
-  async listSchedules() {
+  async listSchedules(@Query('partnerId') partnerId?: string) {
     if (!(await this.platformServices.isEnabled('cabs'))) return [];
-    return this.schedules.listOpen();
+    return this.schedules.listOpen(partnerId);
   }
 
   @Get('schedules/mine')

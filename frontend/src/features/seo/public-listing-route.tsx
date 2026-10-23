@@ -18,6 +18,7 @@ function asDetail(listing: NonNullable<Awaited<ReturnType<typeof getVendorListin
     location: listing.location,
     image: listing.image,
     status: listing.status || "ACCEPTED",
+    partnerId: listing.partnerId,
     mobileNumber: listing.mobileNumber,
     photoUrls: listing.photoUrls,
     description: listing.description,

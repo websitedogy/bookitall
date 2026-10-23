@@ -26,6 +26,7 @@ export type ListingDetail = {
   location: string;
   image: string;
   status: string;
+  partnerId?: string;
   mobileNumber?: string | null;
   photoUrls?: string[];
   description?: string;
@@ -260,6 +261,17 @@ export function ListingDetailView({ id, initial }: { id: string; initial?: Listi
                 ? "This is your post. Nearby customers can book it."
                 : "This is your post. Customers see it after admin accepts."}
             </p>
+          ) : null}
+          {listing.categoryId === "cabs" && listing.partnerId && !listing.isOwner ? (
+            <Link
+              href={`/cabs/scheduled?${new URLSearchParams({
+                partnerId: listing.partnerId,
+                vendor: listing.vendor || listing.title,
+              }).toString()}`}
+              className="mb-4 flex min-h-12 items-center justify-center rounded-full bg-[#0f7d6e] px-5 text-sm font-semibold text-white transition hover:bg-[#0d6d60]"
+            >
+              Schedule Cab
+            </Link>
           ) : null}
           <ListingBookingCard listing={{ ...listing, rooms: bookableRooms(listing), extraGuestCharge: extraGuestAmount(listing) }} />
         </ListingInfoTabs>

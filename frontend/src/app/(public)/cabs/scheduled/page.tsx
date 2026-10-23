@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: "Find and request seats on cab trips scheduled by vendors.",
 };
 
-export default function ScheduledCabTripsPage() {
-  return <ScheduledCabTrips />;
+export default async function ScheduledCabTripsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ partnerId?: string; vendor?: string }>;
+}) {
+  const { partnerId, vendor } = await searchParams;
+  return <ScheduledCabTrips partnerId={partnerId} vendor={vendor} />;
 }

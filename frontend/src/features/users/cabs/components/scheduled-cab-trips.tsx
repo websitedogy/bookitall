@@ -31,10 +31,14 @@ function dateTime(value: string) {
   return new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
-export function ScheduledCabTrips() {
+export function ScheduledCabTrips({ partnerId, vendor }: { partnerId?: string; vendor?: string }) {
   const token = useAuth((state) => state.accessToken);
   const user = useAuth((state) => state.user);
   const router = useRouter();
+  const schedulePath = partnerId
+    ? `/cabs/scheduled?${new URLSearchParams({ partnerId, ...(vendor ? { vendor } : {}) }).toString()}`
+    : "/cabs/scheduled";
+  const schedulesApiPath = partnerId ? `/cabs/schedules?${new URLSearchParams({ partnerId }).toString()}` : "/cabs/schedules";
   const [trips, setTrips] = useState<TripSchedule[]>([]);
   const [requests, setRequests] = useState<TripRequest[]>([]);
   const [seatCounts, setSeatCounts] = useState<Record<string, number>>({});
@@ -47,7 +51,7 @@ export function ScheduledCabTrips() {
       token && user?.role === "CUSTOMER"
         ? api<TripRequest[]>("/cabs/schedule-requests/mine", { token })
         : Promise.resolve({ data: [] as TripRequest[] });
-    void Promise.all([api<TripSchedule[]>("/cabs/schedules"), loadRequests]).then(([tripResult, requestResult]) => {
+    void Promise.all([api<TripSchedule[]>(schedulesApiPath), loadRequests]).then(([tripResult, requestResult]) => {
       if (!active) return;
       setTrips(tripResult.data ?? []);
       setRequests(requestResult.data ?? []);
@@ -57,10 +61,10 @@ export function ScheduledCabTrips() {
     return () => {
       active = false;
     };
-  }, [token, user?.role]);
+  }, [schedulesApiPath, token, user?.role]);
 
   async function refresh() {
-    const result = await api<TripSchedule[]>("/cabs/schedules");
+    const result = await api<TripSchedule[]>(schedulesApiPath);
     setTrips(result.data ?? []);
     if (token && user?.role === "CUSTOMER") {
       const mine = await api<TripRequest[]>("/cabs/schedule-requests/mine", { token });
@@ -70,7 +74,7 @@ export function ScheduledCabTrips() {
 
   async function requestSeats(trip: TripSchedule) {
     if (!token || user?.role !== "CUSTOMER") {
-      router.push("/login?next=/cabs/scheduled");
+      router.push(`/login?next=${encodeURIComponent(schedulePath)}`);
       return;
     }
     const seatsRequested = seatCounts[trip.id] ?? 1;
@@ -94,9 +98,13 @@ export function ScheduledCabTrips() {
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
       <Link href="/cabs" className="text-sm font-semibold text-[#0f7d6e]">← Cab booking</Link>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#0f7d6e]">Shared scheduled trips</p>
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#12241f]">Find a cab already going your way</h1>
+      <h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#12241f]">
+        {partnerId ? `Scheduled trips${vendor ? ` by ${vendor}` : " from this cab vendor"}` : "Find a cab already going your way"}
+      </h1>
       <p className="mt-2 text-sm text-[#5b6e68]">
-        Request the seats you need. The cab vendor will confirm or decline your request.
+        {partnerId
+          ? "See the route, departure time, and available seats for this vendor's trips."
+          : "Request the seats you need. The cab vendor will confirm or decline your request."}
       </p>
 
       {error ? <p role="alert" className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
@@ -148,7 +156,9 @@ export function ScheduledCabTrips() {
           );
         })}
         {!trips.length ? (
-          <p className="rounded-2xl bg-[#f3faf7] px-5 py-6 text-sm text-[#5b6e68]">No future cab trips are posted right now. Check back soon.</p>
+          <p className="rounded-2xl bg-[#f3faf7] px-5 py-6 text-sm text-[#5b6e68]">
+            {partnerId ? "This cab vendor has no future trips posted right now." : "No future cab trips are posted right now. Check back soon."}
+          </p>
         ) : null}
       </section>
 
