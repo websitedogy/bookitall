@@ -552,7 +552,7 @@ export class WalletService implements OnModuleInit {
     return { creditPoints: wallet?.creditPoints ?? 0, data };
   }
 
-  private serviceTypeForBooking(type: BookingType, details: Record<string, unknown>) {
+  serviceTypeForBooking(type: BookingType, details: Record<string, unknown>) {
     if (type === BookingType.HOTEL) {
       return VendorCreditService.HOTELS;
     }

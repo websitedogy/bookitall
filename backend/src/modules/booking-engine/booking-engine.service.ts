@@ -1009,7 +1009,15 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
           if (creditsPerOrder > 0) {
             const vendorId = current.partnerId ?? current.assigneeId;
             if (!vendorId) throw new BadRequestException('No vendor is assigned to this order.');
-            await this.wallet.debitCreditsForOrder(vendorId, creditsPerOrder, manager);
+            const serviceType = this.wallet.serviceTypeForBooking(current.type, current.details);
+            await this.wallet.debitCreditsForOrder(
+              vendorId,
+              creditsPerOrder,
+              manager,
+              serviceType,
+              current.id,
+              `Order ${current.bookingNumber}`,
+            );
             current.vendorCreditsCharged = creditsPerOrder;
           }
         }

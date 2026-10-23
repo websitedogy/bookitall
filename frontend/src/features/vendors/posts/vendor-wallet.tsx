@@ -17,14 +17,23 @@ type WalletInfo = {
   creditRates?: Partial<Record<string, number>>;
 };
 
-type WalletTx = {
+type CreditHistoryEvent = {
   id: string;
   type: "CREDIT" | "DEBIT";
-  reason: string;
-  amount: string;
-  balanceAfter: string;
+  source: "PURCHASE" | "ADMIN" | "SERVICE";
+  amount: number;
+  balanceAfter: number | null;
+  serviceType: string | null;
+  serviceName: string | null;
+  listingTitle?: string;
+  bookingNumber: string | null;
   note: string | null;
   createdAt: string;
+};
+
+type CreditHistory = {
+  creditPoints: number;
+  data: CreditHistoryEvent[];
 };
 
 type RazorpayCheckoutResponse = {
@@ -68,17 +77,19 @@ function loadRazorpayCheckout() {
   });
 }
 
-const REASON_LABELS: Record<string, string> = {
-  TOPUP: "Wallet top-up",
-  BOOKING_EARNING: "Booking earning",
-  COMMISSION: "Commission",
-  PAYOUT: "Payout",
-  REFUND: "Refund",
-  ADJUSTMENT: "Adjustment",
-};
+function serviceLabel(serviceType: string | null) {
+  if (!serviceType) return "Service";
+  return serviceType
+    .replaceAll("-", " ")
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
-function reasonLabel(reason: string) {
-  return REASON_LABELS[reason] ?? reason.replaceAll("_", " ").toLowerCase();
+function creditEventTitle(row: CreditHistoryEvent) {
+  if (row.source === "PURCHASE") return "Credits added";
+  if (row.source === "ADMIN") return row.type === "CREDIT" ? "Credits added by admin" : "Admin credit adjustment";
+  return `Credits used · ${row.listingTitle || row.serviceName || serviceLabel(row.serviceType)}`;
 }
 
 export function VendorWallet() {
@@ -302,22 +313,19 @@ export function VendorWallet() {
 
 export function VendorWalletHistory() {
   const token = useAuth((s) => s.accessToken);
-  const [rows, setRows] = useState<WalletTx[]>([]);
-  const [wallet, setWallet] = useState<WalletInfo | null>(null);
+  const [rows, setRows] = useState<CreditHistoryEvent[]>([]);
+  const [creditPoints, setCreditPoints] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!token) return;
     let live = true;
-    Promise.all([
-      api<WalletTx[]>("/wallet/transactions?limit=50", { token }),
-      api<WalletInfo>("/wallet", { token }),
-    ])
-      .then(([transactions, walletResult]) => {
+    api<CreditHistory>("/wallet/credits/history", { token })
+      .then((result) => {
         if (!live) return;
-        setRows(transactions.data ?? []);
-        setWallet(walletResult.data ?? null);
+        setRows(result.data?.data ?? []);
+        setCreditPoints(result.data?.creditPoints ?? null);
       })
       .catch(() => {
         if (live) setError("Could not load wallet history");
@@ -334,19 +342,17 @@ export function VendorWalletHistory() {
     <div className="px-1 pb-6">
       <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
         <History className="h-3.5 w-3.5" aria-hidden />
-        Wallet history
+        Credits history
       </p>
       <section className="mt-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
         <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-          <Wallet className="h-3.5 w-3.5" aria-hidden />
-          Wallet balance (₹)
+          <Coins className="h-3.5 w-3.5" aria-hidden />
+          Credit balance
         </p>
-        <p className="mt-2 text-3xl font-semibold tracking-tight">{wallet ? inr(wallet.availableBalance) : "—"}</p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
-          {Number(wallet?.pendingBalance ?? 0) > 0
-            ? `${inr(wallet?.pendingBalance ?? 0)} pending from bookings`
-            : "Wallet earnings and adjustments appear in the history below."}
+        <p className="mt-2 text-3xl font-semibold tracking-tight">
+          {creditPoints == null ? "—" : creditPoints.toLocaleString("en-IN")}
         </p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">Credit purchases, admin additions, and service deductions appear below.</p>
       </section>
       <div className="mt-4 overflow-hidden rounded-[1.5rem] bg-white ring-1 ring-[var(--border)]">
         {loading ? (
@@ -354,22 +360,35 @@ export function VendorWalletHistory() {
         ) : error ? (
           <p className="px-5 py-8 text-sm text-rose-600">{error}</p>
         ) : rows.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-[var(--text-muted)]">No wallet transactions yet.</p>
+          <p className="px-5 py-8 text-sm text-[var(--text-muted)]">No credit activity yet.</p>
         ) : (
           <ul className="divide-y divide-[var(--border)]">
             {rows.map((row) => (
               <li key={row.id} className="flex items-start justify-between gap-3 px-5 py-3.5">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{reasonLabel(row.reason)}</p>
+                  <p className="truncate text-sm font-medium">{creditEventTitle(row)}</p>
                   <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                    {row.note ? `${row.note} · ` : ""}
+                    {[
+                      row.bookingNumber ? `Booking ${row.bookingNumber}` : "",
+                      row.source === "SERVICE" ? serviceLabel(row.serviceType) : row.note ?? "",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    {[
+                      row.bookingNumber,
+                      row.source === "SERVICE" ? serviceLabel(row.serviceType) : row.note,
+                    ].some(Boolean) ? " · " : ""}
                     {new Date(row.createdAt).toLocaleString("en-IN")}
                   </p>
-                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">Balance {inr(row.balanceAfter)}</p>
+                  {row.balanceAfter != null ? (
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                      Balance {row.balanceAfter.toLocaleString("en-IN")} credits
+                    </p>
+                  ) : null}
                 </div>
                 <p className={cn("shrink-0 text-sm font-semibold", row.type === "CREDIT" ? "text-emerald-700" : "text-rose-600")}>
                   {row.type === "CREDIT" ? "+" : "−"}
-                  {inr(row.amount)}
+                  {row.amount.toLocaleString("en-IN")} credits
                 </p>
               </li>
             ))}
