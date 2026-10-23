@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Coins, History, Wallet } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
 import { inr } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+
+const CREDIT_PRESETS = [500, 1000, 2000, 5000];
 
 type WalletInfo = {
   availableBalance: string;
@@ -25,6 +27,47 @@ type WalletTx = {
   createdAt: string;
 };
 
+type RazorpayCheckoutResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+type RazorpayOptions = {
+  key: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill: { name?: string; email?: string; contact?: string };
+  handler: (response: RazorpayCheckoutResponse) => void;
+  modal: { ondismiss: () => void };
+};
+
+type RazorpayCheckout = {
+  open: () => void;
+  on: (event: "payment.failed", handler: (response: { error?: { description?: string } }) => void) => void;
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayCheckout;
+  }
+}
+
+function loadRazorpayCheckout() {
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => (window.Razorpay ? resolve() : reject(new Error("Razorpay checkout did not load.")));
+    script.onerror = () => reject(new Error("Could not load Razorpay checkout. Check your connection and try again."));
+    document.head.appendChild(script);
+  });
+}
+
 const REASON_LABELS: Record<string, string> = {
   TOPUP: "Wallet top-up",
   BOOKING_EARNING: "Booking earning",
@@ -40,9 +83,14 @@ function reasonLabel(reason: string) {
 
 export function VendorWallet() {
   const token = useAuth((s) => s.accessToken);
+  const user = useAuth((s) => s.user);
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [walletError, setWalletError] = useState("");
+  const [creditsToAdd, setCreditsToAdd] = useState("");
+  const [purchaseBusy, setPurchaseBusy] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
+  const [purchaseNotice, setPurchaseNotice] = useState("");
 
   const refreshWallet = useCallback(async () => {
     if (!token) return;
@@ -90,7 +138,7 @@ export function VendorWallet() {
           {loading ? "…" : wallet ? wallet.creditPoints.toLocaleString("en-IN") : "—"}
         </p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Admin-assigned credits are deducted when an order is completed. The rate depends on the service type.
+          Credits are deducted when an order is completed. Admin-assigned and purchased credits share this balance.
         </p>
         {walletError ? (
           <div className="mt-2 flex items-center justify-between gap-3">
@@ -105,6 +153,59 @@ export function VendorWallet() {
           </div>
         ) : null}
       </section>
+
+      <form onSubmit={(event) => void purchaseCredits(event)} className="mt-4 space-y-4 rounded-[1.5rem] bg-white p-5 ring-1 ring-[var(--border)]">
+        <label className="block">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Add credits</span>
+          <input
+            required
+            type="number"
+            min={100}
+            max={20000}
+            step={1}
+            value={creditsToAdd}
+            onChange={(event) => {
+              setCreditsToAdd(event.target.value);
+              setPurchaseError("");
+              setPurchaseNotice("");
+            }}
+            placeholder="Enter 100 – 20,000 credits"
+            className="mt-1.5 h-11 w-full rounded-2xl bg-white px-3 text-sm outline-none ring-1 ring-[var(--border)] focus:ring-[var(--primary)]"
+          />
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {CREDIT_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              disabled={purchaseBusy}
+              onClick={() => {
+                setCreditsToAdd(String(preset));
+                setPurchaseError("");
+                setPurchaseNotice("");
+              }}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-semibold ring-1 disabled:opacity-60",
+                creditsToAdd === String(preset)
+                  ? "bg-[var(--primary)] text-white ring-[var(--primary)]"
+                  : "bg-white text-[var(--text)] ring-[var(--border)]",
+              )}
+            >
+              {preset.toLocaleString("en-IN")} credits
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-[var(--text-muted)]">1 credit = ₹1. Payment is securely processed by Razorpay.</p>
+        {purchaseError ? <p role="alert" className="text-sm text-rose-600">{purchaseError}</p> : null}
+        {purchaseNotice ? <p role="status" className="text-sm text-emerald-700">{purchaseNotice}</p> : null}
+        <button
+          type="submit"
+          disabled={purchaseBusy || !creditsToAdd}
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-60"
+        >
+          {purchaseBusy ? "Processing…" : "Add credits"}
+        </button>
+      </form>
     </div>
   );
 }
@@ -138,6 +239,95 @@ export function VendorWalletHistory() {
       live = false;
     };
   }, [token]);
+
+  async function purchaseCredits(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || purchaseBusy) return;
+    const credits = Number(creditsToAdd);
+    if (!Number.isInteger(credits) || credits < 100 || credits > 20000) {
+      setPurchaseError("Choose between 100 and 20,000 credits.");
+      setPurchaseNotice("");
+      return;
+    }
+
+    setPurchaseBusy(true);
+    setPurchaseError("");
+    setPurchaseNotice("");
+    try {
+      const orderResult = await api<{
+        keyId: string;
+        orderId: string;
+        amount: number;
+        currency: string;
+        credits: number;
+      }>("/wallet/credits/purchase-order", {
+        method: "POST",
+        token,
+        body: JSON.stringify({ credits }),
+      });
+      if (!orderResult.data?.keyId || !orderResult.data.orderId) {
+        throw new Error("Could not start the credit purchase. Please try again.");
+      }
+      await loadRazorpayCheckout();
+      if (!window.Razorpay) throw new Error("Razorpay checkout is unavailable.");
+
+      const checkout = new window.Razorpay({
+        key: orderResult.data.keyId,
+        order_id: orderResult.data.orderId,
+        amount: orderResult.data.amount,
+        currency: orderResult.data.currency,
+        name: "Book It All",
+        description: `${orderResult.data.credits.toLocaleString("en-IN")} credits`,
+        prefill: {
+          name: user?.fullName,
+          email: user?.email ?? undefined,
+          contact: user?.phone,
+        },
+        handler: (response) => {
+          void (async () => {
+            try {
+              const verification = await api<{ creditPoints: number; creditsAdded: number }>(
+                "/wallet/credits/verify-purchase",
+                {
+                  method: "POST",
+                  token,
+                  body: JSON.stringify(response),
+                },
+              );
+              if (!verification.data) throw new Error("Payment verification returned no credit balance.");
+              setWallet((current) => current ? { ...current, creditPoints: verification.data.creditPoints } : current);
+              setCreditsToAdd("");
+              setPurchaseNotice(
+                verification.data.creditsAdded > 0
+                  ? `${verification.data.creditsAdded.toLocaleString("en-IN")} credits added.`
+                  : "Payment verified. These credits were already added to your balance.",
+              );
+            } catch (cause) {
+              setPurchaseError(
+                cause instanceof Error
+                  ? cause.message
+                  : "Payment completed, but credits could not be verified. Contact support before paying again.",
+              );
+            } finally {
+              setPurchaseBusy(false);
+              void refreshWallet();
+            }
+          })();
+        },
+        modal: {
+          ondismiss: () => setPurchaseBusy(false),
+        },
+      });
+      checkout.on("payment.failed", (response) => {
+        setPurchaseError(response.error?.description ?? "Payment failed. No credits were added.");
+        setPurchaseBusy(false);
+      });
+      checkout.open();
+    } catch (cause) {
+      setPurchaseError(cause instanceof Error ? cause.message : "Could not start the credit purchase.");
+      setPurchaseBusy(false);
+    }
+  }
 
   return (
     <div className="px-1 pb-6">

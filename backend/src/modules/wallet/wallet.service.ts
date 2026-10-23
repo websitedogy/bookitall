@@ -175,6 +175,14 @@ export class WalletService implements OnModuleInit {
         },
       );
     }
+    if (
+      payment.id !== paymentId ||
+      payment.order_id !== orderId ||
+      payment.amount !== purchase.amountInPaise ||
+      payment.currency !== 'INR'
+    ) {
+      throw new BadRequestException('Captured payment does not match this credit purchase.');
+    }
     if (payment.status !== 'captured') {
       throw new BadRequestException('Payment has not been captured. Credits have not been added.');
     }
@@ -191,8 +199,9 @@ export class WalletService implements OnModuleInit {
         if (lockedPurchase.razorpayPaymentId !== paymentId) {
           throw new ConflictException('This purchase has already been verified with another payment.');
         }
+        const existingWallet = await walletRepo.findOne({ where: { user: { id: userId } } });
         return {
-          creditPoints: await this.getCreditPoints(userId),
+          creditPoints: existingWallet?.creditPoints ?? 0,
           creditsAdded: 0,
         };
       }
