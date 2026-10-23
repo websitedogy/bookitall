@@ -8,10 +8,9 @@ import { CabTripRequest } from '../../modules/cabs/entities/cab-trip-request.ent
 import { HomeService } from '../../modules/home-services/entities/home-service.entity';
 import { Booking, BookingStatusHistory } from '../../modules/booking-engine/entities/booking.entity';
 import { Payment } from '../../modules/payments/entities/payment.entity';
-import { Wallet, WalletTransaction } from '../../modules/wallet/entities/wallet.entity';
+import { VendorCreditTransaction, Wallet, WalletTransaction } from '../../modules/wallet/entities/wallet.entity';
 import { VendorCreditSetting } from '../../modules/wallet/entities/vendor-credit-setting.entity';
 import { VendorCreditPurchase } from '../../modules/wallet/entities/vendor-credit-purchase.entity';
-import { VendorCreditTransaction } from '../../modules/wallet/entities/vendor-credit-transaction.entity';
 import { CommissionLedger, CommissionRule } from '../../modules/commission/entities/commission.entity';
 import { Payout } from '../../modules/payout/entities/payout.entity';
 import { LocationPing } from '../../modules/gps/entities/location-ping.entity';

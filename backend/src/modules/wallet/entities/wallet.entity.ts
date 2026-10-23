@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { WalletTransactionReason, WalletTransactionType } from '../../../common/enums/finance.enum';
 import { User } from '../../users/entities/user.entity';
@@ -45,6 +45,35 @@ export class WalletTransaction extends BaseEntity {
 
   @Column({ type: 'uuid', nullable: true })
   bookingId!: string | null;
+
+  @Column({ type: 'varchar', length: 240, nullable: true })
+  note!: string | null;
+}
+
+@Entity({ name: 'vendor_credit_transactions' })
+export class VendorCreditTransaction extends BaseEntity {
+  @Index()
+  @Column({ type: 'uuid' })
+  userId!: string;
+
+  @Column({ type: 'varchar', length: 8 })
+  type!: 'CREDIT' | 'DEBIT';
+
+  @Column({ type: 'varchar', length: 16 })
+  source!: 'ADMIN' | 'SERVICE';
+
+  @Column({ type: 'integer' })
+  amount!: number;
+
+  @Column({ type: 'integer' })
+  balanceAfter!: number;
+
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  bookingId!: string | null;
+
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  serviceType!: string | null;
 
   @Column({ type: 'varchar', length: 240, nullable: true })
   note!: string | null;
