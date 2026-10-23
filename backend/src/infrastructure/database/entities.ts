@@ -10,6 +10,7 @@ import { Booking, BookingStatusHistory } from '../../modules/booking-engine/enti
 import { Payment } from '../../modules/payments/entities/payment.entity';
 import { Wallet, WalletTransaction } from '../../modules/wallet/entities/wallet.entity';
 import { VendorCreditSetting } from '../../modules/wallet/entities/vendor-credit-setting.entity';
+import { VendorCreditPurchase } from '../../modules/wallet/entities/vendor-credit-purchase.entity';
 import { CommissionLedger, CommissionRule } from '../../modules/commission/entities/commission.entity';
 import { Payout } from '../../modules/payout/entities/payout.entity';
 import { LocationPing } from '../../modules/gps/entities/location-ping.entity';
@@ -37,6 +38,7 @@ export const ALL_ENTITIES = [
   Wallet,
   WalletTransaction,
   VendorCreditSetting,
+  VendorCreditPurchase,
   CommissionRule,
   CommissionLedger,
   Payout,

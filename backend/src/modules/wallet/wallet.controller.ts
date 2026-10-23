@@ -1,7 +1,13 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PaginationDto, paginateMeta } from '../../common/dto/pagination.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/enums/user-role.enum';
+import {
+  CreateVendorCreditPurchaseDto,
+  VerifyVendorCreditPurchaseDto,
+} from './dto/vendor-credit-purchase.dto';
 
 @Controller('wallet')
 export class WalletController {
@@ -15,6 +21,24 @@ export class WalletController {
       this.wallet.creditRates(),
     ]);
     return { ...wallet, creditsPerOrder, creditRates };
+  }
+
+  @Post('credits/purchase-order')
+  @Roles(UserRole.PARTNER, UserRole.DRIVER, UserRole.TECHNICIAN)
+  createCreditPurchaseOrder(
+    @CurrentUser('id') userId: string,
+    @Body() dto: CreateVendorCreditPurchaseDto,
+  ) {
+    return this.wallet.createCreditPurchaseOrder(userId, dto.credits);
+  }
+
+  @Post('credits/verify-purchase')
+  @Roles(UserRole.PARTNER, UserRole.DRIVER, UserRole.TECHNICIAN)
+  verifyCreditPurchase(
+    @CurrentUser('id') userId: string,
+    @Body() dto: VerifyVendorCreditPurchaseDto,
+  ) {
+    return this.wallet.verifyCreditPurchase(userId, dto);
   }
 
   @Get('transactions')
