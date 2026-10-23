@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CabsService, QuoteCabDto, SearchCabDto, UpsertVehicleDto } from './cabs.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -52,10 +52,8 @@ export class CabsController {
   }
 
   @Get('schedule-requests/mine')
-  listMyRequests(@CurrentUser('id') userId: string, @CurrentUser('role') role: string) {
-    if (role !== UserRole.CUSTOMER) {
-      return [];
-    }
+  @Roles(UserRole.CUSTOMER)
+  listMyRequests(@CurrentUser('id') userId: string) {
     return this.schedules.listCustomerRequests(userId);
   }
 
