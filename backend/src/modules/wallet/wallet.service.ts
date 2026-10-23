@@ -247,14 +247,6 @@ export class WalletService implements OnModuleInit {
     return this.mutate(userId, amount, 'available', WalletTransactionType.CREDIT, reason, bookingId, note);
   }
 
-  async topUp(userId: string, amount: number) {
-    const value = Number(amount);
-    if (!Number.isFinite(value) || value < 100 || value > 20000) {
-      throw new BadRequestException('Add between ₹100 and ₹20,000');
-    }
-    return this.creditAvailable(userId, Number(value.toFixed(2)), WalletTransactionReason.TOPUP, 'Wallet top-up');
-  }
-
   private async mutate(
     userId: string,
     amount: number,

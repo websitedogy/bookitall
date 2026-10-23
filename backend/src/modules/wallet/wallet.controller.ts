@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PaginationDto, paginateMeta } from '../../common/dto/pagination.dto';
-import { WalletTopUpDto } from './dto/wallet.dto';
 
 @Controller('wallet')
 export class WalletController {
@@ -16,11 +15,6 @@ export class WalletController {
       this.wallet.creditRates(),
     ]);
     return { ...wallet, creditsPerOrder, creditRates };
-  }
-
-  @Post('topup')
-  topUp(@CurrentUser('id') userId: string, @Body() dto: WalletTopUpDto) {
-    return this.wallet.topUp(userId, dto.amount);
   }
 
   @Get('transactions')

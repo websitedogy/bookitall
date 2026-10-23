@@ -48,7 +48,6 @@ export function CheckoutPage() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [topupBusy, setTopupBusy] = useState(false);
 
   const hotelCheckout = items.length > 0 && items.every((item) => item.categoryId === "hotels");
   const payMethods = hotelCheckout
@@ -123,24 +122,6 @@ export function CheckoutPage() {
   function setMethod(method: PayMethod) {
     setDraft((prev) => ({ ...prev, method }));
     setError("");
-  }
-
-  async function addMoney(amount: number) {
-    if (!token) return;
-    setTopupBusy(true);
-    setError("");
-    try {
-      const res = await api<WalletInfo>("/wallet/topup", {
-        method: "POST",
-        token,
-        body: JSON.stringify({ amount }),
-      });
-      if (res.data) setWallet(res.data);
-    } catch (err) {
-      setError(err instanceof ApiError || err instanceof Error ? err.message : "Could not add money");
-    } finally {
-      setTopupBusy(false);
-    }
   }
 
   async function onSubmit(event: FormEvent) {
@@ -305,19 +286,11 @@ export function CheckoutPage() {
           {draft.method === "WALLET" ? (
             <div className="mt-4 rounded-2xl bg-[var(--background-blue)] px-3 py-3">
               <p className="text-sm font-medium">Balance {inr(walletBalance)}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[500, 1000, 2000, 5000].map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    disabled={topupBusy}
-                    onClick={() => void addMoney(amount)}
-                    className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold ring-1 ring-[var(--border)] disabled:opacity-60"
-                  >
-                    Add {inr(amount)}
-                  </button>
-                ))}
-              </div>
+              {walletBalance < totals.total ? (
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                  Your wallet balance is not enough for this booking. Choose another payment method.
+                </p>
+              ) : null}
             </div>
           ) : null}
         </section>

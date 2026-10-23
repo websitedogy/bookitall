@@ -30,7 +30,7 @@ export function VendorPostsPage() {
                 Credits
               </TabButton>
               <TabButton active={tab === "history"} onClick={() => setTab("history")}>
-                Wallet History
+                Wallet & History
               </TabButton>
             </div>
           ) : null

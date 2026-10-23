@@ -63,7 +63,7 @@ export function validatePaymentDraft(draft: PaymentDraft, walletBalance = 0, amo
   }
   if (draft.method === "NET_BANKING" && !draft.bankCode) return "Choose a bank";
   if (draft.method === "WALLET" && walletBalance + 0.001 < amount) {
-    return "Wallet balance is too low. Add money first.";
+    return "Wallet balance is too low. Choose another payment method.";
   }
   return null;
 }
