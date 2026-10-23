@@ -150,7 +150,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   }
 
   return (
-    <section className="mt-10 rounded-3xl bg-[var(--paper)] p-5 md:p-7">
+    <section id="scheduled-cab-trips" className="mt-10 scroll-mt-24 rounded-3xl bg-[var(--paper)] p-5 md:p-7">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--teal)]">Share your route</p>
         <h2 className="serif mt-1 text-3xl">Scheduled cab trips</h2>
