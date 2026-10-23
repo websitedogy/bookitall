@@ -199,12 +199,6 @@ body {
   }
 }
 
-@media (min-width: 768px) {
-  body {
-    background: #f4f7fb;
-  }
-}
-
 .native-app body,
 html.native-app {
   overscroll-behavior: none;
