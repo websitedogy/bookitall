@@ -182,7 +182,7 @@ export function LoginForm() {
   }
 
   return (
-    <section className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center bg-[var(--auth-ivory)] px-6 py-10 md:min-h-[calc(100dvh-4rem)]">
+    <section className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center bg-white px-6 py-10 md:min-h-[calc(100dvh-4rem)]">
       <div className="w-full max-w-[26rem]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--auth-brass)]">
             Book It All

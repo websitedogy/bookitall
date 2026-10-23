@@ -13,7 +13,7 @@ export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { he
           <h1 className="text-[17px] font-semibold tracking-tight">{heading}</h1>
         </header>
 
-        <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 overflow-y-auto bg-slate-50 p-3">
+        <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 overflow-y-auto bg-white p-3">
           {items.map((service, index) => (
             <li key={service.id}>
               <Link

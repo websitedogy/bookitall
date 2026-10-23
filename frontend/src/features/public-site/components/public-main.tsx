@@ -27,9 +27,9 @@ export function PublicMain({ children }: { children: React.ReactNode }) {
       id="main-content"
       className={
         isAuth
-          ? "min-h-[calc(100dvh-3.5rem)] bg-[var(--auth-ivory)] p-0 md:min-h-[calc(100dvh-4rem)]"
+          ? "min-h-[calc(100dvh-3.5rem)] bg-white p-0 md:min-h-[calc(100dvh-4rem)]"
           : isSupportChat
-            ? "h-[100dvh] overflow-hidden bg-[#efeae2] p-0 md:h-[calc(100dvh-4rem)] md:px-6 md:py-4"
+            ? "h-[100dvh] overflow-hidden bg-white p-0 md:h-[calc(100dvh-4rem)] md:px-6 md:py-4"
           : isProfessionals
           ? `min-h-[100dvh] bg-white p-0 ${pad} md:mx-auto md:min-h-[70vh] md:max-w-7xl md:bg-transparent md:px-8 md:py-8 md:pb-16`
           : fullBleed

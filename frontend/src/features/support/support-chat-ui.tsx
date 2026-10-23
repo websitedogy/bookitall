@@ -63,7 +63,7 @@ export function SupportInbox({
       : [chat?.phone, chat?.email].filter(Boolean).join(" · ");
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden rounded-none bg-[#efeae2] shadow-sm ring-0 md:rounded-3xl md:ring-1 md:ring-black/5">
+    <div className="flex h-full min-h-0 overflow-hidden rounded-none bg-white shadow-sm ring-0 md:rounded-3xl md:ring-1 md:ring-black/5">
       <aside
         className={cn(
           "flex w-full shrink-0 flex-col border-r border-black/5 bg-white md:w-[320px] lg:w-[360px]",
@@ -226,7 +226,7 @@ export function SupportInbox({
             )}
           </>
         ) : (
-          <div className="hidden flex-1 flex-col items-center justify-center bg-[#efeae2] text-center md:flex">
+          <div className="hidden flex-1 flex-col items-center justify-center bg-white text-center md:flex">
             <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#0f766e] text-white">
               <Headphones className="h-7 w-7" />
             </span>
