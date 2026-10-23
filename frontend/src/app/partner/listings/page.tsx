@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import type { HomeService, Hotel, Tour, Vehicle } from "@/shared/types/catalog";
+import { CabSchedulesManager } from "@/features/vendors/services/cab-schedules-manager";
 
 export default function PartnerListingsPage() {
   const token = useAuth((s) => s.accessToken);
@@ -26,6 +27,7 @@ export default function PartnerListingsPage() {
       <Section title="Hotels" items={hotels.map((h) => h.name)} />
       <Section title="Tours" items={tours.map((t) => t.name)} />
       <Section title="Vehicles" items={vehicles.map((v) => `${v.name} · ${v.category}`)} />
+      <CabSchedulesManager vehicles={vehicles} />
       <Section title="Home services" items={services.map((s) => s.name)} />
     </div>
   );
