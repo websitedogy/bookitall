@@ -16,12 +16,14 @@ import { BookingType } from '../../common/enums/booking.enum';
 import { VendorCreditService } from '../../common/enums/vendor-credit-service.enum';
 import { Wallet, WalletTransaction } from './entities/wallet.entity';
 import { VendorCreditSetting } from './entities/vendor-credit-setting.entity';
+import { VendorCreditTransaction } from './entities/vendor-credit-transaction.entity';
 import { WalletTransactionReason, WalletTransactionType } from '../../common/enums/finance.enum';
 import { User } from '../users/entities/user.entity';
 import { UserRole, UserStatus } from '../../common/enums/user-role.enum';
 import { VENDOR_LOW_CREDIT_THRESHOLD } from '../../common/constants/app.constants';
 import { VendorCreditPurchase } from './entities/vendor-credit-purchase.entity';
 import { VerifyVendorCreditPurchaseDto } from './dto/vendor-credit-purchase.dto';
+import { Booking } from '../booking-engine/entities/booking.entity';
 
 type RazorpayOrder = { id: string; amount: number; currency: string };
 type RazorpayPayment = {
@@ -42,6 +44,9 @@ export class WalletService implements OnModuleInit {
     @InjectRepository(WalletTransaction) private readonly txs: Repository<WalletTransaction>,
     @InjectRepository(VendorCreditSetting) private readonly creditSettings: Repository<VendorCreditSetting>,
     @InjectRepository(VendorCreditPurchase) private readonly creditPurchases: Repository<VendorCreditPurchase>,
+    @InjectRepository(VendorCreditTransaction)
+    private readonly creditTransactions: Repository<VendorCreditTransaction>,
+    @InjectRepository(Booking) private readonly bookings: Repository<Booking>,
     private readonly dataSource: DataSource,
     private readonly config: ConfigService,
   ) {}
@@ -78,6 +83,29 @@ export class WalletService implements OnModuleInit {
         );
         await this.dataSource.query(
           `CREATE INDEX IF NOT EXISTS idx_vendor_credit_purchases_user_id ON vendor_credit_purchases (user_id)`,
+        );
+        await this.dataSource.query(
+          `CREATE TABLE IF NOT EXISTS vendor_credit_transactions (
+            id uuid PRIMARY KEY,
+            user_id uuid NOT NULL,
+            type varchar(8) NOT NULL,
+            source varchar(16) NOT NULL,
+            amount integer NOT NULL,
+            balance_after integer NOT NULL,
+            booking_id uuid,
+            service_type varchar(40),
+            note varchar(240),
+            created_at timestamptz NOT NULL DEFAULT now(),
+            updated_at timestamptz NOT NULL DEFAULT now()
+          )`,
+        );
+        await this.dataSource.query(
+          `CREATE INDEX IF NOT EXISTS idx_vendor_credit_transactions_user_created
+           ON vendor_credit_transactions (user_id, created_at DESC)`,
+        );
+        await this.dataSource.query(
+          `CREATE INDEX IF NOT EXISTS idx_vendor_credit_transactions_booking
+           ON vendor_credit_transactions (booking_id)`,
         );
       })().catch((error: unknown) => {
         this.creditSchemaReady = undefined;
@@ -297,8 +325,21 @@ export class WalletService implements OnModuleInit {
           walletRepo.create({ user: { id: userId }, availableBalance: '0', pendingBalance: '0' }),
         );
       }
-      await walletRepo.increment({ id: wallet.id }, 'creditPoints', points);
-      return walletRepo.findOneByOrFail({ id: wallet.id });
+      wallet.creditPoints += points;
+      await walletRepo.save(wallet);
+      await manager.getRepository(VendorCreditTransaction).save(
+        manager.getRepository(VendorCreditTransaction).create({
+          userId,
+          type: 'CREDIT',
+          source: 'ADMIN',
+          amount: points,
+          balanceAfter: wallet.creditPoints,
+          bookingId: null,
+          serviceType: null,
+          note: 'Credits added by admin',
+        }),
+      );
+      return wallet;
     });
   }
 
@@ -315,8 +356,24 @@ export class WalletService implements OnModuleInit {
           walletRepo.create({ user: { id: userId }, availableBalance: '0', pendingBalance: '0' }),
         );
       }
+      const difference = points - wallet.creditPoints;
       wallet.creditPoints = points;
-      return walletRepo.save(wallet);
+      await walletRepo.save(wallet);
+      if (difference !== 0) {
+        await manager.getRepository(VendorCreditTransaction).save(
+          manager.getRepository(VendorCreditTransaction).create({
+            userId,
+            type: difference > 0 ? 'CREDIT' : 'DEBIT',
+            source: 'ADMIN',
+            amount: Math.abs(difference),
+            balanceAfter: wallet.creditPoints,
+            bookingId: null,
+            serviceType: null,
+            note: 'Credits adjusted by admin',
+          }),
+        );
+      }
+      return wallet;
     });
   }
 
@@ -351,7 +408,14 @@ export class WalletService implements OnModuleInit {
     return { serviceType, creditsPerOrder: points };
   }
 
-  async debitCreditsForOrder(userId: string, points: number, manager: EntityManager) {
+  async debitCreditsForOrder(
+    userId: string,
+    points: number,
+    manager: EntityManager,
+    serviceType: string,
+    bookingId: string,
+    note?: string,
+  ) {
     if (points <= 0) return;
     let wallet = await manager.getRepository(Wallet).findOne({
       where: { user: { id: userId } },
@@ -371,6 +435,18 @@ export class WalletService implements OnModuleInit {
     }
     wallet.creditPoints -= points;
     await manager.getRepository(Wallet).save(wallet);
+    await manager.getRepository(VendorCreditTransaction).save(
+      manager.getRepository(VendorCreditTransaction).create({
+        userId,
+        type: 'DEBIT',
+        source: 'SERVICE',
+        amount: points,
+        balanceAfter: wallet.creditPoints,
+        bookingId,
+        serviceType,
+        note: note ?? null,
+      }),
+    );
   }
 
   async creditsPerOrder(serviceType?: VendorCreditService, manager?: EntityManager) {
@@ -396,20 +472,111 @@ export class WalletService implements OnModuleInit {
   }
 
   async creditsPerOrderForBooking(type: BookingType, details: Record<string, unknown>, manager?: EntityManager) {
-    let serviceType: VendorCreditService;
-    if (type === BookingType.HOTEL) {
-      serviceType = VendorCreditService.HOTELS;
-    } else if (type === BookingType.TOUR) {
-      serviceType = VendorCreditService.TOURS;
-    } else if (type === BookingType.CAB) {
-      serviceType = VendorCreditService.CABS;
-    } else {
-      const rawCategory = details.category ?? details.listingCategory;
-      const category = typeof rawCategory === 'string' ? rawCategory.toLowerCase() : '';
-      const supportedService = Object.values(VendorCreditService).find((service) => service === category);
-      serviceType = supportedService ?? VendorCreditService.HOME_SERVICES;
-    }
+    const serviceType = this.serviceTypeForBooking(type, details);
     return this.creditsPerOrder(serviceType, manager);
+  }
+
+  async creditsHistory(userId: string) {
+    await this.ensureCreditSchema();
+    const [purchases, creditChanges, bookings, wallet] = await Promise.all([
+      this.creditPurchases.find({
+        where: { userId, status: 'PAID' },
+        order: { paidAt: 'DESC', createdAt: 'DESC' },
+        take: 100,
+      }),
+      this.creditTransactions.find({
+        where: { userId },
+        order: { createdAt: 'DESC' },
+        take: 100,
+      }),
+      this.bookings
+        .createQueryBuilder('booking')
+        .where('(booking.partnerId = :userId OR booking.assigneeId = :userId)', { userId })
+        .andWhere('booking.vendorCreditsCharged > 0')
+        .orderBy('COALESCE(booking.completedAt, booking.updatedAt)', 'DESC')
+        .take(100)
+        .getMany(),
+      this.wallets.findOne({ where: { user: { id: userId } }, select: { creditPoints: true } }),
+    ]);
+    const bookingById = new Map(bookings.map((booking) => [booking.id, booking]));
+    const recordedBookingIds = new Set(
+      creditChanges.filter((row) => row.source === 'SERVICE' && row.bookingId).map((row) => row.bookingId),
+    );
+    const data = [
+      ...purchases.map((purchase) => ({
+        id: purchase.id,
+        type: 'CREDIT' as const,
+        source: 'PURCHASE' as const,
+        amount: purchase.credits,
+        balanceAfter: null,
+        serviceType: null,
+        serviceName: null,
+        bookingNumber: null,
+        note: `Credit purchase · ${this.formatRupees(purchase.amountInPaise / 100)}`,
+        createdAt: purchase.paidAt ?? purchase.createdAt,
+      })),
+      ...creditChanges.map((row) => {
+        const booking = row.bookingId ? bookingById.get(row.bookingId) : undefined;
+        const details = booking?.details ?? {};
+        return {
+          id: row.id,
+          type: row.type,
+          source: row.source,
+          amount: row.amount,
+          balanceAfter: row.balanceAfter,
+          serviceType: row.serviceType,
+          serviceName: booking ? this.bookingServiceName(booking) : null,
+          bookingNumber: booking?.bookingNumber ?? null,
+          note: row.note,
+          createdAt: row.createdAt,
+          ...(details.listingTitle ? { listingTitle: String(details.listingTitle) } : {}),
+        };
+      }),
+      ...bookings
+        .filter((booking) => !recordedBookingIds.has(booking.id))
+        .map((booking) => ({
+          id: `booking-${booking.id}`,
+          type: 'DEBIT' as const,
+          source: 'SERVICE' as const,
+          amount: booking.vendorCreditsCharged,
+          balanceAfter: null,
+          serviceType: this.serviceTypeForBooking(booking.type, booking.details),
+          serviceName: this.bookingServiceName(booking),
+          bookingNumber: booking.bookingNumber,
+          note: null,
+          createdAt: booking.completedAt ?? booking.updatedAt,
+          listingTitle: booking.details.listingTitle ? String(booking.details.listingTitle) : undefined,
+        })),
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return { creditPoints: wallet?.creditPoints ?? 0, data };
+  }
+
+  private serviceTypeForBooking(type: BookingType, details: Record<string, unknown>) {
+    if (type === BookingType.HOTEL) {
+      return VendorCreditService.HOTELS;
+    }
+    if (type === BookingType.TOUR) return VendorCreditService.TOURS;
+    if (type === BookingType.CAB) return VendorCreditService.CABS;
+    const rawCategory = details.category ?? details.listingCategory;
+    const category = typeof rawCategory === 'string' ? rawCategory.toLowerCase() : '';
+    return Object.values(VendorCreditService).find((service) => service === category) ?? VendorCreditService.HOME_SERVICES;
+  }
+
+  private bookingServiceName(booking: Booking) {
+    const details = booking.details ?? {};
+    return String(
+      details.listingTitle ||
+        details.hotelName ||
+        details.tourName ||
+        details.serviceName ||
+        details.vehicleName ||
+        booking.type,
+    );
+  }
+
+  private formatRupees(amount: number) {
+    return `₹${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
   }
 
   async transactions(userId: string, page = 1, limit = 20) {

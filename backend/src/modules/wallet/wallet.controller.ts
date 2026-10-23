@@ -50,4 +50,9 @@ export class WalletController {
       meta: paginateMeta(query.page, query.limit, result.total),
     };
   }
+
+  @Get('credits/history')
+  creditsHistory(@CurrentUser('id') userId: string) {
+    return this.wallet.creditsHistory(userId);
+  }
 }
