@@ -266,7 +266,7 @@ export class WalletService implements OnModuleInit {
       const current = Number(bucket === 'available' ? wallet.availableBalance : wallet.pendingBalance);
       const next = type === WalletTransactionType.CREDIT ? current + amount : current - amount;
       if (next < -0.001) {
-        throw new BadRequestException('Wallet balance is too low. Add money or choose another method.');
+        throw new BadRequestException('Wallet balance is too low. Choose another payment method.');
       }
       if (bucket === 'available') {
         wallet.availableBalance = next.toFixed(2);
