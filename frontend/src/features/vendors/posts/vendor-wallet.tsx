@@ -125,6 +125,96 @@ export function VendorWallet() {
     };
   }, [token, refreshWallet]);
 
+  async function purchaseCredits(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token || purchaseBusy) return;
+    const credits = Number(creditsToAdd);
+    if (!Number.isInteger(credits) || credits < 100 || credits > 20000) {
+      setPurchaseError("Choose between 100 and 20,000 credits.");
+      setPurchaseNotice("");
+      return;
+    }
+
+    setPurchaseBusy(true);
+    setPurchaseError("");
+    setPurchaseNotice("");
+    try {
+      const orderResult = await api<{
+        keyId: string;
+        orderId: string;
+        amount: number;
+        currency: string;
+        credits: number;
+      }>("/wallet/credits/purchase-order", {
+        method: "POST",
+        token,
+        body: JSON.stringify({ credits }),
+      });
+      if (!orderResult.data?.keyId || !orderResult.data.orderId) {
+        throw new Error("Could not start the credit purchase. Please try again.");
+      }
+      await loadRazorpayCheckout();
+      if (!window.Razorpay) throw new Error("Razorpay checkout is unavailable.");
+
+      const checkout = new window.Razorpay({
+        key: orderResult.data.keyId,
+        order_id: orderResult.data.orderId,
+        amount: orderResult.data.amount,
+        currency: orderResult.data.currency,
+        name: "Book It All",
+        description: `${orderResult.data.credits.toLocaleString("en-IN")} credits`,
+        prefill: {
+          name: user?.fullName,
+          email: user?.email ?? undefined,
+          contact: user?.phone,
+        },
+        handler: (response) => {
+          void (async () => {
+            try {
+              const verification = await api<{ creditPoints: number; creditsAdded: number }>(
+                "/wallet/credits/verify-purchase",
+                {
+                  method: "POST",
+                  token,
+                  body: JSON.stringify(response),
+                },
+              );
+              const result = verification.data;
+              if (!result) throw new Error("Payment verification returned no credit balance.");
+              setWallet((current) => current ? { ...current, creditPoints: result.creditPoints } : current);
+              setCreditsToAdd("");
+              setPurchaseNotice(
+                result.creditsAdded > 0
+                  ? `${result.creditsAdded.toLocaleString("en-IN")} credits added.`
+                  : "Payment verified. These credits were already added to your balance.",
+              );
+            } catch (cause) {
+              setPurchaseError(
+                cause instanceof Error
+                  ? cause.message
+                  : "Payment completed, but credits could not be verified. Contact support before paying again.",
+              );
+            } finally {
+              setPurchaseBusy(false);
+              void refreshWallet();
+            }
+          })();
+        },
+        modal: {
+          ondismiss: () => setPurchaseBusy(false),
+        },
+      });
+      checkout.on("payment.failed", (response) => {
+        setPurchaseError(response.error?.description ?? "Payment failed. No credits were added.");
+        setPurchaseBusy(false);
+      });
+      checkout.open();
+    } catch (cause) {
+      setPurchaseError(cause instanceof Error ? cause.message : "Could not start the credit purchase.");
+      setPurchaseBusy(false);
+    }
+  }
+
   return (
     <div className="px-1 pb-6">
       <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
@@ -239,95 +329,6 @@ export function VendorWalletHistory() {
       live = false;
     };
   }, [token]);
-
-  async function purchaseCredits(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!token || purchaseBusy) return;
-    const credits = Number(creditsToAdd);
-    if (!Number.isInteger(credits) || credits < 100 || credits > 20000) {
-      setPurchaseError("Choose between 100 and 20,000 credits.");
-      setPurchaseNotice("");
-      return;
-    }
-
-    setPurchaseBusy(true);
-    setPurchaseError("");
-    setPurchaseNotice("");
-    try {
-      const orderResult = await api<{
-        keyId: string;
-        orderId: string;
-        amount: number;
-        currency: string;
-        credits: number;
-      }>("/wallet/credits/purchase-order", {
-        method: "POST",
-        token,
-        body: JSON.stringify({ credits }),
-      });
-      if (!orderResult.data?.keyId || !orderResult.data.orderId) {
-        throw new Error("Could not start the credit purchase. Please try again.");
-      }
-      await loadRazorpayCheckout();
-      if (!window.Razorpay) throw new Error("Razorpay checkout is unavailable.");
-
-      const checkout = new window.Razorpay({
-        key: orderResult.data.keyId,
-        order_id: orderResult.data.orderId,
-        amount: orderResult.data.amount,
-        currency: orderResult.data.currency,
-        name: "Book It All",
-        description: `${orderResult.data.credits.toLocaleString("en-IN")} credits`,
-        prefill: {
-          name: user?.fullName,
-          email: user?.email ?? undefined,
-          contact: user?.phone,
-        },
-        handler: (response) => {
-          void (async () => {
-            try {
-              const verification = await api<{ creditPoints: number; creditsAdded: number }>(
-                "/wallet/credits/verify-purchase",
-                {
-                  method: "POST",
-                  token,
-                  body: JSON.stringify(response),
-                },
-              );
-              if (!verification.data) throw new Error("Payment verification returned no credit balance.");
-              setWallet((current) => current ? { ...current, creditPoints: verification.data.creditPoints } : current);
-              setCreditsToAdd("");
-              setPurchaseNotice(
-                verification.data.creditsAdded > 0
-                  ? `${verification.data.creditsAdded.toLocaleString("en-IN")} credits added.`
-                  : "Payment verified. These credits were already added to your balance.",
-              );
-            } catch (cause) {
-              setPurchaseError(
-                cause instanceof Error
-                  ? cause.message
-                  : "Payment completed, but credits could not be verified. Contact support before paying again.",
-              );
-            } finally {
-              setPurchaseBusy(false);
-              void refreshWallet();
-            }
-          })();
-        },
-        modal: {
-          ondismiss: () => setPurchaseBusy(false),
-        },
-      });
-      checkout.on("payment.failed", (response) => {
-        setPurchaseError(response.error?.description ?? "Payment failed. No credits were added.");
-        setPurchaseBusy(false);
-      });
-      checkout.open();
-    } catch (cause) {
-      setPurchaseError(cause instanceof Error ? cause.message : "Could not start the credit purchase.");
-      setPurchaseBusy(false);
-    }
-  }
 
   return (
     <div className="px-1 pb-6">
