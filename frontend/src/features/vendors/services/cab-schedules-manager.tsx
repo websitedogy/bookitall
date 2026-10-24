@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Armchair, ArrowRight, CalendarClock, CarFront, Clock3, MapPin, Users } from "lucide-react";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
@@ -73,6 +74,11 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   }, [token]);
 
   const selectedVehicle = vehicles.find((vehicle) => vehicle.id === vehicleId) ?? vehicles[0];
+  const openSeats = schedules.reduce(
+    (total, schedule) => total + (schedule.status === "OPEN" ? schedule.seatsRemaining : 0),
+    0,
+  );
+  const pendingRequests = requests.filter((request) => request.status === "PENDING").length;
 
   async function refresh() {
     if (!token) return;
@@ -150,116 +156,216 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   }
 
   return (
-    <section id="scheduled-cab-trips" className="mt-10 scroll-mt-24 rounded-3xl bg-[var(--paper)] p-5 md:p-7">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--teal)]">Share your route</p>
-        <h2 className="serif mt-1 text-3xl">Scheduled cab trips</h2>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--ink-soft)]">
-          Going somewhere? Post your route and departure time. Travellers can request seats, and you decide which requests to accept.
-        </p>
-      </div>
-
-      {error ? <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-
-      {vehicles.length ? (
-        <form onSubmit={(event) => void createSchedule(event)} className="mt-5 grid gap-3 md:grid-cols-2">
-          <label className="text-sm font-medium">
-            Your vehicle
-            <select
-              required
-              value={selectedVehicle?.id ?? ""}
-              onChange={(event) => {
-                setVehicleId(event.target.value);
-                setSeatsOffered("1");
-              }}
-              className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3"
-            >
-              {vehicles.map((vehicle) => (
-                <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.category} · {vehicle.seats} seats</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm font-medium">
-            Departure
-            <input
-              required
-              type="datetime-local"
-              min={minimumDeparture}
-              value={departureAt}
-              onChange={(event) => setDepartureAt(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3"
-            />
-          </label>
-          <label className="text-sm font-medium">
-            Starting place
-            <input required minLength={2} maxLength={160} value={fromPlace} onChange={(event) => setFromPlace(event.target.value)} className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3" placeholder="e.g. Hyderabad" />
-          </label>
-          <label className="text-sm font-medium">
-            Going to
-            <input required minLength={2} maxLength={160} value={toPlace} onChange={(event) => setToPlace(event.target.value)} className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3" placeholder="e.g. Vijayawada" />
-          </label>
-          <label className="text-sm font-medium">
-            Seats available
-            <input required type="number" min={1} max={selectedVehicle?.seats ?? 1} value={seatsOffered} onChange={(event) => setSeatsOffered(event.target.value)} className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3" />
-          </label>
-          <label className="text-sm font-medium">
-            Price per seat (₹)
-            <input required type="number" min="1" max="100000" step="0.01" value={pricePerSeat} onChange={(event) => setPricePerSeat(event.target.value)} className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3" />
-          </label>
-          <label className="text-sm font-medium md:col-span-2">
-            Trip note (optional)
-            <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-1 w-full rounded-xl border border-black/10 bg-white px-3 py-3" placeholder="Pickup details or luggage information" />
-          </label>
-          <button disabled={busy} className="rounded-full bg-[var(--teal)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50 md:col-span-2">
-            {busy ? "Please wait…" : "Post scheduled trip"}
-          </button>
-        </form>
-      ) : (
-        <p className="mt-5 text-sm text-[var(--ink-soft)]">
-          Register a cab first to post a trip. <Link href="/vendors/services/cabs" className="font-semibold text-[var(--teal)]">Add a cab</Link>
-        </p>
-      )}
-
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold">Your trips</h3>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {schedules.map((schedule) => (
-            <article key={schedule.id} className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
-              <p className="font-semibold">{schedule.fromPlace} → {schedule.toPlace}</p>
-              <p className="mt-1 text-sm text-[var(--ink-soft)]">{dateTime(schedule.departureAt)} · {schedule.seatsRemaining}/{schedule.seatsOffered} seats left</p>
-              <p className="mt-1 text-sm">{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} per seat · {schedule.status.toLowerCase()}</p>
-              {schedule.status === "OPEN" ? (
-                <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="mt-3 text-sm font-semibold text-red-700 disabled:opacity-50">
-                  Cancel trip
-                </button>
-              ) : null}
-            </article>
-          ))}
-          {!schedules.length ? <p className="text-sm text-[var(--ink-soft)]">Your posted trips will appear here.</p> : null}
+    <section id="scheduled-cab-trips" className="mx-auto mt-12 max-w-6xl scroll-mt-24">
+      <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-[0_20px_55px_-42px_rgba(15,23,42,0.45)]">
+        <div className="bg-gradient-to-br from-[#0b5f59] via-[#0f766e] to-[#16877d] px-6 py-8 text-white sm:px-9 sm:py-10">
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+                <CarFront className="h-4 w-4" aria-hidden />
+                Share your route
+              </span>
+              <h2 className="serif mt-4 text-3xl font-semibold sm:text-4xl">Scheduled cab trips</h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-white/80">
+                Post an upcoming journey, offer spare seats, and manage traveller requests from one place.
+              </p>
+            </div>
+            <div className="grid min-w-60 grid-cols-3 gap-2 self-end sm:gap-3">
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
+                <p className="text-xl font-bold">{schedules.length}</p>
+                <p className="mt-1 text-[11px] leading-tight text-white/75">Trips posted</p>
+              </div>
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
+                <p className="text-xl font-bold">{openSeats}</p>
+                <p className="mt-1 text-[11px] leading-tight text-white/75">Open seats</p>
+              </div>
+              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
+                <p className="text-xl font-bold">{pendingRequests}</p>
+                <p className="mt-1 text-[11px] leading-tight text-white/75">New requests</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold">Seat requests</h3>
-        <div className="mt-3 grid gap-3">
-          {requests.map((request) => (
-            <article key={request.id} className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-8 p-5 sm:p-8">
+          {error ? (
+            <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
+
+          <div className="rounded-2xl border border-[var(--border)] bg-slate-50/70 p-5 sm:p-7">
+            <div className="mb-6 flex items-start gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
+                <CalendarClock className="h-5 w-5" aria-hidden />
+              </span>
+              <div>
+                <h3 className="text-lg font-semibold">Post a trip</h3>
+                <p className="mt-1 text-sm text-[var(--ink-soft)]">Add your route and travel details to let passengers reserve a seat.</p>
+              </div>
+            </div>
+
+            {vehicles.length ? (
+              <form onSubmit={(event) => void createSchedule(event)} className="grid gap-x-5 gap-y-4 md:grid-cols-2">
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Your vehicle
+                  <select
+                    required
+                    value={selectedVehicle?.id ?? ""}
+                    onChange={(event) => {
+                      setVehicleId(event.target.value);
+                      setSeatsOffered("1");
+                    }}
+                    className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]"
+                  >
+                    {vehicles.map((vehicle) => (
+                      <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.category} · {vehicle.seats} seats</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Departure date &amp; time
+                  <input
+                    required
+                    type="datetime-local"
+                    min={minimumDeparture}
+                    value={departureAt}
+                    onChange={(event) => setDepartureAt(event.target.value)}
+                    className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]"
+                  />
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Starting place
+                  <span className="relative mt-2 block">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-soft)]" aria-hidden />
+                    <input required minLength={2} maxLength={160} value={fromPlace} onChange={(event) => setFromPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="e.g. Hyderabad" />
+                  </span>
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Destination
+                  <span className="relative mt-2 block">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--primary)]" aria-hidden />
+                    <input required minLength={2} maxLength={160} value={toPlace} onChange={(event) => setToPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="e.g. Vijayawada" />
+                  </span>
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Seats to offer
+                  <span className="relative mt-2 block">
+                    <Armchair className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-soft)]" aria-hidden />
+                    <input required type="number" min={1} max={selectedVehicle?.seats ?? 1} value={seatsOffered} onChange={(event) => setSeatsOffered(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" />
+                  </span>
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)]">
+                  Price per seat (₹)
+                  <input required type="number" min="1" max="100000" step="0.01" value={pricePerSeat} onChange={(event) => setPricePerSeat(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" />
+                </label>
+                <label className="text-sm font-semibold text-[var(--ink)] md:col-span-2">
+                  Trip note <span className="font-normal text-[var(--ink-soft)]">(optional)</span>
+                  <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="Pickup details or luggage information" />
+                </label>
+                <button disabled={busy} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2">
+                  {busy ? "Please wait…" : "Post scheduled trip"}
+                  {!busy ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
+                </button>
+              </form>
+            ) : (
+              <div className="rounded-xl border border-dashed border-[var(--border)] bg-white p-5 text-sm text-[var(--ink-soft)]">
+                <p>Register a cab first to post a trip.</p>
+                <Link href="/vendors/services/cabs" className="mt-3 inline-flex font-semibold text-[var(--primary)] hover:underline">
+                  Add a cab <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold">{request.customer.fullName} · {request.customer.phone}</p>
-                  <p className="mt-1 text-sm text-[var(--ink-soft)]">{request.schedule.fromPlace} → {request.schedule.toPlace} · {dateTime(request.schedule.departureAt)}</p>
-                  <p className="mt-1 text-sm">{request.seatsRequested} seat(s) · {inr(request.totalPrice)} · {request.status.toLowerCase()}</p>
+                  <h3 className="text-lg font-semibold">Your trips</h3>
+                  <p className="mt-1 text-sm text-[var(--ink-soft)]">Manage the journeys you have posted.</p>
                 </div>
-                {request.status === "PENDING" ? (
-                  <div className="flex gap-2">
-                    <button disabled={busy} onClick={() => void answerRequest(request.id, "ACCEPTED")} className="rounded-full bg-[var(--teal)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Accept</button>
-                    <button disabled={busy} onClick={() => void answerRequest(request.id, "DECLINED")} className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold disabled:opacity-50">Decline</button>
-                  </div>
+                <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>
+              </div>
+              <div className="mt-5 grid gap-3">
+                {schedules.map((schedule) => (
+                  <article key={schedule.id} className="rounded-xl border border-[var(--border)] bg-white p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="flex min-w-0 items-center gap-2 font-semibold">
+                        <span className="truncate">{schedule.fromPlace}</span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--primary)]" aria-hidden />
+                        <span className="truncate">{schedule.toPlace}</span>
+                      </p>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
+                        schedule.status === "OPEN" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {schedule.status.toLowerCase()}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[var(--ink-soft)]">
+                      <span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" aria-hidden />{dateTime(schedule.departureAt)}</span>
+                      <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" aria-hidden />{schedule.seatsRemaining}/{schedule.seatsOffered} seats left</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-sm">
+                      <span>{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} <span className="text-[var(--ink-soft)]">/ seat</span></span>
+                      {schedule.status === "OPEN" ? (
+                        <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
+                          Cancel trip
+                        </button>
+                      ) : null}
+                    </div>
+                  </article>
+                ))}
+                {!schedules.length ? (
+                  <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted trips will appear here.</p>
                 ) : null}
               </div>
-            </article>
-          ))}
-          {!requests.length ? <p className="text-sm text-[var(--ink-soft)]">Customer requests will appear here.</p> : null}
+            </div>
+
+            <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold">Seat requests</h3>
+                  <p className="mt-1 text-sm text-[var(--ink-soft)]">Review passengers asking to join your trips.</p>
+                </div>
+                <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">{pendingRequests} pending</span>
+              </div>
+              <div className="mt-5 grid gap-3">
+                {requests.map((request) => (
+                  <article key={request.id} className="rounded-xl border border-[var(--border)] bg-white p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">{request.customer.fullName}</p>
+                        <p className="mt-0.5 text-sm text-[var(--ink-soft)]">{request.customer.phone}</p>
+                        <p className="mt-3 flex items-center gap-1.5 text-sm font-medium">
+                          <span className="max-w-[40%] truncate">{request.schedule.fromPlace}</span>
+                          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[var(--primary)]" aria-hidden />
+                          <span className="max-w-[40%] truncate">{request.schedule.toPlace}</span>
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                          {dateTime(request.schedule.departureAt)} · {request.seatsRequested} seat(s) · {inr(request.totalPrice)}
+                        </p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
+                        request.status === "PENDING" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {request.status.toLowerCase()}
+                      </span>
+                    </div>
+                    {request.status === "PENDING" ? (
+                      <div className="mt-4 flex gap-2 border-t border-[var(--border)] pt-3">
+                        <button disabled={busy} onClick={() => void answerRequest(request.id, "ACCEPTED")} className="rounded-lg bg-[var(--primary)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--primary-hover)] disabled:opacity-50">Accept</button>
+                        <button disabled={busy} onClick={() => void answerRequest(request.id, "DECLINED")} className="rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-semibold text-[var(--ink)] hover:bg-slate-50 disabled:opacity-50">Decline</button>
+                      </div>
+                    ) : null}
+                  </article>
+                ))}
+                {!requests.length ? (
+                  <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Customer requests will appear here.</p>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

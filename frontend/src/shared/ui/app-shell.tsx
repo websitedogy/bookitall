@@ -65,6 +65,47 @@ export function AppShell({
     );
   }
 
+  if (role === "PARTNER") {
+    return (
+      <div className="min-h-screen bg-[var(--cream)]">
+        <header className="border-b border-[var(--line)] bg-white">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-4 md:px-8">
+            <div className="flex items-center gap-8">
+              <Link href="/" className="serif text-2xl text-[var(--ink)]">
+                Book It All
+              </Link>
+              <nav aria-label={`${title} navigation`} className="flex flex-wrap items-center gap-1 text-sm">
+                {nav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={pathname === item.href ? "page" : undefined}
+                    className={`rounded-full px-4 py-2 font-medium transition-colors ${
+                      pathname === item.href
+                        ? "bg-[var(--primary-soft)] text-[var(--primary)]"
+                        : "text-[var(--ink-soft)] hover:bg-slate-50 hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="max-w-48 truncate text-[var(--ink-soft)]">{user.fullName}</span>
+              <button onClick={logout} className="font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                Sign out
+              </button>
+            </div>
+          </div>
+        </header>
+        <main className="mx-auto max-w-7xl px-5 py-8 pb-28 md:px-8 md:pb-32">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--cream)] md:grid md:grid-cols-[240px_1fr]">
       <aside className="border-b border-[var(--line)] bg-[var(--teal-dark)] p-6 text-[var(--cream)] md:min-h-screen md:border-b-0">
