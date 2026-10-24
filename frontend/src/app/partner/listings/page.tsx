@@ -15,8 +15,6 @@ export default function PartnerListingsPage() {
   useEffect(() => {
     if (!token) return;
     let active = true;
-    setIsLoadingVehicles(true);
-    setVehicleError("");
     api<Vehicle[]>("/cabs/mine", { token })
       .then((result) => {
         if (active) setVehicles(result.data ?? []);
