@@ -3,7 +3,6 @@ import { publicBrowsePath, HOME_SERVICES_PATH } from "@/shared/lib/public-paths"
 export const SERVICE_NAV = [
   { id: "hotels", name: "Hotels", href: publicBrowsePath("hotels") },
   { id: "tours", name: "Tours", href: publicBrowsePath("tours") },
-  { id: "cabs", name: "Cabs", href: publicBrowsePath("cabs") },
   { id: "electrician", name: "Electrician", href: publicBrowsePath("electrician") },
   { id: "plumber", name: "Plumber", href: publicBrowsePath("plumber") },
   { id: "ac", name: "AC", href: publicBrowsePath("ac") },
