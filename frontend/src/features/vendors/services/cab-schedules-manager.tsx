@@ -158,30 +158,30 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   return (
     <section id="scheduled-cab-trips" className="mx-auto mt-12 max-w-6xl scroll-mt-24">
       <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-[0_20px_55px_-42px_rgba(15,23,42,0.45)]">
-        <div className="bg-gradient-to-br from-[#0b5f59] via-[#0f766e] to-[#16877d] px-6 py-8 text-white sm:px-9 sm:py-10">
-          <div className="flex flex-wrap items-start justify-between gap-6">
+        <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8 sm:py-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
                 <CarFront className="h-4 w-4" aria-hidden />
                 Share your route
               </span>
-              <h2 className="serif mt-4 text-3xl font-semibold sm:text-4xl">Scheduled cab trips</h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-white/80">
+              <h2 className="serif mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl">Scheduled cab trips</h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-soft)]">
                 Post an upcoming journey, offer spare seats, and manage traveller requests from one place.
               </p>
             </div>
-            <div className="grid min-w-60 grid-cols-3 gap-2 self-end sm:gap-3">
-              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
-                <p className="text-xl font-bold">{schedules.length}</p>
-                <p className="mt-1 text-[11px] leading-tight text-white/75">Trips posted</p>
+            <div className="grid grid-cols-3 gap-2 sm:min-w-72 sm:gap-3">
+              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
+                <p className="text-xl font-bold text-[var(--ink)]">{schedules.length}</p>
+                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">Trips posted</p>
               </div>
-              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
-                <p className="text-xl font-bold">{openSeats}</p>
-                <p className="mt-1 text-[11px] leading-tight text-white/75">Open seats</p>
+              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
+                <p className="text-xl font-bold text-[var(--ink)]">{openSeats}</p>
+                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">Open seats</p>
               </div>
-              <div className="rounded-2xl bg-white/10 px-3 py-3 text-center ring-1 ring-white/15">
-                <p className="text-xl font-bold">{pendingRequests}</p>
-                <p className="mt-1 text-[11px] leading-tight text-white/75">New requests</p>
+              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
+                <p className="text-xl font-bold text-[var(--ink)]">{pendingRequests}</p>
+                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">New requests</p>
               </div>
             </div>
           </div>

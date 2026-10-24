@@ -68,19 +68,22 @@ export function AppShell({
   if (role === "PARTNER") {
     return (
       <div className="min-h-screen bg-[var(--cream)]">
-        <header className="border-b border-[var(--line)] bg-white">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-3 px-5 py-4 md:px-8">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="serif text-2xl text-[var(--ink)]">
+        <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-white/95 backdrop-blur">
+          <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6 md:flex md:justify-between md:gap-8 md:px-8 md:py-4">
+            <div className="contents md:flex md:min-w-0 md:items-center md:gap-8">
+              <Link href="/" className="serif w-fit shrink-0 whitespace-nowrap text-xl leading-none text-[var(--ink)] sm:text-2xl">
                 Book It All
               </Link>
-              <nav aria-label={`${title} navigation`} className="flex flex-wrap items-center gap-1 text-sm">
+              <nav
+                aria-label={`${title} navigation`}
+                className="col-span-2 -mx-4 flex min-w-0 items-center gap-1 overflow-x-auto border-t border-[var(--line)] px-3 pt-2 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-5 md:mx-0 md:col-span-1 md:overflow-visible md:border-0 md:px-0 md:pt-0"
+              >
                 {nav.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     aria-current={pathname === item.href ? "page" : undefined}
-                    className={`rounded-full px-4 py-2 font-medium transition-colors ${
+                    className={`shrink-0 rounded-full px-3 py-2 font-medium transition-colors sm:px-4 ${
                       pathname === item.href
                         ? "bg-[var(--primary-soft)] text-[var(--primary)]"
                         : "text-[var(--ink-soft)] hover:bg-slate-50 hover:text-[var(--ink)]"
@@ -91,9 +94,9 @@ export function AppShell({
                 ))}
               </nav>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="max-w-48 truncate text-[var(--ink-soft)]">{user.fullName}</span>
-              <button onClick={logout} className="font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">
+            <div className="flex items-center justify-end gap-2 text-sm sm:gap-4">
+              <span className="hidden max-w-48 truncate text-[var(--ink-soft)] sm:block">{user.fullName}</span>
+              <button onClick={logout} className="shrink-0 rounded-full px-2 py-2 font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] sm:px-3">
                 Sign out
               </button>
             </div>
