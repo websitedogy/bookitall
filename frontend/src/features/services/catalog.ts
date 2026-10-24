@@ -61,7 +61,7 @@ export function catalogMap(catalog: PlatformService[] | null) {
 }
 
 const FORCED_OFF = new Set(["jobs", "cloud-kitchen"]);
-const HIDDEN_NAV = new Set(["packers-movers"]);
+const HIDDEN_NAV = new Set(["packers-movers", "public-transport"]);
 
 export function isServiceEnabled(catalog: PlatformService[] | null, slug: string) {
   const key = slug === "local-shops" ? "cloud-kitchen" : slug;
