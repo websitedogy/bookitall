@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, IsNull, Repository } from 'typeorm';
@@ -20,7 +21,7 @@ import {
 const RESERVED_REQUEST_STATUSES = ['PENDING', 'ACCEPTED'] as const;
 
 @Injectable()
-export class CabSchedulesService {
+export class CabSchedulesService implements OnModuleInit {
   constructor(
     @InjectRepository(CabTripSchedule)
     private readonly schedules: Repository<CabTripSchedule>,
@@ -30,6 +31,56 @@ export class CabSchedulesService {
     private readonly vehicles: Repository<Vehicle>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit() {
+    await this.ensureScheduleSchema();
+  }
+
+  private async ensureScheduleSchema() {
+    await this.dataSource.query(`
+      CREATE TABLE IF NOT EXISTS cab_trip_schedules (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        partner_id uuid NOT NULL REFERENCES users(id),
+        vehicle_id uuid NOT NULL REFERENCES vehicles(id),
+        from_place varchar(160) NOT NULL,
+        to_place varchar(160) NOT NULL,
+        departure_at timestamptz NOT NULL,
+        seats_offered integer NOT NULL,
+        price_per_seat decimal(10, 2) NOT NULL,
+        note varchar(500),
+        status varchar(16) NOT NULL DEFAULT 'OPEN',
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await this.dataSource.query(`
+      CREATE TABLE IF NOT EXISTS cab_trip_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        schedule_id uuid NOT NULL REFERENCES cab_trip_schedules(id),
+        customer_id uuid NOT NULL REFERENCES users(id),
+        seats_requested integer NOT NULL,
+        total_price decimal(10, 2) NOT NULL,
+        status varchar(16) NOT NULL DEFAULT 'PENDING',
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await this.dataSource.query(
+      `CREATE INDEX IF NOT EXISTS idx_cab_trip_schedules_partner_id ON cab_trip_schedules (partner_id)`,
+    );
+    await this.dataSource.query(
+      `CREATE INDEX IF NOT EXISTS idx_cab_trip_schedules_departure_at ON cab_trip_schedules (departure_at)`,
+    );
+    await this.dataSource.query(
+      `CREATE INDEX IF NOT EXISTS idx_cab_trip_schedules_status ON cab_trip_schedules (status)`,
+    );
+    await this.dataSource.query(
+      `CREATE INDEX IF NOT EXISTS idx_cab_trip_requests_schedule_id ON cab_trip_requests (schedule_id)`,
+    );
+    await this.dataSource.query(
+      `CREATE INDEX IF NOT EXISTS idx_cab_trip_requests_customer_id ON cab_trip_requests (customer_id)`,
+    );
+  }
 
   async create(partnerId: string, dto: CreateCabScheduleDto) {
     const vehicle = await this.vehicles.findOne({
