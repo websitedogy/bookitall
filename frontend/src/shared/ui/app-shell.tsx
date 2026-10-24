@@ -94,11 +94,8 @@ export function AppShell({
                 ))}
               </nav>
             </div>
-            <div className="flex items-center justify-end gap-2 text-sm sm:gap-4">
+            <div className="flex items-center justify-end text-sm">
               <span className="hidden max-w-48 truncate text-[var(--ink-soft)] sm:block">{user.fullName}</span>
-              <button onClick={logout} className="shrink-0 rounded-full px-2 py-2 font-semibold text-[var(--primary)] hover:bg-[var(--primary-soft)] sm:px-3">
-                Sign out
-              </button>
             </div>
           </div>
         </header>
