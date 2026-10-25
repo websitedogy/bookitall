@@ -21,6 +21,7 @@ import { SupportTicket } from '../../modules/admin/entities/support-ticket.entit
 import { SupportMessage } from '../../modules/admin/entities/support-message.entity';
 import { PlatformService } from '../../modules/platform-services/entities/platform-service.entity';
 import { HeroBanner } from '../../modules/hero-banners/entities/hero-banner.entity';
+import { GoodsTransportSchedule } from '../../modules/special-schedules/entities/goods-transport-schedule.entity';
 
 export const ALL_ENTITIES = [
   User,
@@ -30,6 +31,7 @@ export const ALL_ENTITIES = [
   Vehicle,
   CabTripSchedule,
   CabTripRequest,
+  GoodsTransportSchedule,
   HomeService,
   VendorListing,
   Booking,

@@ -44,6 +44,7 @@ import { VendorListingsModule } from './modules/vendor-listings/vendor-listings.
 import { PlatformServicesModule } from './modules/platform-services/platform-services.module';
 import { HeroBannersModule } from './modules/hero-banners/hero-banners.module';
 import { MailModule } from './modules/mail/mail.module';
+import { SpecialSchedulesModule } from './modules/special-schedules/special-schedules.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { MailModule } from './modules/mail/mail.module';
     HotelsModule,
     ToursModule,
     CabsModule,
+    SpecialSchedulesModule,
     HomeServicesModule,
     ElectricianModule,
     PlumberModule,
