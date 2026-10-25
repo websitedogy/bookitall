@@ -31,7 +31,7 @@ function dateTime(value: string) {
   return new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
-export function ScheduledCabTrips({ partnerId, vendor }: { partnerId?: string; vendor?: string }) {
+export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { partnerId?: string; vendor?: string; embedded?: boolean }) {
   const token = useAuth((state) => state.accessToken);
   const user = useAuth((state) => state.user);
   const router = useRouter();
@@ -96,7 +96,7 @@ export function ScheduledCabTrips({ partnerId, vendor }: { partnerId?: string; v
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
-      <Link href="/cabs" className="text-sm font-semibold text-[#0f7d6e]">← Cab booking</Link>
+      {embedded ? null : <Link href="/cabs" className="text-sm font-semibold text-[#0f7d6e]">← Cab booking</Link>}
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#0f7d6e]">Special Schedule · Cabs</p>
       <h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#12241f]">
         {partnerId ? `Scheduled trips${vendor ? ` by ${vendor}` : " from this cab vendor"}` : "Find a cab already going your way"}

@@ -15,6 +15,7 @@ import { packersServiceById } from "@/features/vendors/services/packers-movers-d
 import { LocalMarketChoices } from "@/features/vendors/services/local-market-choices";
 import { SpecialScheduleTabs } from "@/features/public-site/components/special-schedule-tabs";
 import { GoodsTransportSpecialSchedules } from "@/features/users/cabs/components/goods-transport-special-schedules";
+import { ScheduledCabTrips } from "@/features/users/cabs/components/scheduled-cab-trips";
 
 export function ServiceCategoryScreen({
   serviceId,
@@ -75,11 +76,17 @@ export function ServiceCategoryScreen({
     </>
   );
   const pageContent =
-    serviceId === "goods-transport" ? (
+    serviceId === "goods-transport" || serviceId === "public-transport" ? (
       <SpecialScheduleTabs
-        service="goods-transport"
+        service={serviceId === "goods-transport" ? "goods-transport" : "cabs"}
         serviceContent={serviceContent}
-        scheduleContent={<GoodsTransportSpecialSchedules />}
+        scheduleContent={
+          serviceId === "goods-transport" ? (
+            <GoodsTransportSpecialSchedules />
+          ) : (
+            <ScheduledCabTrips embedded />
+          )
+        }
       />
     ) : (
       serviceContent
