@@ -56,7 +56,7 @@ export function ServiceCategoryScreen({
         </>
       ) : null}
       <InnerPageShell title={badge} titleStyle="badge">
-        {serviceId === "public-transport" ? (
+        {serviceId === "public-transport" && publicVehicle?.id !== "auto" ? (
           <PublicTransportTypePicker
             baseHref={seo?.path || "/public-transport/hyderabad"}
             selected={publicVehicle?.id}
