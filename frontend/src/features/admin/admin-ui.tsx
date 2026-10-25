@@ -571,6 +571,7 @@ export const ADMIN_MENU: AdminMenuSection[] = [
       { href: "/admin/bookings?bucket=working", label: "Processing", icon: Wrench, count: (data) => menuCount(data.orders?.processing) },
       { href: "/admin/bookings?bucket=worked", label: "Worked", icon: CheckCircle2, count: (data) => menuCount(data.customers.worked) },
       { href: "/admin/bookings?bucket=scheduled", label: "Scheduled", icon: CalendarClock, count: (data) => menuCount(data.customers.scheduled) },
+      { href: "/admin/special-schedules", label: "Special Schedule", icon: CalendarClock, count: () => "" },
     ],
   },
 ];

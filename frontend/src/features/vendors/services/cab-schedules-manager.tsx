@@ -165,7 +165,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 <CarFront className="h-4 w-4" aria-hidden />
                 Share your route
               </span>
-              <h2 className="serif mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl">Scheduled cab trips</h2>
+              <h2 className="serif mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl">Special Schedule</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-soft)]">
                 Post an upcoming journey, offer spare seats, and manage traveller requests from one place.
               </p>
@@ -264,7 +264,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                   <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="Pickup details or luggage information" />
                 </label>
                 <button disabled={busy} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2">
-                  {busy ? "Please wait…" : "Post scheduled trip"}
+                  {busy ? "Please wait…" : "Post Special Schedule"}
                   {!busy ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
                 </button>
               </form>
@@ -282,7 +282,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
             <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold">Your trips</h3>
+                  <h3 className="text-lg font-semibold">Your Special Schedules</h3>
                   <p className="mt-1 text-sm text-[var(--ink-soft)]">Manage the journeys you have posted.</p>
                 </div>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>

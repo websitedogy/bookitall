@@ -13,6 +13,8 @@ import { goodsTransportTypeById } from "@/features/vendors/services/goods-transp
 import { PackersMoversTypePicker } from "@/features/vendors/services/packers-movers-type-picker";
 import { packersServiceById } from "@/features/vendors/services/packers-movers-data";
 import { LocalMarketChoices } from "@/features/vendors/services/local-market-choices";
+import { SpecialScheduleTabs } from "@/features/public-site/components/special-schedule-tabs";
+import { GoodsTransportSpecialSchedules } from "@/features/users/cabs/components/goods-transport-special-schedules";
 
 export function ServiceCategoryScreen({
   serviceId,
@@ -37,6 +39,51 @@ export function ServiceCategoryScreen({
   const prices = listings.map((item) => item.unitPrice).filter((value): value is number => typeof value === "number" && value > 0);
   const low = prices.length ? Math.min(...prices) : undefined;
   const high = prices.length ? Math.max(...prices) : undefined;
+  const serviceContent = (
+    <>
+      {serviceId === "public-transport" && publicVehicle?.id !== "auto" ? (
+        <PublicTransportTypePicker
+          baseHref={seo?.path || "/public-transport/hyderabad"}
+          selected={publicVehicle?.id}
+          compact={Boolean(vehicleType)}
+          title="Choose a ride"
+          subtitle="Auto, Car, Mini Bus, Bus, or Van."
+        />
+      ) : null}
+      {serviceId === "goods-transport" ? (
+        <GoodsTransportTypePicker
+          baseHref={seo?.path || "/goods-transport/hyderabad"}
+          selected={goodsVehicle?.id}
+          compact={Boolean(vehicleType)}
+          title="Choose a vehicle"
+          subtitle="Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, Other, or Packers & Movers."
+        />
+      ) : null}
+      {hasListings && serviceId === "packers-movers" ? (
+        <PackersMoversTypePicker
+          baseHref={seo?.path || "/packers-movers/hyderabad"}
+          selected={packersType?.id}
+          compact={Boolean(vehicleType)}
+          title="Choose a service"
+          subtitle="Home, office, local or long-distance shifting."
+        />
+      ) : null}
+      {serviceId === "cloud-kitchen" ? <LocalMarketChoices /> : null}
+      {serviceId === "cloud-kitchen" && !hasListings ? null : pickingType && hasListings ? null : (
+        <NearbyProfessionals category={serviceId} initialAds={listings} vehicleType={vehicleType} />
+      )}
+    </>
+  );
+  const pageContent =
+    serviceId === "goods-transport" ? (
+      <SpecialScheduleTabs
+        service="goods-transport"
+        serviceContent={serviceContent}
+        scheduleContent={<GoodsTransportSpecialSchedules />}
+      />
+    ) : (
+      serviceContent
+    );
 
   return (
     <DesktopServicesLayout>
@@ -56,37 +103,7 @@ export function ServiceCategoryScreen({
         </>
       ) : null}
       <InnerPageShell title={badge} titleStyle="badge">
-        {serviceId === "public-transport" && publicVehicle?.id !== "auto" ? (
-          <PublicTransportTypePicker
-            baseHref={seo?.path || "/public-transport/hyderabad"}
-            selected={publicVehicle?.id}
-            compact={Boolean(vehicleType)}
-            title="Choose a ride"
-            subtitle="Auto, Car, Mini Bus, Bus, or Van."
-          />
-        ) : null}
-        {serviceId === "goods-transport" ? (
-          <GoodsTransportTypePicker
-            baseHref={seo?.path || "/goods-transport/hyderabad"}
-            selected={goodsVehicle?.id}
-            compact={Boolean(vehicleType)}
-            title="Choose a vehicle"
-            subtitle="Tata Ace, Mini Lorry, Light / Medium / Heavy Truck, Other, or Packers & Movers."
-          />
-        ) : null}
-        {hasListings && serviceId === "packers-movers" ? (
-          <PackersMoversTypePicker
-            baseHref={seo?.path || "/packers-movers/hyderabad"}
-            selected={packersType?.id}
-            compact={Boolean(vehicleType)}
-            title="Choose a service"
-            subtitle="Home, office, local or long-distance shifting."
-          />
-        ) : null}
-        {serviceId === "cloud-kitchen" ? <LocalMarketChoices /> : null}
-        {serviceId === "cloud-kitchen" && !hasListings ? null : pickingType && hasListings ? null : (
-          <NearbyProfessionals category={serviceId} initialAds={listings} vehicleType={vehicleType} />
-        )}
+        {pageContent}
       </InnerPageShell>
     </DesktopServicesLayout>
   );
