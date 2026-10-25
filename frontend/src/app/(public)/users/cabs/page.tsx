@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProfessionalsBrowse } from "@/features/users/professionals/professionals-browse";
+import { SpecialScheduleTabs } from "@/features/public-site/components/special-schedule-tabs";
+import { ScheduledCabTrips } from "@/features/users/cabs/components/scheduled-cab-trips";
 import { getServiceCatalog, isServiceEnabled } from "@/features/services/catalog";
 
 export const metadata: Metadata = {
@@ -16,5 +18,11 @@ export default async function CabsPage({
   const { pro } = await searchParams;
   const catalog = await getServiceCatalog();
   if (catalog.length && !isServiceEnabled(catalog, "cabs")) notFound();
-  return <ProfessionalsBrowse serviceId="cabs" selectedId={pro} />;
+  return (
+    <SpecialScheduleTabs
+      service="cabs"
+      serviceContent={<ProfessionalsBrowse serviceId="cabs" selectedId={pro} />}
+      scheduleContent={<ScheduledCabTrips embedded />}
+    />
+  );
 }
