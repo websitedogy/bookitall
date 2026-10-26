@@ -11,7 +11,7 @@ type Tab = "posts" | "wallet" | "history";
 
 export function VendorPostsPage() {
   const user = useAuth((s) => s.user);
-  const isVendor = Boolean(user);
+  const isVendor = user?.role === "PARTNER";
   const [tab, setTab] = useState<Tab>("posts");
 
   return (
@@ -19,7 +19,7 @@ export function VendorPostsPage() {
       <InnerPageShell
         kicker="Vendor"
         title="My Services"
-        subtitle="Your live listings, credits and wallet."
+        subtitle={isVendor ? "Your live listings, credits and wallet." : "Browse and manage your service listings."}
         tabs={
           isVendor ? (
             <div className="flex flex-wrap gap-1 px-3 pt-2 md:px-7">
