@@ -188,7 +188,7 @@ export class CabSchedulesService implements OnModuleInit {
       })
       .andWhere('listing.deletedAt IS NULL')
       .andWhere(
-        '(listing.catalogId = :vehicleId OR listing.fields -> \'scheduleVehicleIds\' @> jsonb_build_array(CAST(:vehicleId AS text)))',
+        '(listing.catalogId = :vehicleId OR COALESCE((listing.fields ->> \'scheduleVehicleIds\')::jsonb, \'[]\'::jsonb) @> jsonb_build_array(CAST(:vehicleId AS text)))',
         { vehicleId },
       )
       .getOne();
@@ -210,7 +210,7 @@ export class CabSchedulesService implements OnModuleInit {
       .innerJoin(
         VendorListing,
         'listing',
-        'listing.userId = schedule.partnerId AND (listing.catalogId = vehicle.id OR listing.fields -> \'scheduleVehicleIds\' @> jsonb_build_array(vehicle.id::text))',
+        'listing.userId = schedule.partnerId AND (listing.catalogId = vehicle.id OR COALESCE((listing.fields ->> \'scheduleVehicleIds\')::jsonb, \'[]\'::jsonb) @> jsonb_build_array(vehicle.id::text))',
       )
       .andWhere('listing.category IN (:...categories)', {
         categories: ['cabs', 'public-transport'],

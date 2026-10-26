@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ListingStatus, VendorListing } from './entities/vendor-listing.entity';
@@ -824,13 +829,16 @@ export class VendorListingsService {
     if (fields.scheduleVehicleIds) {
       try {
         const parsed: unknown = JSON.parse(fields.scheduleVehicleIds);
-        if (Array.isArray(parsed)) {
-          scheduleVehicleIds = parsed.filter(
-            (id): id is string => typeof id === 'string',
-          );
+        if (!Array.isArray(parsed) || parsed.some((id) => typeof id !== 'string')) {
+          throw new Error('Expected an array of vehicle IDs.');
         }
+        scheduleVehicleIds = parsed.filter(
+          (id): id is string => typeof id === 'string',
+        );
       } catch {
-        scheduleVehicleIds = [];
+        throw new InternalServerErrorException(
+          'Stored schedule vehicle references are invalid.',
+        );
       }
     }
     const location =
@@ -879,32 +887,34 @@ export class VendorListingsService {
       seats: number;
       perKmRate: number;
     };
-    let submitted: unknown;
     if (fields.vehicleScheduleDetails) {
+      let submitted: unknown;
       try {
         submitted = JSON.parse(fields.vehicleScheduleDetails);
       } catch {
         throw new BadRequestException('Cab vehicle details are invalid.');
       }
-    }
-    if (Array.isArray(submitted)) {
-      const definitions = submitted.flatMap((item): Definition[] => {
-        if (!item || typeof item !== 'object') return [];
+      if (!Array.isArray(submitted) || !submitted.length) {
+        throw new BadRequestException('Select at least one cab vehicle type.');
+      }
+      return submitted.map((item): Definition => {
+        if (!item || typeof item !== 'object') {
+          throw new BadRequestException('Cab vehicle details are invalid.');
+        }
         const detail = item as Record<string, unknown>;
         const name = typeof detail.name === 'string' ? detail.name.trim() : '';
         const seats = Number(detail.seats);
         const perKmRate = Number(detail.perKmRate);
-        if (!name || !Number.isInteger(seats) || seats < 1 || !Number.isFinite(perKmRate) || perKmRate < 0) {
-          return [];
+        if (!name || !Number.isInteger(seats) || seats < 1 || !Number.isFinite(perKmRate) || perKmRate <= 0) {
+          throw new BadRequestException('Cab vehicle details are invalid.');
         }
-        return [{
+        return {
           name,
           category: this.cabVehicleCategory(name),
           seats,
           perKmRate,
-        }];
+        };
       });
-      if (definitions.length) return definitions;
     }
     const seats = Number(fields.seats);
     return [{
