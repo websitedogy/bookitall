@@ -42,6 +42,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [requests, setRequests] = useState<TripRequest[]>([]);
   const [editingId, setEditingId] = useState("");
   const [formOpen, setFormOpen] = useState(false);
+  const [scheduleView, setScheduleView] = useState<"upcoming" | "history">("upcoming");
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -51,7 +52,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const [minimumDeparture] = useState(() => {
     const date = new Date(Date.now() + 60_000);
     const pad = (value: number) => String(value).padStart(2, "0");
@@ -90,9 +91,12 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() <= now
       ? "INACTIVE"
       : schedule.status;
+  const visibleSchedules = schedules.filter((schedule) =>
+    scheduleView === "upcoming" ? statusOf(schedule) === "ACTIVE" : statusOf(schedule) !== "ACTIVE",
+  );
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 15_000);
+    const interval = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(interval);
   }, []);
 
@@ -352,8 +356,29 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 </div>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>
               </div>
+              <div role="tablist" aria-label="Cab special schedules" className="mt-5 flex gap-2 border-b border-[var(--border)]">
+                {([
+                  ["upcoming", "Special Schedules", schedules.filter((schedule) => statusOf(schedule) === "ACTIVE").length],
+                  ["history", "History", schedules.filter((schedule) => statusOf(schedule) !== "ACTIVE").length],
+                ] as const).map(([view, label, count]) => (
+                  <button
+                    key={view}
+                    type="button"
+                    role="tab"
+                    aria-selected={scheduleView === view}
+                    onClick={() => setScheduleView(view)}
+                    className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold ${
+                      scheduleView === view
+                        ? "border-[var(--primary)] text-[var(--primary)]"
+                        : "border-transparent text-[var(--ink-soft)]"
+                    }`}
+                  >
+                    {label} ({count})
+                  </button>
+                ))}
+              </div>
               <div className="mt-5 grid gap-3">
-                {schedules.map((schedule) => (
+                {visibleSchedules.map((schedule) => (
                   <article key={schedule.id} className="rounded-xl border border-[var(--border)] bg-white p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="flex min-w-0 items-center gap-2 font-semibold">
@@ -386,8 +411,12 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                     </div>
                   </article>
                 ))}
-                {!schedules.length ? (
-                  <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted trips will appear here.</p>
+                {!visibleSchedules.length ? (
+                  <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">
+                    {scheduleView === "upcoming"
+                      ? "Your upcoming special schedules will appear here."
+                      : "Your past and cancelled schedules will appear here."}
+                  </p>
                 ) : null}
               </div>
             </div>
