@@ -155,9 +155,9 @@ export function VendorPostsFeed({ compact = false }: { compact?: boolean }) {
                     </span>
                   </span>
                   </Link>
-                  {["cabs", "public-transport", "goods-transport"].includes(ad.categoryId) && ad.status === "ACCEPTED" ? (
+                  {["cabs", "public-transport", "goods-transport", "packers-movers"].includes(ad.categoryId) && ad.status === "ACCEPTED" ? (
                     <Link
-                      href={`/partner/listings#${ad.categoryId === "goods-transport" ? "goods-transport-schedules" : "scheduled-cab-trips"}`}
+                      href={`/partner/listings#${ad.categoryId === "goods-transport" || ad.categoryId === "packers-movers" ? `${ad.categoryId}-schedules` : "scheduled-cab-trips"}`}
                       className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--primary-soft)] px-3 text-xs font-semibold text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
                     >
                       Special Schedule

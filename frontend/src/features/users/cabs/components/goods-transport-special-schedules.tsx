@@ -8,6 +8,7 @@ import { inr } from "@/shared/lib/format";
 
 type GoodsTransportSchedule = {
   id: string;
+  serviceCategory: "goods-transport" | "packers-movers";
   vehicle: string;
   vehicleNumber: string | null;
   loadCapacity: string | null;
@@ -24,7 +25,11 @@ function dateTime(value: string) {
   return new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
-export function GoodsTransportSpecialSchedules() {
+export function GoodsTransportSpecialSchedules({
+  serviceCategory = "goods-transport",
+}: {
+  serviceCategory?: "goods-transport" | "packers-movers";
+}) {
   const token = useAuth((state) => state.accessToken);
   const user = useAuth((state) => state.user);
   const router = useRouter();
@@ -36,7 +41,7 @@ export function GoodsTransportSpecialSchedules() {
 
   useEffect(() => {
     let active = true;
-    void api<GoodsTransportSchedule[]>("/special-schedules/goods-transport")
+    void api<GoodsTransportSchedule[]>(`/special-schedules/${serviceCategory}`)
       .then((result) => {
         if (active) setSchedules(result.data ?? []);
       })
@@ -49,7 +54,7 @@ export function GoodsTransportSpecialSchedules() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [serviceCategory]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 15_000);
@@ -62,7 +67,7 @@ export function GoodsTransportSpecialSchedules() {
 
   async function bookSchedule(schedule: GoodsTransportSchedule) {
     if (!token || user?.role !== "CUSTOMER") {
-      router.push(`/login?next=${encodeURIComponent("/goods-transport")}`);
+      router.push(`/login?next=${encodeURIComponent(serviceCategory === "packers-movers" ? "/packers-movers" : "/goods-transport")}`);
       return;
     }
     setBusyId(schedule.id);
@@ -76,6 +81,7 @@ export function GoodsTransportSpecialSchedules() {
           details: {
             specialScheduleId: schedule.id,
             specialScheduleType: "goods-transport",
+            listingCategory: serviceCategory,
           },
         }),
       });
@@ -90,9 +96,13 @@ export function GoodsTransportSpecialSchedules() {
   return (
     <section className="px-4 py-5 md:px-7 md:py-7">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Goods Transport</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">
+          {serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"}
+        </p>
         <h2 className="mt-1 text-xl font-semibold tracking-tight text-[var(--text)]">Special Schedule</h2>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">Upcoming goods vehicle routes shared by approved transport partners.</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Upcoming {serviceCategory === "packers-movers" ? "moving service routes" : "goods vehicle routes"} shared by approved partners.
+        </p>
       </div>
 
       {error ? <p role="alert" className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
@@ -129,7 +139,7 @@ export function GoodsTransportSpecialSchedules() {
           ))}
           {!upcomingSchedules.length ? (
             <p className="rounded-xl bg-[var(--primary-soft)] px-4 py-5 text-sm text-[var(--text-muted)]">
-              No upcoming Goods Transport schedules are available right now. Please check again soon.
+              No upcoming {serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"} schedules are available right now. Please check again soon.
             </p>
           ) : null}
         </div>

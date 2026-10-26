@@ -9,7 +9,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, IsNull, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Booking, BookingStatusHistory } from './entities/booking.entity';
 import { BookingStatus, BookingType } from '../../common/enums/booking.enum';
 import { PaymentMethod, PaymentStatus, WalletTransactionReason } from '../../common/enums/finance.enum';

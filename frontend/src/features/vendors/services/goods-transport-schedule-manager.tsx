@@ -21,6 +21,7 @@ export type GoodsTransportListing = {
 type Schedule = {
   id: string;
   listingId: string;
+  serviceCategory: "goods-transport" | "packers-movers";
   vehicle: string;
   vehicleNumber: string | null;
   loadCapacity: string | null;
@@ -38,8 +39,10 @@ function dateTime(value: string) {
 
 export function GoodsTransportScheduleManager({
   approvedListings,
+  serviceCategory = "goods-transport",
 }: {
   approvedListings: GoodsTransportListing[];
+  serviceCategory?: "goods-transport" | "packers-movers";
 }) {
   const token = useAuth((state) => state.accessToken);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -67,7 +70,7 @@ export function GoodsTransportScheduleManager({
       : schedule.status;
   async function refresh() {
     if (!token) return;
-    const scheduleResult = await api<Schedule[]>("/special-schedules/mine/goods-transport", { token });
+    const scheduleResult = await api<Schedule[]>(`/special-schedules/mine/${serviceCategory}`, { token });
     setListingId((current) =>
       approvedListings.some((listing) => listing.id === current)
         ? current
@@ -79,7 +82,7 @@ export function GoodsTransportScheduleManager({
   useEffect(() => {
     if (!token) return;
     let active = true;
-    void api<Schedule[]>("/special-schedules/mine/goods-transport", { token })
+    void api<Schedule[]>(`/special-schedules/mine/${serviceCategory}`, { token })
       .then((scheduleResult) => {
         if (!active) return;
         setListingId(approvedListings[0]?.id ?? "");
@@ -94,7 +97,7 @@ export function GoodsTransportScheduleManager({
     return () => {
       active = false;
     };
-  }, [token, approvedListings]);
+  }, [token, approvedListings, serviceCategory]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 1_000);
@@ -108,7 +111,7 @@ export function GoodsTransportScheduleManager({
     setError("");
     try {
       await api<Schedule>(
-        editingId ? `/special-schedules/${editingId}` : "/special-schedules/goods-transport",
+        editingId ? `/special-schedules/${editingId}` : `/special-schedules/${serviceCategory}`,
         {
           method: editingId ? "PATCH" : "POST",
           token,
@@ -164,7 +167,7 @@ export function GoodsTransportScheduleManager({
     );
     setPrice(schedule.price);
     setNote(schedule.note ?? "");
-    document.getElementById("goods-transport-schedules")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(`${serviceCategory}-schedules`)?.scrollIntoView({ behavior: "smooth" });
   }
 
   function stopEditing() {
@@ -177,10 +180,12 @@ export function GoodsTransportScheduleManager({
   }
 
   return (
-    <section id="goods-transport-schedules" className="mt-8 max-w-6xl">
+    <section id={`${serviceCategory}-schedules`} className="mt-8 max-w-6xl">
       <div className="rounded-3xl border border-[var(--border)] bg-white shadow-sm">
         <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">Goods Transport</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
+            {serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"}
+          </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--ink)]">Special Schedule</h2>
           <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
         </div>
@@ -264,8 +269,14 @@ export function GoodsTransportScheduleManager({
             </form>
           ) : (
             <div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-sm text-[var(--ink-soft)]">
-              {waiting ? "Loading approved vehicle listings…" : "An approved Goods Transport listing is required before you can post a schedule."}
-              {!waiting ? <Link href="/vendors/services/goods-transport" className="ml-1 font-semibold text-[var(--primary)] hover:underline">Add a vehicle</Link> : null}
+              {waiting
+                ? "Loading approved listings…"
+                : `An approved ${serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"} listing is required before you can post a schedule.`}
+              {!waiting ? (
+                <Link href={`/vendors/services/${serviceCategory}`} className="ml-1 font-semibold text-[var(--primary)] hover:underline">
+                  Add a service
+                </Link>
+              ) : null}
             </div>
           ) : (
 

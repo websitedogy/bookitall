@@ -18,7 +18,10 @@ export default function PartnerListingsPage() {
   const [goodsListings, setGoodsListings] = useState<GoodsTransportListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeService, setActiveService] = useState<"cabs" | "goods-transport">("cabs");
+  const [packersListings, setPackersListings] = useState<GoodsTransportListing[]>([]);
+  const [activeService, setActiveService] = useState<
+    "cabs" | "goods-transport" | "packers-movers"
+  >("cabs");
 
   useEffect(() => {
     if (!token) return;
@@ -27,8 +30,9 @@ export default function PartnerListingsPage() {
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=cabs", { token }),
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=public-transport", { token }),
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=goods-transport", { token }),
+      api<GoodsTransportListing[]>("/vendor-listings/mine?category=packers-movers", { token }),
     ])
-      .then(async ([cabListingResult, publicTransportResult, goodsListingResult]) => {
+      .then(async ([cabListingResult, publicTransportResult, goodsListingResult, packersResult]) => {
         if (!active) return;
         const vehicleResult = await api<RegisteredVehicle[]>("/cabs/mine", { token });
         if (!active) return;
@@ -44,9 +48,13 @@ export default function PartnerListingsPage() {
           (vehicle) => vehicle.isActive && approvedCabVehicleIds.has(vehicle.id),
         );
         const approvedListings = (goodsListingResult.data ?? []).filter((listing) => listing.status === "ACCEPTED");
+        const approvedPackersListings = (packersResult.data ?? []).filter((listing) => listing.status === "ACCEPTED");
         setVehicles(approvedVehicles);
         setGoodsListings(approvedListings);
-        if (window.location.hash === "#goods-transport-schedules" || (!approvedVehicles.length && approvedListings.length)) {
+        setPackersListings(approvedPackersListings);
+        if (window.location.hash === "#packers-movers-schedules" || (!approvedVehicles.length && !approvedListings.length && approvedPackersListings.length)) {
+          setActiveService("packers-movers");
+        } else if (window.location.hash === "#goods-transport-schedules" || (!approvedVehicles.length && approvedListings.length)) {
           setActiveService("goods-transport");
         }
       })
@@ -64,7 +72,9 @@ export default function PartnerListingsPage() {
   useEffect(() => {
     if (loading) return;
     const targetId =
-      activeService === "goods-transport" ? "goods-transport-schedules" : "scheduled-cab-trips";
+      activeService === "cabs"
+        ? "scheduled-cab-trips"
+        : `${activeService}-schedules`;
     if (!window.location.hash || window.location.hash.slice(1) !== targetId) return;
     window.requestAnimationFrame(() => {
       document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
@@ -74,6 +84,7 @@ export default function PartnerListingsPage() {
   const availableServices = [
     ...(vehicles.length ? (["cabs"] as const) : []),
     ...(goodsListings.length ? (["goods-transport"] as const) : []),
+    ...(packersListings.length ? (["packers-movers"] as const) : []),
   ];
 
   return (
@@ -94,6 +105,7 @@ export default function PartnerListingsPage() {
         {([
           ...(vehicles.length ? ([["cabs", "Cabs & Public Transport"]] as const) : []),
           ...(goodsListings.length ? ([["goods-transport", "Goods Transport"]] as const) : []),
+          ...(packersListings.length ? ([["packers-movers", "Packers & Movers"]] as const) : []),
         ] as const).map(([id, label]) => (
           <button
             key={id}
@@ -115,9 +127,15 @@ export default function PartnerListingsPage() {
       {!loading && activeService === "goods-transport" && goodsListings.length ? (
         <GoodsTransportScheduleManager approvedListings={goodsListings} />
       ) : null}
+      {!loading && activeService === "packers-movers" && packersListings.length ? (
+        <GoodsTransportScheduleManager
+          approvedListings={packersListings}
+          serviceCategory="packers-movers"
+        />
+      ) : null}
       {!loading && !availableServices.length && !error ? (
         <p className="mt-6 rounded-xl border border-dashed border-[var(--line)] px-5 py-6 text-sm text-[var(--ink-soft)]">
-          Special Schedule becomes available after an administrator approves your Cab, Public Transport or Goods Transport vehicle.
+          Special Schedule becomes available after an administrator approves your Cab, Public Transport, Goods Transport or Packers & Movers service.
         </p>
       ) : null}
     </div>
