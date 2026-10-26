@@ -13,6 +13,8 @@ import { Vehicle } from './entities/vehicle.entity';
 import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
 import { CabTripRequest } from './entities/cab-trip-request.entity';
 import { Booking } from '../booking-engine/entities/booking.entity';
+import { ListingStatus, VendorListing } from '../vendor-listings/entities/vendor-listing.entity';
+import { PlatformServicesService } from '../platform-services/platform-services.service';
 import {
   CreateCabScheduleDto,
   CreateCabTripRequestDto,
@@ -31,9 +33,12 @@ export class CabSchedulesService implements OnModuleInit {
     private readonly requests: Repository<CabTripRequest>,
     @InjectRepository(Booking)
     private readonly bookings: Repository<Booking>,
+    @InjectRepository(VendorListing)
+    private readonly listings: Repository<VendorListing>,
     @InjectRepository(Vehicle)
     private readonly vehicles: Repository<Vehicle>,
     private readonly dataSource: DataSource,
+    private readonly platformServices: PlatformServicesService,
   ) {}
 
   async onModuleInit() {
@@ -87,12 +92,14 @@ export class CabSchedulesService implements OnModuleInit {
   }
 
   async create(partnerId: string, dto: CreateCabScheduleDto) {
+    await this.platformServices.assertEnabled('cabs');
     const vehicle = await this.vehicles.findOne({
       where: { id: dto.vehicleId, partnerId, isActive: true, deletedAt: IsNull() },
     });
     if (!vehicle) {
       throw new NotFoundException('Choose one of your active registered vehicles.');
     }
+    await this.assertApprovedCabListing(partnerId, vehicle.id);
 
     const departureAt = new Date(dto.departureAt);
     if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
@@ -124,6 +131,7 @@ export class CabSchedulesService implements OnModuleInit {
   }
 
   async update(partnerId: string, scheduleId: string, dto: UpdateCabScheduleDto) {
+    await this.platformServices.assertEnabled('cabs');
     const schedule = await this.schedules.findOne({ where: { id: scheduleId } });
     if (!schedule) throw new NotFoundException('Scheduled trip not found.');
     if (schedule.partnerId !== partnerId) {
@@ -139,6 +147,7 @@ export class CabSchedulesService implements OnModuleInit {
     if (!vehicle) {
       throw new NotFoundException('Choose one of your active registered vehicles.');
     }
+    await this.assertApprovedCabListing(partnerId, vehicle.id);
     const departureAt = new Date(dto.departureAt);
     if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
       throw new BadRequestException('Departure must be a future date and time.');
@@ -151,6 +160,24 @@ export class CabSchedulesService implements OnModuleInit {
     }
     if (dto.pricePerSeat > 100000) {
       throw new BadRequestException('Price per seat cannot exceed ₹1,00,000.');
+    }
+
+    private async assertApprovedCabListing(partnerId: string, vehicleId: string) {
+      const listing = await this.listings.findOne({
+        where: {
+          userId: partnerId,
+          catalogId: vehicleId,
+          category: 'cabs',
+          status: ListingStatus.ACCEPTED,
+          deletedAt: IsNull(),
+        },
+        select: { id: true },
+      });
+      if (!listing) {
+        throw new ForbiddenException(
+          'An administrator must approve your Cab registration before you can post a schedule.',
+        );
+      }
     }
 
     schedule.vehicleId = vehicle.id;
@@ -170,7 +197,17 @@ export class CabSchedulesService implements OnModuleInit {
       .where('schedule.status = :status', { status: 'OPEN' })
       .andWhere('schedule.departureAt > :now', { now: new Date() })
       .andWhere('vehicle.isActive = true')
-      .andWhere('vehicle.deletedAt IS NULL');
+      .andWhere('vehicle.deletedAt IS NULL')
+      .innerJoin(
+        VendorListing,
+        'listing',
+        'listing.catalogId = vehicle.id AND listing.userId = schedule.partnerId',
+      )
+      .andWhere('listing.category = :category', { category: 'cabs' })
+      .andWhere('listing.status = :approvedStatus', {
+        approvedStatus: ListingStatus.ACCEPTED,
+      })
+      .andWhere('listing.deletedAt IS NULL');
     if (partnerId) {
       query.andWhere('schedule.partnerId = :partnerId', { partnerId });
     }

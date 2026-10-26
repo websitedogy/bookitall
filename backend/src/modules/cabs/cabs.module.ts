@@ -8,9 +8,21 @@ import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
 import { CabTripRequest } from './entities/cab-trip-request.entity';
 import { CabSchedulesService } from './cab-schedules.service';
 import { Booking } from '../booking-engine/entities/booking.entity';
+import { VendorListing } from '../vendor-listings/entities/vendor-listing.entity';
+import { PlatformServicesModule } from '../platform-services/platform-services.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vehicle, User, CabTripSchedule, CabTripRequest, Booking])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Vehicle,
+      User,
+      CabTripSchedule,
+      CabTripRequest,
+      Booking,
+      VendorListing,
+    ]),
+    PlatformServicesModule,
+  ],
   providers: [CabsService, CabSchedulesService],
   controllers: [CabsController],
   exports: [CabsService],

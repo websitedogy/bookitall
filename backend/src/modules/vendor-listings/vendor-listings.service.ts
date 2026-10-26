@@ -777,6 +777,7 @@ export class VendorListingsService {
       '';
     return {
       id: row.id,
+      catalogId: row.catalogId,
       categoryId: row.category,
       category: LABELS[row.category] ?? row.category,
       title: row.title,

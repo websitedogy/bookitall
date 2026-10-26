@@ -28,6 +28,7 @@ import { PlatformServicesModule } from '../platform-services/platform-services.m
       CabTripRequest,
       CabTripSchedule,
       GoodsTransportSchedule,
+      VendorListing,
     ]),
     HotelsModule,
     ToursModule,

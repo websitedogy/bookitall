@@ -25,12 +25,20 @@ export default function PartnerListingsPage() {
     let active = true;
     void Promise.all([
       api<RegisteredVehicle[]>("/cabs/mine", { token }),
+      api<GoodsTransportListing[]>("/vendor-listings/mine?category=cabs", { token }),
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=goods-transport", { token }),
     ])
-      .then(([vehicleResult, listingResult]) => {
+      .then(([vehicleResult, cabListingResult, goodsListingResult]) => {
         if (!active) return;
-        const approvedVehicles = (vehicleResult.data ?? []).filter((vehicle) => vehicle.isActive);
-        const approvedListings = (listingResult.data ?? []).filter((listing) => listing.status === "ACCEPTED");
+        const approvedCabVehicleIds = new Set(
+          (cabListingResult.data ?? [])
+            .filter((listing) => listing.status === "ACCEPTED" && listing.catalogId)
+            .map((listing) => listing.catalogId),
+        );
+        const approvedVehicles = (vehicleResult.data ?? []).filter(
+          (vehicle) => vehicle.isActive && approvedCabVehicleIds.has(vehicle.id),
+        );
+        const approvedListings = (goodsListingResult.data ?? []).filter((listing) => listing.status === "ACCEPTED");
         setVehicles(approvedVehicles);
         setGoodsListings(approvedListings);
         if (!approvedVehicles.length && approvedListings.length) {
