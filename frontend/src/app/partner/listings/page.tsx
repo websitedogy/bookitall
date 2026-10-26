@@ -92,9 +92,6 @@ export default function PartnerListingsPage() {
       <div className="mb-8 border-b border-[var(--line)] pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">My Services</p>
         <h1 className="serif mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Special Schedule</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--ink-soft)]">
-          Post and manage routes for your Cabs, Public Transport and Goods Transport vehicles.
-        </p>
       </div>
 
       {error ? <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
