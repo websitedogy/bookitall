@@ -176,16 +176,22 @@ export class CabSchedulesService implements OnModuleInit {
   }
 
   private async assertApprovedCabListing(partnerId: string, vehicleId: string) {
-    const listing = await this.listings.findOne({
-      where: {
-        userId: partnerId,
-        catalogId: vehicleId,
-        category: 'cabs',
+    const listing = await this.listings
+      .createQueryBuilder('listing')
+      .select('listing.id')
+      .where('listing.userId = :partnerId', { partnerId })
+      .andWhere('listing.category IN (:...categories)', {
+        categories: ['cabs', 'public-transport'],
+      })
+      .andWhere('listing.status = :status', {
         status: ListingStatus.ACCEPTED,
-        deletedAt: IsNull(),
-      },
-      select: { id: true },
-    });
+      })
+      .andWhere('listing.deletedAt IS NULL')
+      .andWhere(
+        '(listing.catalogId = :vehicleId OR listing.fields -> \'scheduleVehicleIds\' @> jsonb_build_array(CAST(:vehicleId AS text)))',
+        { vehicleId },
+      )
+      .getOne();
     if (!listing) {
       throw new ForbiddenException(
         'An administrator must approve your Cab registration before you can post a schedule.',
@@ -204,9 +210,11 @@ export class CabSchedulesService implements OnModuleInit {
       .innerJoin(
         VendorListing,
         'listing',
-        'listing.catalogId = vehicle.id AND listing.userId = schedule.partnerId',
+        'listing.userId = schedule.partnerId AND (listing.catalogId = vehicle.id OR listing.fields -> \'scheduleVehicleIds\' @> jsonb_build_array(vehicle.id::text))',
       )
-      .andWhere('listing.category = :category', { category: 'cabs' })
+      .andWhere('listing.category IN (:...categories)', {
+        categories: ['cabs', 'public-transport'],
+      })
       .andWhere('listing.status = :approvedStatus', {
         approvedStatus: ListingStatus.ACCEPTED,
       })

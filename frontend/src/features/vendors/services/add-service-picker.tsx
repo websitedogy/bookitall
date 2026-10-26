@@ -10,6 +10,7 @@ export function AddServicePicker() {
   const catalog = useVisibleServices();
   const { claimed } = useClaimedCategories();
   const items = catalog.filter((service) => {
+    if (service.id === "public-transport" || service.id === "goods-transport") return true;
     if (service.id === "cloud-kitchen") return !claimed.has("cloud-kitchen") || !claimed.has("local-shops");
     return !claimed.has(service.id);
   });
@@ -29,8 +30,8 @@ export function AddServicePicker() {
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-start justify-center px-4 py-10 md:px-0">
           <p className="max-w-md text-sm leading-6 text-[var(--text-muted)]">
-            Every service you already posted is hidden here, so you cannot add the same one twice. Open My Services to
-            check review status.
+            Services you already posted are hidden here. Public Transport and Goods Transport stay available so you can
+            register additional vehicle types. Open My Services to check review status.
           </p>
           <Link href="/vendors/posts" className="mt-5 text-sm font-medium text-[var(--primary)]">
             View My Services

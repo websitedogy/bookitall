@@ -191,6 +191,16 @@ export function CabRegistrationForm() {
       body.append("whatsapp", whatsapp.replace(/\s/g, ""));
       body.append("cabType", vehicles[0]);
       body.append("vehicleTypes", vehicles.join(", "));
+      body.append(
+        "vehicleScheduleDetails",
+        JSON.stringify(
+          vehicles.map((vehicle) => ({
+            name: vehicle,
+            seats: Number(quotes[vehicle]?.capacity) || 4,
+            perKmRate: Number(quotes[vehicle]?.fare.replace(/[^\d.]/g, "")) || 0,
+          })),
+        ),
+      );
       body.append("vehicleFares", fares);
       body.append("vehicleFeatures", features.join(", "));
       body.append("bookingType", bookingTypes.join(", "));

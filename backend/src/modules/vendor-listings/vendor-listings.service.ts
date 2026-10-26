@@ -320,7 +320,6 @@ export class VendorListingsService {
 
   async create(userId: string, category: string, raw: Record<string, string>, photoUrls: string[]) {
     await this.platformServices.assertEnabled(category);
-    await this.assertCategoryAvailable(userId, category);
     const spec = FORMS[category];
     const fields: Record<string, string> = {};
     for (const [key, value] of Object.entries(raw)) {
@@ -354,6 +353,7 @@ export class VendorListingsService {
     if (fields.mobileNumber && !/^\d{10}$/.test(fields.mobileNumber.replace(/\s/g, ''))) {
       throw new BadRequestException('Enter a 10-digit mobile number');
     }
+    await this.assertCategoryAvailable(userId, category, fields.vehicleNumber);
 
     const user = await this.users.getOrFail(userId);
     const title =
@@ -438,7 +438,11 @@ export class VendorListingsService {
     catalogId?: string | null;
   }) {
     await this.platformServices.assertEnabled(input.category);
-    await this.assertCategoryAvailable(input.userId, input.category);
+    await this.assertCategoryAvailable(
+      input.userId,
+      input.category,
+      input.fields.vehicleNumber,
+    );
     const listing = await this.listings.save(
       this.listings.create({
         userId: input.userId,
@@ -546,10 +550,35 @@ export class VendorListingsService {
     return [...new Set(rows.map((row) => row.category))];
   }
 
-  async assertCategoryAvailable(userId: string, category: string) {
-    const existing = (await this.ownerActiveListings(userId)).find((row) => row.category === category);
-    if (!existing) return;
-    if (existing.status === ListingStatus.ACCEPTED) {
+  async assertCategoryAvailable(
+    userId: string,
+    category: string,
+    vehicleNumber?: string,
+  ) {
+    const existing = (await this.ownerActiveListings(userId)).filter(
+      (row) => row.category === category,
+    );
+    if (['public-transport', 'goods-transport'].includes(category)) {
+      const normalizedNumber = vehicleNumber?.replace(/[\s-]/g, '').toUpperCase();
+      if (!normalizedNumber) {
+        throw new BadRequestException('Enter the vehicle registration number.');
+      }
+      if (
+        existing.some(
+          (row) =>
+            row.fields.vehicleNumber?.replace(/[\s-]/g, '').toUpperCase() ===
+            normalizedNumber,
+        )
+      ) {
+        throw new BadRequestException(
+          'This vehicle is already submitted or registered.',
+        );
+      }
+      return;
+    }
+    const duplicate = existing[0];
+    if (!duplicate) return;
+    if (duplicate.status === ListingStatus.ACCEPTED) {
       throw new BadRequestException('You already listed this service');
     }
     throw new BadRequestException('This service is already submitted and waiting for admin review');
@@ -700,18 +729,39 @@ export class VendorListingsService {
     const user = await this.users.getOrFail(row.userId);
 
     if (row.category === 'cabs') {
-      const seats = Number(fields.seats);
+      const definitions = this.cabScheduleVehicleDefinitions(fields);
+      const vehicleIds: string[] = [];
+      for (const [index, definition] of definitions.entries()) {
+        const vehicle = await this.cabs.create(row.userId, {
+          name: definition.name,
+          category: definition.category,
+          registrationNumber:
+            fields.vehicleNumber ||
+            `TEMP-${Date.now().toString(36)}-${index}`,
+          color: 'White',
+          seats: definition.seats,
+          baseFare: 0,
+          perKmRate: definition.perKmRate,
+          imageUrl: row.photoUrls[0],
+        });
+        vehicleIds.push(vehicle.id);
+      }
+      fields.scheduleVehicleIds = JSON.stringify(vehicleIds);
+      return vehicleIds[0];
+    }
+    if (row.category === 'public-transport') {
       const vehicle = await this.cabs.create(row.userId, {
-        name: fields.shopName || fields.vehicleModel || fields.driverName || row.title,
-        category: fields.cabType,
-        registrationNumber: fields.vehicleNumber || `TEMP-${Date.now().toString(36)}`,
+        name: [fields.vehicleMake, fields.vehicleModel].filter(Boolean).join(' ') ||
+          fields.vehicleType || row.title,
+        category: this.publicTransportCabCategory(fields.vehicleType),
+        registrationNumber: fields.vehicleNumber,
         color: 'White',
-        seats: Number.isFinite(seats) && seats > 0 ? seats : 4,
-        baseFare: Number(fields.entryPrice || fields.price || 0),
-        perKmRate: fields.priceUnit === 'PER_KM' ? Number(fields.price) : 0,
+        seats: Number(fields.seats) || 4,
+        baseFare: 0,
+        perKmRate: 0,
         imageUrl: row.photoUrls[0],
       });
-      return vehicle.id;
+      fields.scheduleVehicleIds = JSON.stringify([vehicle.id]);
     }
     if (row.category === 'tours') {
       const durationDays = Number(String(fields.duration || '').replace(/\D/g, '')) || 1;
@@ -770,6 +820,19 @@ export class VendorListingsService {
 
   private toPost(row: VendorListing, distanceKm: number | null = null, hold = false) {
     const fields = row.fields ?? {};
+    let scheduleVehicleIds: string[] = [];
+    if (fields.scheduleVehicleIds) {
+      try {
+        const parsed: unknown = JSON.parse(fields.scheduleVehicleIds);
+        if (Array.isArray(parsed)) {
+          scheduleVehicleIds = parsed.filter(
+            (id): id is string => typeof id === 'string',
+          );
+        }
+      } catch {
+        scheduleVehicleIds = [];
+      }
+    }
     const location =
       fields.location ||
       fields.destinations ||
@@ -778,6 +841,7 @@ export class VendorListingsService {
     return {
       id: row.id,
       catalogId: row.catalogId,
+      scheduleVehicleIds,
       categoryId: row.category,
       category: LABELS[row.category] ?? row.category,
       title: row.title,
@@ -806,6 +870,63 @@ export class VendorListingsService {
           ? 'homestay'
           : 'hotel',
     };
+  }
+
+  private cabScheduleVehicleDefinitions(fields: Record<string, string>) {
+    type Definition = {
+      name: string;
+      category: string;
+      seats: number;
+      perKmRate: number;
+    };
+    let submitted: unknown;
+    if (fields.vehicleScheduleDetails) {
+      try {
+        submitted = JSON.parse(fields.vehicleScheduleDetails);
+      } catch {
+        throw new BadRequestException('Cab vehicle details are invalid.');
+      }
+    }
+    if (Array.isArray(submitted)) {
+      const definitions = submitted.flatMap((item): Definition[] => {
+        if (!item || typeof item !== 'object') return [];
+        const detail = item as Record<string, unknown>;
+        const name = typeof detail.name === 'string' ? detail.name.trim() : '';
+        const seats = Number(detail.seats);
+        const perKmRate = Number(detail.perKmRate);
+        if (!name || !Number.isInteger(seats) || seats < 1 || !Number.isFinite(perKmRate) || perKmRate < 0) {
+          return [];
+        }
+        return [{
+          name,
+          category: this.cabVehicleCategory(name),
+          seats,
+          perKmRate,
+        }];
+      });
+      if (definitions.length) return definitions;
+    }
+    const seats = Number(fields.seats);
+    return [{
+      name: fields.shopName || fields.vehicleModel || fields.driverName || fields.cabType || 'Cab',
+      category: this.cabVehicleCategory(fields.cabType || ''),
+      seats: Number.isFinite(seats) && seats > 0 ? seats : 4,
+      perKmRate: Number(fields.price) || 0,
+    }];
+  }
+
+  private cabVehicleCategory(name: string) {
+    const normalized = name.toLowerCase();
+    if (normalized.includes('auto')) return 'auto';
+    if (normalized.includes('tempo') || normalized.includes('traveller') || normalized.includes('van')) return 'van';
+    return 'car';
+  }
+
+  private publicTransportCabCategory(vehicleType: string) {
+    const normalized = vehicleType.trim().toLowerCase();
+    if (normalized.includes('auto')) return 'auto';
+    if (normalized.includes('van') || normalized.includes('bus')) return 'van';
+    return 'car';
   }
 
   async getBookable(id: string) {
