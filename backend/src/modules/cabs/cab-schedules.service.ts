@@ -12,10 +12,12 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { Vehicle } from './entities/vehicle.entity';
 import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
 import { CabTripRequest } from './entities/cab-trip-request.entity';
+import { Booking } from '../booking-engine/entities/booking.entity';
 import {
   CreateCabScheduleDto,
   CreateCabTripRequestDto,
   UpdateCabTripRequestDto,
+  UpdateCabScheduleDto,
 } from './dto/cab-schedule.dto';
 
 const RESERVED_REQUEST_STATUSES = ['PENDING', 'ACCEPTED'] as const;
@@ -27,6 +29,8 @@ export class CabSchedulesService implements OnModuleInit {
     private readonly schedules: Repository<CabTripSchedule>,
     @InjectRepository(CabTripRequest)
     private readonly requests: Repository<CabTripRequest>,
+    @InjectRepository(Booking)
+    private readonly bookings: Repository<Booking>,
     @InjectRepository(Vehicle)
     private readonly vehicles: Repository<Vehicle>,
     private readonly dataSource: DataSource,
@@ -88,6 +92,46 @@ export class CabSchedulesService implements OnModuleInit {
     });
     if (!vehicle) {
       throw new NotFoundException('Choose one of your active registered vehicles.');
+    }
+
+    async update(partnerId: string, scheduleId: string, dto: UpdateCabScheduleDto) {
+      const schedule = await this.schedules.findOne({ where: { id: scheduleId } });
+      if (!schedule) throw new NotFoundException('Scheduled trip not found.');
+      if (schedule.partnerId !== partnerId) {
+        throw new ForbiddenException('You can only edit your own scheduled trips.');
+      }
+      if (schedule.status !== 'OPEN' || schedule.departureAt.getTime() <= Date.now()) {
+        throw new BadRequestException('Only active future schedules can be edited.');
+      }
+
+      const vehicle = await this.vehicles.findOne({
+        where: { id: dto.vehicleId, partnerId, isActive: true, deletedAt: IsNull() },
+      });
+      if (!vehicle) {
+        throw new NotFoundException('Choose one of your active registered vehicles.');
+      }
+      const departureAt = new Date(dto.departureAt);
+      if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
+        throw new BadRequestException('Departure must be a future date and time.');
+      }
+      if (dto.seatsOffered > vehicle.seats) {
+        throw new BadRequestException(`This vehicle has only ${vehicle.seats} seats.`);
+      }
+      if (dto.fromPlace.trim().toLowerCase() === dto.toPlace.trim().toLowerCase()) {
+        throw new BadRequestException('Choose different starting and destination places.');
+      }
+      if (dto.pricePerSeat > 100000) {
+        throw new BadRequestException('Price per seat cannot exceed ₹1,00,000.');
+      }
+
+      schedule.vehicleId = vehicle.id;
+      schedule.fromPlace = dto.fromPlace.trim();
+      schedule.toPlace = dto.toPlace.trim();
+      schedule.departureAt = departureAt;
+      schedule.seatsOffered = dto.seatsOffered;
+      schedule.pricePerSeat = dto.pricePerSeat.toFixed(2);
+      schedule.note = dto.note?.trim() || null;
+      return this.schedules.save(schedule);
     }
 
     const departureAt = new Date(dto.departureAt);
@@ -293,13 +337,55 @@ export class CabSchedulesService implements OnModuleInit {
       .groupBy('request.scheduleId')
       .getRawMany<{ scheduleId: string; seats: string }>();
     const reserved = new Map(totals.map((row) => [row.scheduleId, Number(row.seats)]));
-    return rows.map((schedule) => ({
-      ...this.scheduleSummary(schedule),
-      seatsRemaining: Math.max(0, schedule.seatsOffered - (reserved.get(schedule.id) ?? 0)),
-    }));
+    const booked = await this.bookings
+      .createQueryBuilder('booking')
+      .select("booking.details ->> 'specialScheduleId'", 'scheduleId')
+      .addSelect("SUM(CAST(booking.details ->> 'seatsRequested' AS INTEGER))", 'seats')
+      .where("booking.details ->> 'specialScheduleType' = 'cabs'")
+      .andWhere("booking.details ->> 'specialScheduleId' IN (:...ids)", {
+        ids: rows.map((row) => row.id),
+      })
+      .andWhere('booking.status IN (:...statuses)', {
+        statuses: [
+          'AWAITING_PAYMENT',
+          'PENDING',
+          'CONFIRMED',
+          'ASSIGNED',
+          'IN_PROGRESS',
+        ],
+      })
+      .groupBy("booking.details ->> 'specialScheduleId'")
+      .getRawMany<{ scheduleId: string; seats: string }>();
+    const bookedSeats = new Map(booked.map((row) => [row.scheduleId, Number(row.seats)]));
+    return rows
+      .map((schedule) => {
+        const status =
+          schedule.status === 'OPEN' && schedule.departureAt.getTime() <= Date.now()
+            ? 'INACTIVE'
+            : schedule.status === 'OPEN'
+              ? 'ACTIVE'
+              : schedule.status;
+        return {
+          ...this.scheduleSummary(schedule, status),
+          seatsRemaining: Math.max(
+            0,
+            schedule.seatsOffered -
+              (reserved.get(schedule.id) ?? 0) -
+              (bookedSeats.get(schedule.id) ?? 0),
+          ),
+        };
+      });
   }
 
-  private scheduleSummary(schedule: CabTripSchedule) {
+  private scheduleSummary(
+    schedule: CabTripSchedule,
+    status =
+      schedule.status === 'OPEN' && schedule.departureAt.getTime() <= Date.now()
+        ? 'INACTIVE'
+        : schedule.status === 'OPEN'
+          ? 'ACTIVE'
+          : schedule.status,
+  ) {
     return {
       id: schedule.id,
       partnerId: schedule.partnerId,
@@ -310,7 +396,7 @@ export class CabSchedulesService implements OnModuleInit {
       seatsOffered: schedule.seatsOffered,
       pricePerSeat: schedule.pricePerSeat,
       note: schedule.note,
-      status: schedule.status,
+      status,
       vehicle: schedule.vehicle
         ? {
             name: schedule.vehicle.name,

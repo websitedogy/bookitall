@@ -11,6 +11,7 @@ import {
   CreateCabScheduleDto,
   CreateCabTripRequestDto,
   UpdateCabTripRequestDto,
+  UpdateCabScheduleDto,
 } from './dto/cab-schedule.dto';
 
 @Controller('cabs')
@@ -44,6 +45,15 @@ export class CabsController {
   @Roles(UserRole.PARTNER, UserRole.SUPER_ADMIN)
   createSchedule(@CurrentUser('id') userId: string, @Body() dto: CreateCabScheduleDto) {
     return this.schedules.create(userId, dto);
+  }
+
+  @Patch('schedules/:id')
+  updateSchedule(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateCabScheduleDto,
+  ) {
+    return this.schedules.update(userId, id, dto);
   }
 
   @Post('schedules/:id/cancel')

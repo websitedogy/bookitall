@@ -15,10 +15,20 @@ import { RealtimeModule } from '../realtime/realtime.module';
 import { VendorListingsModule } from '../vendor-listings/vendor-listings.module';
 import { MailModule } from '../mail/mail.module';
 import { UsersModule } from '../users/users.module';
+import { CabTripRequest } from '../cabs/entities/cab-trip-request.entity';
+import { CabTripSchedule } from '../cabs/entities/cab-trip-schedule.entity';
+import { GoodsTransportSchedule } from '../special-schedules/entities/goods-transport-schedule.entity';
+import { PlatformServicesModule } from '../platform-services/platform-services.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Booking, BookingStatusHistory]),
+    TypeOrmModule.forFeature([
+      Booking,
+      BookingStatusHistory,
+      CabTripRequest,
+      CabTripSchedule,
+      GoodsTransportSchedule,
+    ]),
     HotelsModule,
     ToursModule,
     CabsModule,
@@ -31,6 +41,7 @@ import { UsersModule } from '../users/users.module';
     VendorListingsModule,
     MailModule,
     UsersModule,
+    PlatformServicesModule,
   ],
   providers: [BookingEngineService],
   controllers: [BookingEngineController],

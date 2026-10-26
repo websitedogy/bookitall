@@ -32,6 +32,11 @@ import { VendorListingsService } from '../vendor-listings/vendor-listings.servic
 import { VendorListing } from '../vendor-listings/entities/vendor-listing.entity';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
+import { CabTripRequest } from '../cabs/entities/cab-trip-request.entity';
+import { CabTripSchedule } from '../cabs/entities/cab-trip-schedule.entity';
+import { GoodsTransportSchedule } from '../special-schedules/entities/goods-transport-schedule.entity';
+import { ListingStatus } from '../vendor-listings/entities/vendor-listing.entity';
+import { PlatformServicesService } from '../platform-services/platform-services.service';
 
 const VENDOR_RESPOND_MS = 5 * 60 * 1000;
 
@@ -43,6 +48,12 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectRepository(Booking) private readonly bookings: Repository<Booking>,
     @InjectRepository(BookingStatusHistory) private readonly history: Repository<BookingStatusHistory>,
+    @InjectRepository(CabTripSchedule)
+    private readonly cabSchedules: Repository<CabTripSchedule>,
+    @InjectRepository(CabTripRequest)
+    private readonly cabRequests: Repository<CabTripRequest>,
+    @InjectRepository(GoodsTransportSchedule)
+    private readonly goodsSchedules: Repository<GoodsTransportSchedule>,
     private readonly dataSource: DataSource,
     private readonly locks: LockService,
     private readonly hotels: HotelsService,
@@ -57,6 +68,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     private readonly vendorListings: VendorListingsService,
     private readonly users: UsersService,
     private readonly mail: MailService,
+    private readonly platformServices: PlatformServicesService,
   ) {}
 
   async onModuleInit() {
@@ -79,14 +91,25 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   async create(customerId: string, dto: CreateBookingDto) {
     await this.assertProfileComplete(customerId);
     const resolved = await this.resolveDto(dto);
-    const priced = await this.priceBooking(resolved);
-    await this.assertNoOpenDuplicate(customerId, priced.partnerId);
+    let priced = await this.priceBooking(resolved);
+    const specialScheduleId = String(resolved.details?.specialScheduleId ?? '');
+    if (!specialScheduleId) {
+      await this.assertNoOpenDuplicate(customerId, priced.partnerId);
+    }
     if (resolved.type === BookingType.HOTEL) {
       await this.assertHotelStayAvailable(priced);
     }
     const lockKey = REDIS_KEYS.bookingLock(`${resolved.type}:${priced.lockKey}`);
     try {
       return await this.locks.withLock(lockKey, async () => {
+        if (specialScheduleId) {
+          priced = await this.priceBooking(resolved);
+          await this.assertSpecialScheduleAvailable(
+            customerId,
+            resolved,
+            Number(resolved.details?.seatsRequested ?? 1),
+          );
+        }
         const percent = await this.commission.getPercent(resolved.type);
         const split = this.commission.calculate(priced.subtotal, percent);
         const booking = await this.bookings.save(

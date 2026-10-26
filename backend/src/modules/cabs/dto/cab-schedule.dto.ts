@@ -48,6 +48,8 @@ export class CreateCabScheduleDto {
   note?: string;
 }
 
+export class UpdateCabScheduleDto extends CreateCabScheduleDto {}
+
 export class CreateCabTripRequestDto {
   @Type(() => Number)
   @IsInt()
