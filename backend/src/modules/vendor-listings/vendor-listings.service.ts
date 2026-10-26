@@ -12,7 +12,6 @@ import { User } from '../users/entities/user.entity';
 import { PartnerType, UserStatus, isPanelRole } from '../../common/enums/user-role.enum';
 import { normalizeMobile } from '../../common/utils/phone';
 import { CabsService } from '../cabs/cabs.service';
-import { Vehicle } from '../cabs/entities/vehicle.entity';
 import { HomeServicesService } from '../home-services/home-services.service';
 import { ToursService } from '../tours/tours.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -963,6 +962,8 @@ export class VendorListingsService {
       const existingVehicles = await this.cabs.listByPartner(lockedListing.userId);
       const existingVehicle = existingVehicles.find(
         (vehicle) =>
+          vehicle.isActive &&
+          !vehicle.deletedAt &&
           vehicle.category === category &&
           vehicle.registrationNumber.replace(/[\s-]/g, '').toUpperCase() ===
             registrationNumber.replace(/[\s-]/g, '').toUpperCase(),

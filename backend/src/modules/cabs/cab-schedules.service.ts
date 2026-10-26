@@ -197,7 +197,7 @@ export class CabSchedulesService implements OnModuleInit {
       .getOne();
     if (!listing) {
       throw new ForbiddenException(
-        'An administrator must approve your Cab registration before you can post a schedule.',
+        'An administrator must approve your Cab or Public Transport registration before you can post a schedule.',
       );
     }
   }

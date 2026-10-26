@@ -81,7 +81,7 @@ export default function PartnerListingsPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">My Services</p>
         <h1 className="serif mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Special Schedule</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--ink-soft)]">
-          Post and manage upcoming routes for your cab and Goods Transport services.
+          Post and manage routes for your Cabs, Public Transport and Goods Transport vehicles.
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export default function PartnerListingsPage() {
       {!loading && availableServices.length ? (
       <div role="tablist" aria-label="Special schedule service" className="flex gap-2 border-b border-[var(--line)]">
         {([
-          ...(vehicles.length ? ([["cabs", "Cabs"]] as const) : []),
+          ...(vehicles.length ? ([["cabs", "Cabs & Public Transport"]] as const) : []),
           ...(goodsListings.length ? ([["goods-transport", "Goods Transport"]] as const) : []),
         ] as const).map(([id, label]) => (
           <button
@@ -116,7 +116,7 @@ export default function PartnerListingsPage() {
       ) : null}
       {!loading && !availableServices.length && !error ? (
         <p className="mt-6 rounded-xl border border-dashed border-[var(--line)] px-5 py-6 text-sm text-[var(--ink-soft)]">
-          Special Schedule becomes available after an administrator approves your Cab or Goods Transport service.
+          Special Schedule becomes available after an administrator approves your Cab, Public Transport or Goods Transport vehicle.
         </p>
       ) : null}
     </div>
