@@ -13,7 +13,10 @@ import { Vehicle } from './entities/vehicle.entity';
 import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
 import { CabTripRequest } from './entities/cab-trip-request.entity';
 import { Booking } from '../booking-engine/entities/booking.entity';
-import { ListingStatus, VendorListing } from '../vendor-listings/entities/vendor-listing.entity';
+import {
+  ListingStatus,
+  VendorListing,
+} from '../vendor-listings/entities/vendor-listing.entity';
 import { PlatformServicesService } from '../platform-services/platform-services.service';
 import {
   CreateCabScheduleDto,
