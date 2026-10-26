@@ -41,7 +41,7 @@ export default function PartnerListingsPage() {
         const approvedListings = (goodsListingResult.data ?? []).filter((listing) => listing.status === "ACCEPTED");
         setVehicles(approvedVehicles);
         setGoodsListings(approvedListings);
-        if (!approvedVehicles.length && approvedListings.length) {
+        if (window.location.hash === "#goods-transport-schedules" || (!approvedVehicles.length && approvedListings.length)) {
           setActiveService("goods-transport");
         }
       })
@@ -55,6 +55,16 @@ export default function PartnerListingsPage() {
       active = false;
     };
   }, [token]);
+
+  useEffect(() => {
+    if (loading) return;
+    const targetId =
+      activeService === "goods-transport" ? "goods-transport-schedules" : "scheduled-cab-trips";
+    if (!window.location.hash || window.location.hash.slice(1) !== targetId) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
+    });
+  }, [activeService, loading]);
 
   const availableServices = [
     ...(vehicles.length ? (["cabs"] as const) : []),

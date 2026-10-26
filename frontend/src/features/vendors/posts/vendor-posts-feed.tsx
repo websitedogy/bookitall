@@ -155,9 +155,9 @@ export function VendorPostsFeed({ compact = false }: { compact?: boolean }) {
                     </span>
                   </span>
                   </Link>
-                  {ad.categoryId === "cabs" && ad.status === "ACCEPTED" ? (
+                  {["cabs", "goods-transport"].includes(ad.categoryId) && ad.status === "ACCEPTED" ? (
                     <Link
-                      href="/partner/listings#scheduled-cab-trips"
+                      href={`/partner/listings#${ad.categoryId === "goods-transport" ? "goods-transport-schedules" : "scheduled-cab-trips"}`}
                       className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--primary-soft)] px-3 text-xs font-semibold text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
                     >
                       Special Schedule
@@ -165,7 +165,7 @@ export function VendorPostsFeed({ compact = false }: { compact?: boolean }) {
                   ) : null}
                   <Link href={`/vendors/posts/${ad.id}/edit`} className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-3 text-xs font-semibold text-[var(--primary)] ring-1 ring-[var(--border)] transition hover:bg-[var(--primary-soft)]">
                     <Pencil className="h-3.5 w-3.5" aria-hidden />
-                    Edit
+                    Edit Service
                   </Link>
                 </div>
               </li>
