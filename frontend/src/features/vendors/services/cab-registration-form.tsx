@@ -330,7 +330,7 @@ export function CabRegistrationForm() {
             <div className="mt-3 space-y-2">
               {vehicleOptions.map((vehicle) => {
                 const on = vehicles.includes(vehicle);
-                const quote = quotes[vehicle] ?? emptyQuote();
+                const quote = quotes[vehicle] ?? emptyQuote(vehicle);
                 return (
                   <div key={vehicle} className="rounded-lg border border-[#d7dde6] px-3 py-2.5">
                     <button type="button" onClick={() => toggleVehicle(vehicle)} className="flex w-full items-center gap-2.5 text-left text-sm">
