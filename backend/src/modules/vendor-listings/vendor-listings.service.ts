@@ -14,6 +14,7 @@ import { PlatformServicesService } from '../platform-services/platform-services.
 import { geocodeIndiaAddress, isUsableCoord } from '../../common/utils/geocode';
 import { vendorListingCanonicalPath } from '../../common/utils/listing-path';
 import { NotificationType } from '../../common/enums/notification.enum';
+import { Vehicle } from '../cabs/entities/vehicle.entity';
 
 const FORMS: Record<string, { required: string[]; titleField: string; partnerType: PartnerType }> = {
   cabs: { required: ['shopName', 'mobileNumber', 'cabType', 'bookingType', 'price', 'priceUnit', 'district', 'coverageType'], titleField: 'shopName', partnerType: PartnerType.CAB },
@@ -527,6 +528,12 @@ export class VendorListingsService {
     const originLng = Number.isFinite(lng) ? lng : undefined;
     const posts = [];
     for (const row of rows) {
+      if (
+        row.category === 'public-transport' &&
+        row.status === ListingStatus.ACCEPTED
+      ) {
+        await this.ensurePublicTransportScheduleVehicle(row);
+      }
       try {
         const pin = await this.listingPin(row);
         const distanceKm =
@@ -547,6 +554,9 @@ export class VendorListingsService {
   }
 
   async assertCategoryAvailable(userId: string, category: string) {
+    if (['cabs', 'public-transport', 'goods-transport'].includes(category)) {
+      return;
+    }
     const existing = (await this.ownerActiveListings(userId)).find((row) => row.category === category);
     if (!existing) return;
     if (existing.status === ListingStatus.ACCEPTED) {
@@ -669,6 +679,9 @@ export class VendorListingsService {
         [row.catalogId],
       );
     }
+    if (row.category === 'public-transport') {
+      await this.ensurePublicTransportScheduleVehicle(row);
+    }
     const owner = await this.users.getOrFail(row.userId);
     if (owner.status === UserStatus.PENDING_VERIFICATION || owner.status === UserStatus.INACTIVE) {
       await this.users.setStatus(row.userId, UserStatus.ACTIVE);
@@ -768,6 +781,67 @@ export class VendorListingsService {
     return row.catalogId;
   }
 
+  private async ensurePublicTransportScheduleVehicle(row: VendorListing) {
+    const existingId = row.fields?.cabScheduleVehicleId;
+    if (existingId) return existingId;
+
+    const fields = row.fields ?? {};
+    const seats = Number(fields.seats);
+    const baseFare = Number(fields.price);
+    if (
+      !fields.vehicleType ||
+      !fields.vehicleNumber ||
+      !Number.isInteger(seats) ||
+      seats < 1 ||
+      !Number.isFinite(baseFare) ||
+      baseFare <= 0
+    ) {
+      throw new BadRequestException(
+        'This approved Public Transport listing is missing vehicle details required for scheduling.',
+      );
+    }
+
+    const vehicleId = await this.listings.manager.transaction(async (manager) => {
+      const listings = manager.getRepository(VendorListing);
+      const lockedListing = await listings.findOne({
+        where: { id: row.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!lockedListing) throw new NotFoundException('Listing not found');
+      if (lockedListing.fields?.cabScheduleVehicleId) {
+        return lockedListing.fields.cabScheduleVehicleId;
+      }
+
+      const vehicles = manager.getRepository(Vehicle);
+      const vehicle = vehicles.create({
+        partnerId: lockedListing.userId,
+        driverId: null,
+        name:
+          [fields.vehicleType, fields.vehicleModel].filter(Boolean).join(' ') ||
+          lockedListing.title,
+        category: fields.vehicleType,
+        registrationNumber: fields.vehicleNumber,
+        color: 'White',
+        seats,
+        baseFare: baseFare.toFixed(2),
+        perKmRate: '0.00',
+        imageUrl: lockedListing.photoUrls?.[0] ?? null,
+        isActive: true,
+        isAvailable: true,
+      });
+      const savedVehicle = await vehicles.save(vehicle);
+      lockedListing.fields = {
+        ...(lockedListing.fields ?? {}),
+        cabScheduleVehicleId: savedVehicle.id,
+      };
+      await listings.save(lockedListing);
+      row.fields = lockedListing.fields;
+      return savedVehicle.id;
+    });
+    row.fields = { ...(row.fields ?? {}), cabScheduleVehicleId: vehicleId };
+    return vehicleId;
+  }
+
   private toPost(row: VendorListing, distanceKm: number | null = null, hold = false) {
     const fields = row.fields ?? {};
     const location =
@@ -778,6 +852,7 @@ export class VendorListingsService {
     return {
       id: row.id,
       catalogId: row.catalogId,
+      scheduleVehicleId: fields.cabScheduleVehicleId || null,
       categoryId: row.category,
       category: LABELS[row.category] ?? row.category,
       title: row.title,

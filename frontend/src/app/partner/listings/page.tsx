@@ -26,14 +26,20 @@ export default function PartnerListingsPage() {
     void Promise.all([
       api<RegisteredVehicle[]>("/cabs/mine", { token }),
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=cabs", { token }),
+      api<GoodsTransportListing[]>("/vendor-listings/mine?category=public-transport", { token }),
       api<GoodsTransportListing[]>("/vendor-listings/mine?category=goods-transport", { token }),
     ])
-      .then(([vehicleResult, cabListingResult, goodsListingResult]) => {
+      .then(([vehicleResult, cabListingResult, publicTransportResult, goodsListingResult]) => {
         if (!active) return;
         const approvedCabVehicleIds = new Set(
-          (cabListingResult.data ?? [])
-            .filter((listing) => listing.status === "ACCEPTED" && listing.catalogId)
-            .map((listing) => listing.catalogId),
+          [
+            ...(cabListingResult.data ?? [])
+              .filter((listing) => listing.status === "ACCEPTED" && listing.catalogId)
+              .map((listing) => listing.catalogId),
+            ...(publicTransportResult.data ?? [])
+              .filter((listing) => listing.status === "ACCEPTED" && listing.scheduleVehicleId)
+              .map((listing) => listing.scheduleVehicleId),
+          ],
         );
         const approvedVehicles = (vehicleResult.data ?? []).filter(
           (vehicle) => vehicle.isActive && approvedCabVehicleIds.has(vehicle.id),
