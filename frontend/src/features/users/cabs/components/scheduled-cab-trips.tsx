@@ -44,7 +44,7 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
   const [seatCounts, setSeatCounts] = useState<Record<string, number>>({});
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const upcomingTrips = trips.filter(
     (trip) => new Date(trip.departureAt).getTime() > now,
   );
@@ -71,15 +71,6 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
       active = false;
     };
   }, [schedulesApiPath, token, user?.role]);
-
-  async function refresh() {
-    const result = await api<TripSchedule[]>(schedulesApiPath);
-    setTrips(result.data ?? []);
-    if (token && user?.role === "CUSTOMER") {
-      const mine = await api<TripRequest[]>("/cabs/schedule-requests/mine", { token });
-      setRequests(mine.data ?? []);
-    }
-  }
 
   async function requestSeats(trip: TripSchedule) {
     if (!token || user?.role !== "CUSTOMER") {

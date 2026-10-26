@@ -50,7 +50,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const [minimumDeparture] = useState(() => {
     const date = new Date(Date.now() + 60_000);
     const pad = (value: number) => String(value).padStart(2, "0");
