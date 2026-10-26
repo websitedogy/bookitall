@@ -128,8 +128,8 @@ export function GoodsTransportScheduleManager({
       setPrice("");
       setNote("");
       setEditingId("");
-      await refresh();
       setActiveTab("history");
+      await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post this schedule.");
     } finally {
@@ -185,10 +185,10 @@ export function GoodsTransportScheduleManager({
           <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
         </div>
         <div className="grid gap-8 p-5 sm:p-8">
-          <div role="tablist" aria-label="Special schedule tabs" className="flex border-b border-[var(--border)]">
+          <div role="tablist" aria-label="Special schedule tabs" className="grid grid-cols-2 border-b border-[var(--border)]">
             {([
               ["form", editingId ? "Edit Schedule" : "Add Schedule"],
-              ["history", `Special Schedule History (${schedules.length})`],
+              ["history", "history"],
             ] as const).map(([tab, label]) => (
               <button
                 key={tab}
@@ -196,13 +196,18 @@ export function GoodsTransportScheduleManager({
                 role="tab"
                 aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
-                className={`-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                className={`-mb-px min-w-0 border-b-2 px-2 py-3 text-xs font-semibold transition sm:px-4 sm:text-sm ${
                   activeTab === tab
                     ? "border-[var(--primary)] text-[var(--primary)]"
                     : "border-transparent text-[var(--ink-soft)]"
                 }`}
               >
-                {label}
+                {label === "history" ? (
+                  <>
+                    <span className="sm:hidden">History ({schedules.length})</span>
+                    <span className="hidden sm:inline">Special Schedule History ({schedules.length})</span>
+                  </>
+                ) : label}
               </button>
             ))}
           </div>
