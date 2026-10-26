@@ -19,6 +19,7 @@ import { CabTripRequest } from '../cabs/entities/cab-trip-request.entity';
 import { CabTripSchedule } from '../cabs/entities/cab-trip-schedule.entity';
 import { GoodsTransportSchedule } from '../special-schedules/entities/goods-transport-schedule.entity';
 import { PlatformServicesModule } from '../platform-services/platform-services.module';
+import { VendorListing } from '../vendor-listings/entities/vendor-listing.entity';
 
 @Module({
   imports: [

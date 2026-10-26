@@ -9,7 +9,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Booking, BookingStatusHistory } from './entities/booking.entity';
 import { BookingStatus, BookingType } from '../../common/enums/booking.enum';
 import { PaymentMethod, PaymentStatus, WalletTransactionReason } from '../../common/enums/finance.enum';
@@ -110,6 +110,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     const lockKey = REDIS_KEYS.bookingLock(`${resolved.type}:${priced.lockKey}`);
     try {
       return await this.locks.withLock(lockKey, async () => {
+        let bookingDetails: Record<string, unknown> = priced.details;
         if (specialScheduleId) {
           priced = await this.priceBooking(resolved);
           await this.assertSpecialScheduleAvailable(
@@ -118,7 +119,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
             Number(resolved.details?.seatsRequested ?? 1),
           );
           const customer = await this.users.getOrFail(customerId);
-          priced.details = {
+          bookingDetails = {
             ...priced.details,
             customerName: customer.fullName,
             customerPhone: customer.phone,
@@ -140,7 +141,7 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
             commissionAmount: split.commissionAmount.toFixed(2),
             total: (priced.subtotal + priced.tax).toFixed(2),
             scheduledAt: priced.scheduledAt,
-            details: priced.details,
+            details: bookingDetails,
           }),
         );
         await this.addHistory(booking.id, BookingStatus.PENDING, BookingStatus.AWAITING_PAYMENT, customerId, 'Booking created');
