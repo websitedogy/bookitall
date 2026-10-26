@@ -194,6 +194,12 @@ export function BookingDetailPage({ id }: { id: string }) {
           ) : null}
           {booking.details?.pickupLabel ? <Row label="Pickup" value={String(booking.details.pickupLabel)} /> : null}
           {booking.details?.dropLabel ? <Row label="Destination" value={String(booking.details.dropLabel)} /> : null}
+          {booking.details?.specialScheduleType ? (
+            <Row
+              label="Special schedule"
+              value={`${String(booking.details.pickupLabel ?? booking.details.fromPlace ?? "")} → ${String(booking.details.dropLabel ?? booking.details.toPlace ?? "")}`}
+            />
+          ) : null}
           {booking.details?.vehicleName ? <Row label="Vehicle" value={String(booking.details.vehicleName)} /> : null}
           {booking.details?.distanceKm != null ? <Row label="Estimated distance" value={`${booking.details.distanceKm} km`} /> : null}
           {booking.details?.fareKind === "estimated" ? <Row label="Fare" value="Estimated" /> : null}

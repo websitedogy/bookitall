@@ -140,6 +140,9 @@ export class CabSchedulesService implements OnModuleInit {
     if (schedule.status !== 'OPEN' || schedule.departureAt.getTime() <= Date.now()) {
       throw new BadRequestException('Only active future schedules can be edited.');
     }
+    if (await this.hasActiveBooking(scheduleId)) {
+      throw new BadRequestException('This schedule cannot be edited while it has an active order.');
+    }
 
     const vehicle = await this.vehicles.findOne({
       where: { id: dto.vehicleId, partnerId, isActive: true, deletedAt: IsNull() },
@@ -215,7 +218,8 @@ export class CabSchedulesService implements OnModuleInit {
       .orderBy('schedule.departureAt', 'ASC')
       .take(100)
       .getMany();
-    return this.withSeatsRemaining(rows);
+    const withAvailability = await this.withSeatsRemaining(rows);
+    return withAvailability.filter((schedule) => schedule.seatsRemaining > 0);
   }
 
   async listMine(partnerId: string) {
@@ -353,6 +357,9 @@ export class CabSchedulesService implements OnModuleInit {
       if (schedule.status === 'CANCELLED') {
         throw new BadRequestException('This scheduled trip is already cancelled.');
       }
+      if (await this.hasActiveBooking(scheduleId)) {
+        throw new BadRequestException('Resolve the active order before cancelling this trip.');
+      }
       schedule.status = 'CANCELLED';
       await schedules.save(schedule);
       await requests.update(
@@ -361,6 +368,25 @@ export class CabSchedulesService implements OnModuleInit {
       );
       return schedule;
     });
+  }
+
+  private hasActiveBooking(scheduleId: string) {
+    return this.bookings
+      .createQueryBuilder('booking')
+      .where("booking.details ->> 'specialScheduleType' = 'cabs'")
+      .andWhere("booking.details ->> 'specialScheduleId' = :scheduleId", {
+        scheduleId,
+      })
+      .andWhere('booking.status IN (:...statuses)', {
+        statuses: [
+          'AWAITING_PAYMENT',
+          'PENDING',
+          'CONFIRMED',
+          'ASSIGNED',
+          'IN_PROGRESS',
+        ],
+      })
+      .getExists();
   }
 
   private async withSeatsRemaining(rows: CabTripSchedule[]) {

@@ -256,6 +256,11 @@ export function BookingsList({
                     {scope === "orders" ? customerNameOf(booking) || serviceLabelOf(booking) : titleOf(booking)}
                   </p>
                   {summaryLine ? <p className="mt-0.5 truncate text-xs text-slate-500">{summaryLine}</p> : null}
+                  {booking.details?.specialScheduleType ? (
+                    <p className="mt-1 text-[12px] text-slate-600">
+                      {String(booking.details.pickupLabel ?? booking.details.fromPlace ?? "")} → {String(booking.details.dropLabel ?? booking.details.toPlace ?? "")}
+                    </p>
+                  ) : null}
                   {scope === "orders" && location ? (
                     <p className="mt-1 line-clamp-2 text-[12px] text-slate-600">{location}</p>
                   ) : null}
