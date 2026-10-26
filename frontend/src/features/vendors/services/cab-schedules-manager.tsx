@@ -445,8 +445,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 ) : null}
               </div>
             </div>
-            )}
           </div>
+            )}
         </div>
       </div>
     </section>

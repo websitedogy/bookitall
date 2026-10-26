@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarClock, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { useAuth } from "@/features/auth/store";
 import { api } from "@/shared/lib/api";
 import { inr } from "@/shared/lib/format";
