@@ -36,7 +36,14 @@ import { useDraftFiles, useDraftState } from "./use-vendor-form-draft";
 const inputClass =
   "mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-[#f8fafc] px-3.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[var(--primary)] focus:bg-white focus:ring-2 focus:ring-[var(--primary-soft)]";
 
-const emptyQuote = (): VehicleQuote => ({ fare: "", capacity: "4", availability: "Available" });
+function emptyQuote(vehicle: string): VehicleQuote {
+  const normalized = vehicle.toLowerCase();
+  const capacity =
+    normalized.includes("auto") ? "3" :
+    normalized.includes("mini bus") || normalized === "bus" || normalized.includes("tempo") ? "12" :
+    normalized === "van" ? "7" : "4";
+  return { fare: "", capacity, availability: "Available" };
+}
 
 export function CabRegistrationForm() {
   const router = useRouter();
@@ -121,7 +128,7 @@ export function CabRegistrationForm() {
         delete next[value];
         return next;
       }
-      return { ...current, [value]: current[value] ?? emptyQuote() };
+      return { ...current, [value]: current[value] ?? emptyQuote(value) };
     });
     setError("");
   }

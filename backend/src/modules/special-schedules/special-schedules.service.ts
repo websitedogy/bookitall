@@ -177,9 +177,7 @@ export class SpecialSchedulesService implements OnModuleInit {
         'Choose one of your approved Goods Transport or Packers & Movers listings.',
       );
     }
-    await this.platformServices.assertEnabled(
-      listing.category as 'goods-transport' | 'packers-movers',
-    );
+    await this.platformServices.assertEnabled(listing.category);
     const departureAt = new Date(dto.departureAt);
     if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
       throw new BadRequestException('Departure must be a future date and time.');
@@ -335,7 +333,11 @@ export class SpecialSchedulesService implements OnModuleInit {
       id: schedule.id,
       listingId: schedule.listingId,
       serviceCategory: listing?.category ?? 'goods-transport',
-      vehicle: fields.vehicleType || listing?.title || 'Goods vehicle',
+      vehicle:
+        fields.vehicleType ||
+        fields.serviceType ||
+        listing?.title ||
+        'Goods vehicle',
       vehicleNumber: fields.vehicleNumber ?? null,
       loadCapacity: fields.loadCapacity ?? null,
       partnerName: listing?.title ?? 'Goods Transport vendor',
