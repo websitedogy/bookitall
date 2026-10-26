@@ -81,12 +81,19 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
     setBusyId(trip.id);
     setError("");
     try {
-      await api(`/cabs/schedules/${trip.id}/requests`, {
+      const result = await api<{ id: string }>("/bookings", {
         method: "POST",
         token,
-        body: JSON.stringify({ seatsRequested }),
+        body: JSON.stringify({
+          type: "CAB",
+          details: {
+            specialScheduleId: trip.id,
+            specialScheduleType: "cabs",
+            seatsRequested,
+          },
+        }),
       });
-      await refresh();
+      router.push(result.data?.id ? `/my-bookings/${result.data.id}` : "/my-bookings");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not request these seats.");
     } finally {
@@ -148,7 +155,7 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
                     onClick={() => void requestSeats(trip)}
                     className="rounded-full bg-[#0f7d6e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                   >
-                    {busyId === trip.id ? "Sending…" : token ? "Request seats" : "Sign in to request"}
+                    {busyId === trip.id ? "Booking…" : token ? "Book seats" : "Sign in to book"}
                   </button>
                 )}
               </div>
