@@ -94,46 +94,6 @@ export class CabSchedulesService implements OnModuleInit {
       throw new NotFoundException('Choose one of your active registered vehicles.');
     }
 
-    async update(partnerId: string, scheduleId: string, dto: UpdateCabScheduleDto) {
-      const schedule = await this.schedules.findOne({ where: { id: scheduleId } });
-      if (!schedule) throw new NotFoundException('Scheduled trip not found.');
-      if (schedule.partnerId !== partnerId) {
-        throw new ForbiddenException('You can only edit your own scheduled trips.');
-      }
-      if (schedule.status !== 'OPEN' || schedule.departureAt.getTime() <= Date.now()) {
-        throw new BadRequestException('Only active future schedules can be edited.');
-      }
-
-      const vehicle = await this.vehicles.findOne({
-        where: { id: dto.vehicleId, partnerId, isActive: true, deletedAt: IsNull() },
-      });
-      if (!vehicle) {
-        throw new NotFoundException('Choose one of your active registered vehicles.');
-      }
-      const departureAt = new Date(dto.departureAt);
-      if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
-        throw new BadRequestException('Departure must be a future date and time.');
-      }
-      if (dto.seatsOffered > vehicle.seats) {
-        throw new BadRequestException(`This vehicle has only ${vehicle.seats} seats.`);
-      }
-      if (dto.fromPlace.trim().toLowerCase() === dto.toPlace.trim().toLowerCase()) {
-        throw new BadRequestException('Choose different starting and destination places.');
-      }
-      if (dto.pricePerSeat > 100000) {
-        throw new BadRequestException('Price per seat cannot exceed ₹1,00,000.');
-      }
-
-      schedule.vehicleId = vehicle.id;
-      schedule.fromPlace = dto.fromPlace.trim();
-      schedule.toPlace = dto.toPlace.trim();
-      schedule.departureAt = departureAt;
-      schedule.seatsOffered = dto.seatsOffered;
-      schedule.pricePerSeat = dto.pricePerSeat.toFixed(2);
-      schedule.note = dto.note?.trim() || null;
-      return this.schedules.save(schedule);
-    }
-
     const departureAt = new Date(dto.departureAt);
     if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
       throw new BadRequestException('Departure must be a future date and time.');
@@ -161,6 +121,46 @@ export class CabSchedulesService implements OnModuleInit {
         status: 'OPEN',
       }),
     );
+  }
+
+  async update(partnerId: string, scheduleId: string, dto: UpdateCabScheduleDto) {
+    const schedule = await this.schedules.findOne({ where: { id: scheduleId } });
+    if (!schedule) throw new NotFoundException('Scheduled trip not found.');
+    if (schedule.partnerId !== partnerId) {
+      throw new ForbiddenException('You can only edit your own scheduled trips.');
+    }
+    if (schedule.status !== 'OPEN' || schedule.departureAt.getTime() <= Date.now()) {
+      throw new BadRequestException('Only active future schedules can be edited.');
+    }
+
+    const vehicle = await this.vehicles.findOne({
+      where: { id: dto.vehicleId, partnerId, isActive: true, deletedAt: IsNull() },
+    });
+    if (!vehicle) {
+      throw new NotFoundException('Choose one of your active registered vehicles.');
+    }
+    const departureAt = new Date(dto.departureAt);
+    if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
+      throw new BadRequestException('Departure must be a future date and time.');
+    }
+    if (dto.seatsOffered > vehicle.seats) {
+      throw new BadRequestException(`This vehicle has only ${vehicle.seats} seats.`);
+    }
+    if (dto.fromPlace.trim().toLowerCase() === dto.toPlace.trim().toLowerCase()) {
+      throw new BadRequestException('Choose different starting and destination places.');
+    }
+    if (dto.pricePerSeat > 100000) {
+      throw new BadRequestException('Price per seat cannot exceed ₹1,00,000.');
+    }
+
+    schedule.vehicleId = vehicle.id;
+    schedule.fromPlace = dto.fromPlace.trim();
+    schedule.toPlace = dto.toPlace.trim();
+    schedule.departureAt = departureAt;
+    schedule.seatsOffered = dto.seatsOffered;
+    schedule.pricePerSeat = dto.pricePerSeat.toFixed(2);
+    schedule.note = dto.note?.trim() || null;
+    return this.schedules.save(schedule);
   }
 
   async listOpen(partnerId?: string) {
