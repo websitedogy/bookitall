@@ -5,13 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ListingStatus, VendorListing } from './entities/vendor-listing.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import { PartnerType, UserStatus, isPanelRole } from '../../common/enums/user-role.enum';
 import { normalizeMobile } from '../../common/utils/phone';
 import { CabsService } from '../cabs/cabs.service';
+import { Vehicle } from '../cabs/entities/vehicle.entity';
 import { HomeServicesService } from '../home-services/home-services.service';
 import { ToursService } from '../tours/tours.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -321,6 +322,7 @@ export class VendorListingsService {
     private readonly tours: ToursService,
     private readonly notes: NotificationsService,
     private readonly platformServices: PlatformServicesService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(userId: string, category: string, raw: Record<string, string>, photoUrls: string[]) {
@@ -531,6 +533,9 @@ export class VendorListingsService {
       qb.andWhere('listing.category = :category', { category });
     }
     const rows = await qb.getMany();
+    for (let index = 0; index < rows.length; index += 1) {
+      rows[index] = await this.ensurePublicTransportScheduleVehicle(rows[index]);
+    }
     const hold = vendorHeld(me.status);
     const originLat = Number.isFinite(lat) ? lat : undefined;
     const originLng = Number.isFinite(lng) ? lng : undefined;
@@ -755,17 +760,7 @@ export class VendorListingsService {
       return vehicleIds[0];
     }
     if (row.category === 'public-transport') {
-      const vehicle = await this.cabs.create(row.userId, {
-        name: [fields.vehicleMake, fields.vehicleModel].filter(Boolean).join(' ') ||
-          fields.vehicleType || row.title,
-        category: this.publicTransportCabCategory(fields.vehicleType),
-        registrationNumber: fields.vehicleNumber,
-        color: 'White',
-        seats: Number(fields.seats) || 4,
-        baseFare: 0,
-        perKmRate: 0,
-        imageUrl: row.photoUrls[0],
-      });
+      const vehicle = await this.createPublicTransportScheduleVehicle(row);
       fields.scheduleVehicleIds = JSON.stringify([vehicle.id]);
     }
     if (row.category === 'tours') {
@@ -937,6 +932,66 @@ export class VendorListingsService {
     if (normalized.includes('auto')) return 'auto';
     if (normalized.includes('van') || normalized.includes('bus')) return 'van';
     return 'car';
+  }
+
+  private async ensurePublicTransportScheduleVehicle(row: VendorListing) {
+    if (
+      row.category !== 'public-transport' ||
+      row.status !== ListingStatus.ACCEPTED ||
+      row.fields?.scheduleVehicleIds
+    ) {
+      return row;
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const lockedListing = await manager.getRepository(VendorListing).findOne({
+        where: { id: row.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (
+        !lockedListing ||
+        lockedListing.status !== ListingStatus.ACCEPTED ||
+        lockedListing.fields?.scheduleVehicleIds
+      ) {
+        return lockedListing ?? row;
+      }
+
+      const registrationNumber = lockedListing.fields.vehicleNumber || '';
+      const category = this.publicTransportCabCategory(
+        lockedListing.fields.vehicleType || '',
+      );
+      const existingVehicles = await this.cabs.listByPartner(lockedListing.userId);
+      const existingVehicle = existingVehicles.find(
+        (vehicle) =>
+          vehicle.category === category &&
+          vehicle.registrationNumber.replace(/[\s-]/g, '').toUpperCase() ===
+            registrationNumber.replace(/[\s-]/g, '').toUpperCase(),
+      );
+      const vehicle =
+        existingVehicle || (await this.createPublicTransportScheduleVehicle(lockedListing));
+      lockedListing.fields = {
+        ...lockedListing.fields,
+        scheduleVehicleIds: JSON.stringify([vehicle.id]),
+      };
+      return manager.getRepository(VendorListing).save(lockedListing);
+    });
+  }
+
+  private createPublicTransportScheduleVehicle(row: VendorListing) {
+    const fields = row.fields ?? {};
+    return this.cabs.create(row.userId, {
+      name:
+        [fields.vehicleMake, fields.vehicleModel].filter(Boolean).join(' ') ||
+        fields.vehicleType ||
+        row.title,
+      category: this.publicTransportCabCategory(fields.vehicleType || ''),
+      registrationNumber: fields.vehicleNumber || `TEMP-${Date.now().toString(36)}`,
+      color: 'White',
+      seats: Number(fields.seats) || 4,
+      baseFare: 0,
+      perKmRate: 0,
+      imageUrl: row.photoUrls[0],
+    });
   }
 
   async getBookable(id: string) {
