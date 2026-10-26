@@ -54,6 +54,8 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     private readonly cabRequests: Repository<CabTripRequest>,
     @InjectRepository(GoodsTransportSchedule)
     private readonly goodsSchedules: Repository<GoodsTransportSchedule>,
+    @InjectRepository(VendorListing)
+    private readonly vendorListingRows: Repository<VendorListing>,
     private readonly dataSource: DataSource,
     private readonly locks: LockService,
     private readonly hotels: HotelsService,
@@ -764,7 +766,8 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         schedule.status !== 'OPEN' ||
         schedule.departureAt.getTime() <= Date.now() ||
         !schedule.vehicle?.isActive ||
-        schedule.vehicle.deletedAt
+        schedule.vehicle.deletedAt ||
+        !(await this.hasApprovedCabListing(schedule.partnerId, schedule.vehicleId))
       ) {
         throw new NotFoundException('This scheduled cab trip is no longer available.');
       }
@@ -862,7 +865,8 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       if (
         !schedule ||
         schedule.status !== 'OPEN' ||
-        schedule.departureAt.getTime() <= Date.now()
+        schedule.departureAt.getTime() <= Date.now() ||
+        !(await this.hasApprovedCabListing(schedule.partnerId, schedule.vehicleId))
       ) {
         throw new NotFoundException('This scheduled cab trip is no longer available.');
       }
@@ -937,6 +941,19 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     if (existing) {
       throw new ConflictException('This goods transport schedule has already been booked.');
     }
+  }
+
+  private async hasApprovedCabListing(partnerId: string, vehicleId: string) {
+    const listing = await this.vendorListingRows.findOne({
+      where: {
+        userId: partnerId,
+        catalogId: vehicleId,
+        category: 'cabs',
+        status: ListingStatus.ACCEPTED,
+      },
+      select: { id: true },
+    });
+    return Boolean(listing);
   }
 
   private async priceCatalog(dto: CreateBookingDto) {

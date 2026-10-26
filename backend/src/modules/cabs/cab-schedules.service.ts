@@ -162,24 +162,6 @@ export class CabSchedulesService implements OnModuleInit {
       throw new BadRequestException('Price per seat cannot exceed ₹1,00,000.');
     }
 
-    private async assertApprovedCabListing(partnerId: string, vehicleId: string) {
-      const listing = await this.listings.findOne({
-        where: {
-          userId: partnerId,
-          catalogId: vehicleId,
-          category: 'cabs',
-          status: ListingStatus.ACCEPTED,
-          deletedAt: IsNull(),
-        },
-        select: { id: true },
-      });
-      if (!listing) {
-        throw new ForbiddenException(
-          'An administrator must approve your Cab registration before you can post a schedule.',
-        );
-      }
-    }
-
     schedule.vehicleId = vehicle.id;
     schedule.fromPlace = dto.fromPlace.trim();
     schedule.toPlace = dto.toPlace.trim();
@@ -188,6 +170,24 @@ export class CabSchedulesService implements OnModuleInit {
     schedule.pricePerSeat = dto.pricePerSeat.toFixed(2);
     schedule.note = dto.note?.trim() || null;
     return this.schedules.save(schedule);
+  }
+
+  private async assertApprovedCabListing(partnerId: string, vehicleId: string) {
+    const listing = await this.listings.findOne({
+      where: {
+        userId: partnerId,
+        catalogId: vehicleId,
+        category: 'cabs',
+        status: ListingStatus.ACCEPTED,
+        deletedAt: IsNull(),
+      },
+      select: { id: true },
+    });
+    if (!listing) {
+      throw new ForbiddenException(
+        'An administrator must approve your Cab registration before you can post a schedule.',
+      );
+    }
   }
 
   async listOpen(partnerId?: string) {
