@@ -76,15 +76,27 @@ export function ServiceCategoryScreen({
     </>
   );
   const pageContent =
-    serviceId === "goods-transport" || serviceId === "public-transport" ? (
+    serviceId === "goods-transport" ||
+    serviceId === "public-transport" ||
+    serviceId === "packers-movers" ? (
       <SpecialScheduleTabs
-        service={serviceId === "goods-transport" ? "goods-transport" : "cabs"}
+        service={
+          serviceId === "goods-transport"
+            ? "goods-transport"
+            : serviceId === "packers-movers"
+              ? "packers-movers"
+              : "cabs"
+        }
         serviceContent={serviceContent}
         scheduleContent={
-          serviceId === "goods-transport" ? (
-            <GoodsTransportSpecialSchedules />
-          ) : (
+          serviceId === "public-transport" ? (
             <ScheduledCabTrips embedded />
+          ) : (
+            <GoodsTransportSpecialSchedules
+              serviceCategory={
+                serviceId === "packers-movers" ? "packers-movers" : "goods-transport"
+              }
+            />
           )
         }
       />

@@ -14,6 +14,7 @@ export type GoodsTransportListing = {
   title: string;
   status?: string;
   vehicleType?: string;
+  serviceType?: string;
   vehicleNumber?: string;
   loadCapacity?: string;
 };
@@ -226,7 +227,7 @@ export function GoodsTransportScheduleManager({
                 <select required value={listingId} onChange={(event) => setListingId(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal">
                   {approvedListings.map((listing) => (
                     <option key={listing.id} value={listing.id}>
-                      {[listing.vehicleType, listing.vehicleNumber, listing.title].filter(Boolean).join(" · ")}
+                      {[listing.vehicleType, listing.serviceType, listing.vehicleNumber, listing.title].filter(Boolean).join(" · ")}
                     </option>
                   ))}
                 </select>

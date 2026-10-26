@@ -922,7 +922,12 @@ export class VendorListingsService {
   private cabVehicleCategory(name: string) {
     const normalized = name.toLowerCase();
     if (normalized.includes('auto')) return 'auto';
-    if (normalized.includes('tempo') || normalized.includes('traveller') || normalized.includes('van')) return 'van';
+    if (
+      normalized.includes('tempo') ||
+      normalized.includes('traveller') ||
+      normalized.includes('van') ||
+      normalized.includes('bus')
+    ) return 'van';
     return 'car';
   }
 

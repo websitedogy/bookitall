@@ -2,11 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 
-type ScheduleService = "cabs" | "goods-transport";
+type ScheduleService = "cabs" | "goods-transport" | "packers-movers";
 
 const SERVICE_LABEL: Record<ScheduleService, string> = {
   cabs: "Book a cab",
   "goods-transport": "Find transport",
+  "packers-movers": "Book Packers & Movers",
 };
 
 export function SpecialScheduleTabs({

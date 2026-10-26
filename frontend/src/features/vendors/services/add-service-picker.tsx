@@ -1,19 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useVisibleServices } from "@/features/services/service-catalog-provider";
+import { SERVICE_NAV } from "@/features/home/service-nav";
+import { useServiceCatalog } from "@/features/services/service-catalog-provider";
 import { CategoryArt } from "@/features/home/components/category-art";
 import { FormBackButton } from "./form-back-button";
 import { useClaimedCategories } from "./use-claimed-categories";
 
 export function AddServicePicker() {
-  const catalog = useVisibleServices();
+  const { visibleNav, isEnabled } = useServiceCatalog();
   const { claimed } = useClaimedCategories();
-  const items = catalog.filter((service) => {
+  const items = visibleNav.filter((service) => {
     if (service.id === "public-transport" || service.id === "goods-transport") return true;
     if (service.id === "cloud-kitchen") return !claimed.has("cloud-kitchen") || !claimed.has("local-shops");
     return !claimed.has(service.id);
   });
+  const packersMovers = SERVICE_NAV.find((service) => service.id === "packers-movers");
+  if (packersMovers && isEnabled("packers-movers") && !claimed.has("packers-movers")) {
+    items.push(packersMovers);
+  }
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-white pb-[calc(4.85rem+env(safe-area-inset-bottom))] md:h-auto md:overflow-visible">
@@ -30,8 +35,8 @@ export function AddServicePicker() {
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-start justify-center px-4 py-10 md:px-0">
           <p className="max-w-md text-sm leading-6 text-[var(--text-muted)]">
-            Services you already posted are hidden here. Public Transport and Goods Transport stay available so you can
-            register additional vehicle types. Open My Services to check review status.
+            Services you already posted are hidden here. Public Transport and Goods Transport stay available for
+            additional vehicles. Open My Services to check review status.
           </p>
           <Link href="/vendors/posts" className="mt-5 text-sm font-medium text-[var(--primary)]">
             View My Services
