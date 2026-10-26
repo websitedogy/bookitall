@@ -176,22 +176,16 @@ export class CabSchedulesService implements OnModuleInit {
   }
 
   private async assertApprovedCabListing(partnerId: string, vehicleId: string) {
-    const listing = await this.listings
-      .createQueryBuilder('listing')
-      .select('listing.id')
-      .where('listing.userId = :partnerId', { partnerId })
-      .andWhere('listing.category IN (:...categories)', {
-        categories: ['cabs', 'public-transport'],
-      })
-      .andWhere(
-        "(listing.catalogId = :vehicleId OR listing.fields ->> 'cabScheduleVehicleId' = :vehicleId)",
-        { vehicleId },
-      )
-      .andWhere('listing.status = :status', {
+    const listing = await this.listings.findOne({
+      where: {
+        userId: partnerId,
+        catalogId: vehicleId,
+        category: 'cabs',
         status: ListingStatus.ACCEPTED,
-      })
-      .andWhere('listing.deletedAt IS NULL')
-      .getOne();
+        deletedAt: IsNull(),
+      },
+      select: { id: true },
+    });
     if (!listing) {
       throw new ForbiddenException(
         'An administrator must approve your Cab registration before you can post a schedule.',
@@ -210,11 +204,9 @@ export class CabSchedulesService implements OnModuleInit {
       .innerJoin(
         VendorListing,
         'listing',
-        "(listing.userId = schedule.partnerId AND (listing.catalogId = vehicle.id OR listing.fields ->> 'cabScheduleVehicleId' = vehicle.id::text))",
+        'listing.catalogId = vehicle.id AND listing.userId = schedule.partnerId',
       )
-      .andWhere('listing.category IN (:...categories)', {
-        categories: ['cabs', 'public-transport'],
-      })
+      .andWhere('listing.category = :category', { category: 'cabs' })
       .andWhere('listing.status = :approvedStatus', {
         approvedStatus: ListingStatus.ACCEPTED,
       })

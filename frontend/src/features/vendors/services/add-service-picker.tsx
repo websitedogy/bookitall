@@ -11,7 +11,6 @@ export function AddServicePicker() {
   const { claimed } = useClaimedCategories();
   const items = catalog.filter((service) => {
     if (service.id === "cloud-kitchen") return !claimed.has("cloud-kitchen") || !claimed.has("local-shops");
-    if (["cabs", "public-transport", "goods-transport"].includes(service.id)) return true;
     return !claimed.has(service.id);
   });
 
