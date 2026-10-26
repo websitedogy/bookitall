@@ -5,7 +5,7 @@ import { MobileTabBar } from "@/features/public-site";
 
 const nav = [
   { href: "/partner", label: "Overview" },
-  { href: "/partner/listings", label: "Listings" },
+  { href: "/partner/listings", label: "My Services" },
   { href: "/partner/bookings", label: "Bookings" },
   { href: "/partner/wallet", label: "Wallet" },
 ];

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, IsNull, Repository } from 'typeorm';
-import { UserRole } from '../../common/enums/user-role.enum';
+import { UserRole, UserStatus } from '../../common/enums/user-role.enum';
 import { Vehicle } from './entities/vehicle.entity';
 import { CabTripSchedule } from './entities/cab-trip-schedule.entity';
 import { CabTripRequest } from './entities/cab-trip-request.entity';
@@ -211,6 +211,11 @@ export class CabSchedulesService implements OnModuleInit {
         approvedStatus: ListingStatus.ACCEPTED,
       })
       .andWhere('listing.deletedAt IS NULL');
+    query
+      .innerJoin('schedule.partner', 'partner')
+      .andWhere('partner.status = :partnerStatus', {
+        partnerStatus: UserStatus.ACTIVE,
+      });
     if (partnerId) {
       query.andWhere('schedule.partnerId = :partnerId', { partnerId });
     }
