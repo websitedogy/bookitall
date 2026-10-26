@@ -44,6 +44,15 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
   const [seatCounts, setSeatCounts] = useState<Record<string, number>>({});
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
+  const [now, setNow] = useState(Date.now());
+  const upcomingTrips = trips.filter(
+    (trip) => new Date(trip.departureAt).getTime() > now,
+  );
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 15_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -117,7 +126,7 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
       {error ? <p role="alert" className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
       <section className="mt-6 grid gap-4">
-        {trips.map((trip) => {
+        {upcomingTrips.map((trip) => {
           const alreadyRequested = requests.some(
             (request) => request.schedule.id === trip.id && ["PENDING", "ACCEPTED"].includes(request.status),
           );
@@ -162,7 +171,7 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
             </article>
           );
         })}
-        {!trips.length ? (
+        {!upcomingTrips.length ? (
           <p className="rounded-2xl bg-[#f3faf7] px-5 py-6 text-sm text-[#5b6e68]">
             {partnerId ? "This cab vendor has no future trips posted right now." : "No future cab trips are posted right now. Check back soon."}
           </p>

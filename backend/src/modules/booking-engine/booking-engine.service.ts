@@ -25,7 +25,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CheckoutDto, CheckoutItemDto, CreateBookingDto, PayBookingDto } from './dto/booking.dto';
 import { ChargeDetails } from '../payments/payments.service';
-import { UserRole, isPanelRole } from '../../common/enums/user-role.enum';
+import { UserRole, UserStatus, isPanelRole } from '../../common/enums/user-role.enum';
 import { NotificationType } from '../../common/enums/notification.enum';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { VendorListingsService } from '../vendor-listings/vendor-listings.service';
@@ -95,6 +95,12 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     const resolved = await this.resolveDto(dto);
     let priced = await this.priceBooking(resolved);
     const specialScheduleId = String(resolved.details?.specialScheduleId ?? '');
+    if (specialScheduleId) {
+      const customer = await this.users.getOrFail(customerId);
+      if (customer.role !== UserRole.CUSTOMER) {
+        throw new ForbiddenException('Only customers can book a special schedule.');
+      }
+    }
     if (!specialScheduleId) {
       await this.assertNoOpenDuplicate(customerId, priced.partnerId);
     }
@@ -111,6 +117,12 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
             resolved,
             Number(resolved.details?.seatsRequested ?? 1),
           );
+          const customer = await this.users.getOrFail(customerId);
+          priced.details = {
+            ...priced.details,
+            customerName: customer.fullName,
+            customerPhone: customer.phone,
+          };
         }
         const percent = await this.commission.getPercent(resolved.type);
         const split = this.commission.calculate(priced.subtotal, percent);
@@ -771,6 +783,10 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       ) {
         throw new NotFoundException('This scheduled cab trip is no longer available.');
       }
+      const partner = await this.users.getOrFail(schedule.partnerId);
+      if (partner.status !== UserStatus.ACTIVE) {
+        throw new NotFoundException('This scheduled cab trip is no longer available.');
+      }
       const seatsRequested = Number(dto.details.seatsRequested ?? 1);
       if (!Number.isInteger(seatsRequested) || seatsRequested < 1 || seatsRequested > 20) {
         throw new BadRequestException('Choose a valid number of seats.');
@@ -812,6 +828,10 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         schedule.listing.status !== ListingStatus.ACCEPTED ||
         schedule.listing.deletedAt
       ) {
+        throw new NotFoundException('This goods transport schedule is no longer available.');
+      }
+      const partner = await this.users.getOrFail(schedule.partnerId);
+      if (partner.status !== UserStatus.ACTIVE) {
         throw new NotFoundException('This goods transport schedule is no longer available.');
       }
       const fields = schedule.listing.fields ?? {};

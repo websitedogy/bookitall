@@ -50,6 +50,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [now, setNow] = useState(Date.now());
   const [minimumDeparture] = useState(() => {
     const date = new Date(Date.now() + 60_000);
     const pad = (value: number) => String(value).padStart(2, "0");
@@ -76,10 +77,23 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
 
   const selectedVehicle = vehicles.find((vehicle) => vehicle.id === vehicleId) ?? vehicles[0];
   const openSeats = schedules.reduce(
-    (total, schedule) => total + (schedule.status === "ACTIVE" ? schedule.seatsRemaining : 0),
+    (total, schedule) =>
+      total +
+      (schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() > now
+        ? schedule.seatsRemaining
+        : 0),
     0,
   );
   const pendingRequests = requests.filter((request) => request.status === "PENDING").length;
+  const statusOf = (schedule: Schedule) =>
+    schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() <= now
+      ? "INACTIVE"
+      : schedule.status;
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 15_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   async function refresh() {
     if (!token) return;
@@ -330,9 +344,9 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                         <span className="truncate">{schedule.toPlace}</span>
                       </p>
                       <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                        schedule.status === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                        statusOf(schedule) === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
                       }`}>
-                        {schedule.status.toLowerCase()}
+                        {statusOf(schedule).toLowerCase()}
                       </span>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[var(--ink-soft)]">
@@ -341,7 +355,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                     </div>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-sm">
                       <span>{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} <span className="text-[var(--ink-soft)]">/ seat</span></span>
-                      {schedule.status === "ACTIVE" ? (
+                      {statusOf(schedule) === "ACTIVE" ? (
                         <div className="flex gap-3">
                           <button disabled={busy} onClick={() => editSchedule(schedule)} className="text-xs font-semibold text-[var(--primary)] hover:underline disabled:opacity-50">
                             Edit
