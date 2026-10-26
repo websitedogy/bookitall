@@ -44,8 +44,7 @@ export function GoodsTransportScheduleManager({
   const token = useAuth((state) => state.accessToken);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [editingId, setEditingId] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
-  const [scheduleView, setScheduleView] = useState<"upcoming" | "history">("upcoming");
+  const [activeTab, setActiveTab] = useState<"form" | "history">("form");
   const [listingId, setListingId] = useState("");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -66,10 +65,6 @@ export function GoodsTransportScheduleManager({
     schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() <= now
       ? "INACTIVE"
       : schedule.status;
-  const visibleSchedules = schedules.filter((schedule) =>
-    scheduleView === "upcoming" ? statusOf(schedule) === "ACTIVE" : statusOf(schedule) !== "ACTIVE",
-  );
-
   async function refresh() {
     if (!token) return;
     const scheduleResult = await api<Schedule[]>("/special-schedules/mine/goods-transport", { token });
@@ -133,8 +128,8 @@ export function GoodsTransportScheduleManager({
       setPrice("");
       setNote("");
       setEditingId("");
-      setFormOpen(false);
       await refresh();
+      setActiveTab("history");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post this schedule.");
     } finally {
@@ -160,7 +155,7 @@ export function GoodsTransportScheduleManager({
     const date = new Date(schedule.departureAt);
     const pad = (value: number) => String(value).padStart(2, "0");
     setEditingId(schedule.id);
-    setFormOpen(true);
+    setActiveTab("form");
     setListingId(schedule.listingId);
     setFromPlace(schedule.fromPlace);
     setToPlace(schedule.toPlace);
@@ -174,7 +169,6 @@ export function GoodsTransportScheduleManager({
 
   function stopEditing() {
     setEditingId("");
-    setFormOpen(false);
     setFromPlace("");
     setToPlace("");
     setDepartureAt("");
@@ -191,9 +185,31 @@ export function GoodsTransportScheduleManager({
           <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
         </div>
         <div className="grid gap-8 p-5 sm:p-8">
+          <div role="tablist" aria-label="Special schedule tabs" className="flex border-b border-[var(--border)]">
+            {([
+              ["form", editingId ? "Edit Schedule" : "Add Schedule"],
+              ["history", `Special Schedule History (${schedules.length})`],
+            ] as const).map(([tab, label]) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab}
+                onClick={() => setActiveTab(tab)}
+                className={`-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                  activeTab === tab
+                    ? "border-[var(--primary)] text-[var(--primary)]"
+                    : "border-transparent text-[var(--ink-soft)]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
-          {formOpen && approvedListings.length ? (
+          {activeTab === "form" ? approvedListings.length ? (
             <form onSubmit={(event) => void createSchedule(event)} className="grid gap-4 md:grid-cols-2">
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Approved vehicle listing
@@ -241,47 +257,17 @@ export function GoodsTransportScheduleManager({
                 </button>
               ) : null}
             </form>
-          ) : formOpen ? (
+          ) : (
             <div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-sm text-[var(--ink-soft)]">
               {waiting ? "Loading approved vehicle listings…" : "An approved Goods Transport listing is required before you can post a schedule."}
               {!waiting ? <Link href="/vendors/services/goods-transport" className="ml-1 font-semibold text-[var(--primary)] hover:underline">Add a vehicle</Link> : null}
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setFormOpen(true)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white"
-            >
-              <CalendarClock className="h-4 w-4" aria-hidden />
-              Add Special Schedule
-            </button>
-          )}
 
           <div>
-            <div role="tablist" aria-label="Goods Transport special schedules" className="flex gap-2 border-b border-[var(--border)]">
-              {([
-                ["upcoming", "Special Schedules", schedules.filter((schedule) => statusOf(schedule) === "ACTIVE").length],
-                ["history", "History", schedules.filter((schedule) => statusOf(schedule) !== "ACTIVE").length],
-              ] as const).map(([view, label, count]) => (
-                <button
-                  key={view}
-                  type="button"
-                  role="tab"
-                  aria-selected={scheduleView === view}
-                  onClick={() => setScheduleView(view)}
-                  className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold ${
-                    scheduleView === view
-                      ? "border-[var(--primary)] text-[var(--primary)]"
-                      : "border-transparent text-[var(--ink-soft)]"
-                  }`}
-                >
-                  {label} ({count})
-                </button>
-              ))}
-            </div>
             {waiting ? <p className="mt-4 text-sm text-[var(--ink-soft)]">Loading schedules…</p> : null}
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {visibleSchedules.map((schedule) => (
+              {schedules.map((schedule) => (
                 <article key={schedule.id} className="rounded-xl border border-[var(--border)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -307,15 +293,14 @@ export function GoodsTransportScheduleManager({
                   ) : null}
                 </article>
               ))}
-              {!waiting && !visibleSchedules.length ? (
+              {!waiting && !schedules.length ? (
                 <p className="text-sm text-[var(--ink-soft)]">
-                  {scheduleView === "upcoming"
-                    ? "You have no upcoming Goods Transport special schedules."
-                    : "Your past and cancelled schedules will appear here."}
+                  Your posted Goods Transport schedules will appear here.
                 </p>
               ) : null}
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>

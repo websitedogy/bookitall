@@ -41,8 +41,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [requests, setRequests] = useState<TripRequest[]>([]);
   const [editingId, setEditingId] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
-  const [scheduleView, setScheduleView] = useState<"upcoming" | "history">("upcoming");
+  const [activeTab, setActiveTab] = useState<"form" | "history">("form");
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -91,10 +90,6 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() <= now
       ? "INACTIVE"
       : schedule.status;
-  const visibleSchedules = schedules.filter((schedule) =>
-    scheduleView === "upcoming" ? statusOf(schedule) === "ACTIVE" : statusOf(schedule) !== "ACTIVE",
-  );
-
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(interval);
@@ -138,8 +133,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
       setPricePerSeat("");
       setNote("");
       setEditingId("");
-      setFormOpen(false);
       await refresh();
+      setActiveTab("history");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post your trip.");
     } finally {
@@ -164,7 +159,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     const date = new Date(schedule.departureAt);
     const pad = (value: number) => String(value).padStart(2, "0");
     setEditingId(schedule.id);
-    setFormOpen(true);
+    setActiveTab("form");
     setVehicleId(schedule.vehicleId);
     setFromPlace(schedule.fromPlace);
     setToPlace(schedule.toPlace);
@@ -179,7 +174,6 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
 
   function stopEditing() {
     setEditingId("");
-    setFormOpen(false);
     setFromPlace("");
     setToPlace("");
     setDepartureAt("");
@@ -238,25 +232,36 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
         </div>
 
         <div className="space-y-8 p-5 sm:p-8">
+          <div role="tablist" aria-label="Special schedule tabs" className="flex border-b border-[var(--border)]">
+            {([
+              ["form", editingId ? "Edit Schedule" : "Add Schedule"],
+              ["history", `Special Schedule History (${schedules.length})`],
+            ] as const).map(([tab, label]) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab}
+                onClick={() => setActiveTab(tab)}
+                className={`-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                  activeTab === tab
+                    ? "border-[var(--primary)] text-[var(--primary)]"
+                    : "border-transparent text-[var(--ink-soft)]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           {error ? (
             <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </p>
           ) : null}
 
+          {activeTab === "form" ? (
           <div className="rounded-2xl border border-[var(--border)] bg-slate-50/70 p-5 sm:p-7">
-            {!formOpen ? (
-              <button
-                type="button"
-                onClick={() => setFormOpen(true)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)]"
-              >
-                <CalendarClock className="h-4 w-4" aria-hidden />
-                Add Special Schedule
-              </button>
-            ) : null}
-            {formOpen ? (
-            <>
             <div className="mb-6 flex items-start gap-3">
               <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
                 <CalendarClock className="h-5 w-5" aria-hidden />
@@ -343,9 +348,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 </Link>
               </div>
             )}
-            </>
-            ) : null}
           </div>
+          ) : (
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
@@ -356,29 +360,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 </div>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>
               </div>
-              <div role="tablist" aria-label="Cab special schedules" className="mt-5 flex gap-2 border-b border-[var(--border)]">
-                {([
-                  ["upcoming", "Special Schedules", schedules.filter((schedule) => statusOf(schedule) === "ACTIVE").length],
-                  ["history", "History", schedules.filter((schedule) => statusOf(schedule) !== "ACTIVE").length],
-                ] as const).map(([view, label, count]) => (
-                  <button
-                    key={view}
-                    type="button"
-                    role="tab"
-                    aria-selected={scheduleView === view}
-                    onClick={() => setScheduleView(view)}
-                    className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold ${
-                      scheduleView === view
-                        ? "border-[var(--primary)] text-[var(--primary)]"
-                        : "border-transparent text-[var(--ink-soft)]"
-                    }`}
-                  >
-                    {label} ({count})
-                  </button>
-                ))}
-              </div>
               <div className="mt-5 grid gap-3">
-                {visibleSchedules.map((schedule) => (
+                {schedules.map((schedule) => (
                   <article key={schedule.id} className="rounded-xl border border-[var(--border)] bg-white p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="flex min-w-0 items-center gap-2 font-semibold">
@@ -411,11 +394,9 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                     </div>
                   </article>
                 ))}
-                {!visibleSchedules.length ? (
+                {!schedules.length ? (
                   <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">
-                    {scheduleView === "upcoming"
-                      ? "Your upcoming special schedules will appear here."
-                      : "Your past and cancelled schedules will appear here."}
+                    Your posted special schedules will appear here.
                   </p>
                 ) : null}
               </div>
@@ -464,6 +445,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 ) : null}
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
