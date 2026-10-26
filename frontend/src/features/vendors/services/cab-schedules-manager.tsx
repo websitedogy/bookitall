@@ -41,6 +41,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [requests, setRequests] = useState<TripRequest[]>([]);
   const [editingId, setEditingId] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -133,6 +134,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
       setPricePerSeat("");
       setNote("");
       setEditingId("");
+      setFormOpen(false);
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post your trip.");
@@ -158,6 +160,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     const date = new Date(schedule.departureAt);
     const pad = (value: number) => String(value).padStart(2, "0");
     setEditingId(schedule.id);
+    setFormOpen(true);
     setVehicleId(schedule.vehicleId);
     setFromPlace(schedule.fromPlace);
     setToPlace(schedule.toPlace);
@@ -172,6 +175,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
 
   function stopEditing() {
     setEditingId("");
+    setFormOpen(false);
     setFromPlace("");
     setToPlace("");
     setDepartureAt("");
@@ -237,6 +241,18 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
           ) : null}
 
           <div className="rounded-2xl border border-[var(--border)] bg-slate-50/70 p-5 sm:p-7">
+            {!formOpen ? (
+              <button
+                type="button"
+                onClick={() => setFormOpen(true)}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)]"
+              >
+                <CalendarClock className="h-4 w-4" aria-hidden />
+                Add Special Schedule
+              </button>
+            ) : null}
+            {formOpen ? (
+            <>
             <div className="mb-6 flex items-start gap-3">
               <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
                 <CalendarClock className="h-5 w-5" aria-hidden />
@@ -323,6 +339,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 </Link>
               </div>
             )}
+            </>
+            ) : null}
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
