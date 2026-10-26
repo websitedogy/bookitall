@@ -47,6 +47,7 @@ export function LiveLocation() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -62,6 +63,22 @@ export function LiveLocation() {
       setHits([]);
       return;
     }
+    const positionPanel = () => {
+      if (
+        window.matchMedia("(max-width: 767px)").matches &&
+        rootRef.current &&
+        panelRef.current
+      ) {
+        panelRef.current.style.setProperty(
+          "--location-panel-top",
+          `${Math.round(rootRef.current.getBoundingClientRect().bottom + 8)}px`,
+        );
+      } else {
+        panelRef.current?.style.removeProperty("--location-panel-top");
+      }
+    };
+    positionPanel();
+    window.addEventListener("resize", positionPanel);
     window.setTimeout(() => inputRef.current?.focus(), 0);
     const onPointer = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
@@ -72,6 +89,7 @@ export function LiveLocation() {
     window.addEventListener("mousedown", onPointer);
     window.addEventListener("keydown", onKey);
     return () => {
+      window.removeEventListener("resize", positionPanel);
       window.removeEventListener("mousedown", onPointer);
       window.removeEventListener("keydown", onKey);
     };
@@ -132,8 +150,8 @@ export function LiveLocation() {
   const popular = pickPopular(recent);
 
   return (
-    <div ref={rootRef} className="font-location relative ml-auto w-[min(100%,9.75rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
-      <label className="flex h-8 w-full items-center gap-1.5 rounded-full border border-[#1e3a5f]/35 bg-white px-2.5 shadow-[0_1px_0_rgba(15,23,42,0.02)] md:h-9 md:gap-2 md:px-3">
+    <div ref={rootRef} className="font-location relative ml-auto w-[min(58vw,14rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
+      <label className="flex h-10 w-full items-center gap-2 rounded-full border border-[#1e3a5f]/25 bg-white px-3 shadow-[0_2px_8px_rgba(15,23,42,0.06)] md:h-9 md:gap-2 md:px-3">
         <MapPin className="h-3.5 w-3.5 shrink-0 text-[#2b7cff] md:h-4 md:w-4" aria-hidden />
         <input
           ref={inputRef}
@@ -151,11 +169,11 @@ export function LiveLocation() {
           aria-haspopup="listbox"
           aria-label="Search location"
           suppressHydrationWarning
-          className="min-w-0 flex-1 bg-transparent text-[12px] font-medium text-[#2563eb] outline-none placeholder:font-normal placeholder:text-[#93c5fd] md:text-[13px]"
+          className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#2563eb] outline-none placeholder:font-normal placeholder:text-[#93c5fd] md:text-[13px]"
         />
         <button
           type="button"
-          className="inline-flex h-5 w-5 shrink-0 items-center justify-center text-[#9ca3af] md:h-6 md:w-6"
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#64748b] transition hover:bg-slate-50 md:h-6 md:w-6"
           aria-label={open ? "Close location options" : "Open location options"}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => setOpen((value) => !value)}
@@ -167,9 +185,10 @@ export function LiveLocation() {
 
       {open ? (
         <div
+          ref={panelRef}
           role="listbox"
           aria-label="Choose location"
-          className="absolute right-0 z-50 mt-1.5 max-h-[22rem] w-[min(20.5rem,calc(100%-1.5rem))] overflow-y-auto rounded-2xl border border-[#e5e7eb] bg-white py-1 shadow-[0_16px_40px_-18px_rgba(21,32,43,0.38)]"
+          className="fixed left-3 right-3 top-[var(--location-panel-top,0px)] z-[60] max-h-[min(28rem,60dvh)] overflow-y-auto rounded-2xl border border-[#e5e7eb] bg-white py-1 shadow-[0_16px_40px_-18px_rgba(21,32,43,0.38)] md:absolute md:left-auto md:right-0 md:top-full md:mt-1.5 md:max-h-[22rem] md:w-[20.5rem]"
         >
           <button
             type="button"
