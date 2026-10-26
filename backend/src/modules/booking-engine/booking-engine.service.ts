@@ -737,6 +737,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async priceBooking(dto: CreateBookingDto) {
+    if (dto.details?.specialScheduleId) {
+      return this.priceSpecialSchedule(dto);
+    }
     if (dto.details?.listingId) {
       try {
         return await this.priceCatalog(dto);
@@ -745,6 +748,195 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return this.priceCatalog(dto);
+  }
+
+  private async priceSpecialSchedule(dto: CreateBookingDto) {
+    const scheduleId = String(dto.details.specialScheduleId);
+    const scheduleType = String(dto.details.specialScheduleType ?? '');
+    if (scheduleType === 'cabs' && dto.type === BookingType.CAB) {
+      await this.platformServices.assertEnabled('cabs');
+      const schedule = await this.cabSchedules.findOne({
+        where: { id: scheduleId },
+        relations: { vehicle: true },
+      });
+      if (
+        !schedule ||
+        schedule.status !== 'OPEN' ||
+        schedule.departureAt.getTime() <= Date.now() ||
+        !schedule.vehicle?.isActive ||
+        schedule.vehicle.deletedAt
+      ) {
+        throw new NotFoundException('This scheduled cab trip is no longer available.');
+      }
+      const seatsRequested = Number(dto.details.seatsRequested ?? 1);
+      if (!Number.isInteger(seatsRequested) || seatsRequested < 1 || seatsRequested > 20) {
+        throw new BadRequestException('Choose a valid number of seats.');
+      }
+      const subtotal = Number(schedule.pricePerSeat) * seatsRequested;
+      return {
+        partnerId: schedule.partnerId,
+        assigneeId: null as string | null,
+        subtotal,
+        tax: this.taxAmount(BookingType.CAB, subtotal),
+        scheduledAt: schedule.departureAt,
+        lockKey: `special-schedule:cabs:${schedule.id}`,
+        details: {
+          ...dto.details,
+          specialScheduleId: schedule.id,
+          specialScheduleType: 'cabs',
+          listingCategory: 'cabs',
+          listingTitle: schedule.vehicle.name,
+          vehicleName: schedule.vehicle.name,
+          pickupLabel: schedule.fromPlace,
+          dropLabel: schedule.toPlace,
+          seatsRequested,
+          pricePerSeat: schedule.pricePerSeat,
+        },
+      };
+    }
+
+    if (scheduleType === 'goods-transport' && dto.type === BookingType.HOME_SERVICE) {
+      await this.platformServices.assertEnabled('goods-transport');
+      const schedule = await this.goodsSchedules.findOne({
+        where: { id: scheduleId },
+        relations: { listing: true },
+      });
+      if (
+        !schedule ||
+        schedule.status !== 'OPEN' ||
+        schedule.departureAt.getTime() <= Date.now() ||
+        !schedule.listing ||
+        schedule.listing.status !== ListingStatus.ACCEPTED ||
+        schedule.listing.deletedAt
+      ) {
+        throw new NotFoundException('This goods transport schedule is no longer available.');
+      }
+      const fields = schedule.listing.fields ?? {};
+      const subtotal = Number(schedule.price);
+      return {
+        partnerId: schedule.partnerId,
+        assigneeId: null as string | null,
+        subtotal,
+        tax: this.taxAmount(BookingType.HOME_SERVICE, subtotal),
+        scheduledAt: schedule.departureAt,
+        lockKey: `special-schedule:goods-transport:${schedule.id}`,
+        details: {
+          ...dto.details,
+          specialScheduleId: schedule.id,
+          specialScheduleType: 'goods-transport',
+          listingId: schedule.listingId,
+          listingCategory: 'goods-transport',
+          listingTitle: schedule.listing.title,
+          vendorName: schedule.listing.title,
+          vehicleName: String(fields.vehicleType || schedule.listing.title),
+          vehicleNumber: fields.vehicleNumber ?? null,
+          loadCapacity: fields.loadCapacity ?? null,
+          pickupLabel: schedule.fromPlace,
+          dropLabel: schedule.toPlace,
+          fromPlace: schedule.fromPlace,
+          toPlace: schedule.toPlace,
+          price: schedule.price,
+        },
+      };
+    }
+
+    throw new BadRequestException('Choose a valid special schedule.');
+  }
+
+  private async assertSpecialScheduleAvailable(
+    customerId: string,
+    dto: CreateBookingDto,
+    seatsRequested: number,
+  ) {
+    const scheduleId = String(dto.details.specialScheduleId);
+    const scheduleType = String(dto.details.specialScheduleType ?? '');
+    const activeStatuses = [
+      BookingStatus.AWAITING_PAYMENT,
+      BookingStatus.PENDING,
+      BookingStatus.CONFIRMED,
+      BookingStatus.ASSIGNED,
+      BookingStatus.IN_PROGRESS,
+    ];
+    if (scheduleType === 'cabs') {
+      const schedule = await this.cabSchedules.findOne({ where: { id: scheduleId } });
+      if (
+        !schedule ||
+        schedule.status !== 'OPEN' ||
+        schedule.departureAt.getTime() <= Date.now()
+      ) {
+        throw new NotFoundException('This scheduled cab trip is no longer available.');
+      }
+      const duplicate = await this.bookings
+        .createQueryBuilder('booking')
+        .where('booking.customerId = :customerId', { customerId })
+        .andWhere("booking.details ->> 'specialScheduleId' = :scheduleId", {
+          scheduleId,
+        })
+        .andWhere('booking.status IN (:...statuses)', { statuses: activeStatuses })
+        .getOne();
+      if (duplicate) {
+        throw new ConflictException('You already have an active booking for this trip.');
+      }
+      const legacyRequest = await this.cabRequests.findOne({
+        where: { scheduleId, customerId, status: In(['PENDING', 'ACCEPTED']) },
+      });
+      if (legacyRequest) {
+        throw new ConflictException('You already have a request for this trip.');
+      }
+      const bookingSeats = await this.bookings
+        .createQueryBuilder('booking')
+        .select(
+          "COALESCE(SUM(CAST(booking.details ->> 'seatsRequested' AS INTEGER)), 0)",
+          'seats',
+        )
+        .where("booking.details ->> 'specialScheduleType' = 'cabs'")
+        .andWhere("booking.details ->> 'specialScheduleId' = :scheduleId", {
+          scheduleId,
+        })
+        .andWhere('booking.status IN (:...statuses)', { statuses: activeStatuses })
+        .getRawOne<{ seats: string }>();
+      const legacySeats = await this.cabRequests
+        .createQueryBuilder('request')
+        .select('COALESCE(SUM(request.seatsRequested), 0)', 'seats')
+        .where('request.scheduleId = :scheduleId', { scheduleId })
+        .andWhere('request.status IN (:...statuses)', {
+          statuses: ['PENDING', 'ACCEPTED'],
+        })
+        .getRawOne<{ seats: string }>();
+      const reserved =
+        Number(bookingSeats?.seats ?? 0) + Number(legacySeats?.seats ?? 0);
+      if (reserved + seatsRequested > schedule.seatsOffered) {
+        throw new BadRequestException(
+          `Only ${Math.max(0, schedule.seatsOffered - reserved)} seat(s) remain.`,
+        );
+      }
+      return;
+    }
+
+    const schedule = await this.goodsSchedules.findOne({
+      where: { id: scheduleId },
+      relations: { listing: true },
+    });
+    if (
+      !schedule ||
+      schedule.status !== 'OPEN' ||
+      schedule.departureAt.getTime() <= Date.now() ||
+      schedule.listing?.status !== ListingStatus.ACCEPTED ||
+      schedule.listing.deletedAt
+    ) {
+      throw new NotFoundException('This goods transport schedule is no longer available.');
+    }
+    const existing = await this.bookings
+      .createQueryBuilder('booking')
+      .where("booking.details ->> 'specialScheduleType' = 'goods-transport'")
+      .andWhere("booking.details ->> 'specialScheduleId' = :scheduleId", {
+        scheduleId,
+      })
+      .andWhere('booking.status IN (:...statuses)', { statuses: activeStatuses })
+      .getOne();
+    if (existing) {
+      throw new ConflictException('This goods transport schedule has already been booked.');
+    }
   }
 
   private async priceCatalog(dto: CreateBookingDto) {

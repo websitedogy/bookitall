@@ -18,7 +18,7 @@ type Schedule = {
   seatsRemaining: number;
   pricePerSeat: string;
   note: string | null;
-  status: "OPEN" | "CANCELLED";
+  status: "ACTIVE" | "INACTIVE" | "CANCELLED";
   vehicle: { name: string; category: string; color: string; seats: number } | null;
 };
 
@@ -40,6 +40,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
   const token = useAuth((state) => state.accessToken);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [requests, setRequests] = useState<TripRequest[]>([]);
+  const [editingId, setEditingId] = useState("");
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -75,7 +76,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
 
   const selectedVehicle = vehicles.find((vehicle) => vehicle.id === vehicleId) ?? vehicles[0];
   const openSeats = schedules.reduce(
-    (total, schedule) => total + (schedule.status === "OPEN" ? schedule.seatsRemaining : 0),
+    (total, schedule) => total + (schedule.status === "ACTIVE" ? schedule.seatsRemaining : 0),
     0,
   );
   const pendingRequests = requests.filter((request) => request.status === "PENDING").length;
@@ -99,8 +100,8 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     setBusy(true);
     setError("");
     try {
-      await api<Schedule>("/cabs/schedules", {
-        method: "POST",
+      await api<Schedule>(editingId ? `/cabs/schedules/${editingId}` : "/cabs/schedules", {
+        method: editingId ? "PATCH" : "POST",
         token,
         body: JSON.stringify({
           vehicleId: selectedVehicle.id,
@@ -117,6 +118,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
       setDepartureAt("");
       setPricePerSeat("");
       setNote("");
+      setEditingId("");
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post your trip.");
@@ -136,6 +138,32 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  function editSchedule(schedule: Schedule) {
+    const date = new Date(schedule.departureAt);
+    const pad = (value: number) => String(value).padStart(2, "0");
+    setEditingId(schedule.id);
+    setVehicleId(schedule.vehicleId);
+    setFromPlace(schedule.fromPlace);
+    setToPlace(schedule.toPlace);
+    setDepartureAt(
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`,
+    );
+    setSeatsOffered(String(schedule.seatsOffered));
+    setPricePerSeat(String(schedule.pricePerSeat));
+    setNote(schedule.note ?? "");
+    document.getElementById("scheduled-cab-trips")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function stopEditing() {
+    setEditingId("");
+    setFromPlace("");
+    setToPlace("");
+    setDepartureAt("");
+    setSeatsOffered("1");
+    setPricePerSeat("");
+    setNote("");
   }
 
   async function answerRequest(id: string, status: "ACCEPTED" | "DECLINED") {
@@ -200,7 +228,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                 <CalendarClock className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h3 className="text-lg font-semibold">Post a trip</h3>
+                <h3 className="text-lg font-semibold">{editingId ? "Edit your trip" : "Post a trip"}</h3>
                 <p className="mt-1 text-sm text-[var(--ink-soft)]">Add your route and travel details to let passengers reserve a seat.</p>
               </div>
             </div>
@@ -264,9 +292,14 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                   <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="Pickup details or luggage information" />
                 </label>
                 <button disabled={busy} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2">
-                  {busy ? "Please wait…" : "Post Special Schedule"}
+                  {busy ? "Please wait…" : editingId ? "Save Changes" : "Post Special Schedule"}
                   {!busy ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
                 </button>
+                {editingId ? (
+                  <button type="button" disabled={busy} onClick={stopEditing} className="h-12 rounded-xl border border-[var(--border)] px-5 text-sm font-semibold text-[var(--ink)] md:col-span-2">
+                    Stop editing
+                  </button>
+                ) : null}
               </form>
             ) : (
               <div className="rounded-xl border border-dashed border-[var(--border)] bg-white p-5 text-sm text-[var(--ink-soft)]">
@@ -297,7 +330,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                         <span className="truncate">{schedule.toPlace}</span>
                       </p>
                       <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                        schedule.status === "OPEN" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                        schedule.status === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
                       }`}>
                         {schedule.status.toLowerCase()}
                       </span>
@@ -308,10 +341,15 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
                     </div>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-sm">
                       <span>{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} <span className="text-[var(--ink-soft)]">/ seat</span></span>
-                      {schedule.status === "OPEN" ? (
-                        <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
-                          Cancel trip
-                        </button>
+                      {schedule.status === "ACTIVE" ? (
+                        <div className="flex gap-3">
+                          <button disabled={busy} onClick={() => editSchedule(schedule)} className="text-xs font-semibold text-[var(--primary)] hover:underline disabled:opacity-50">
+                            Edit
+                          </button>
+                          <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
+                            Cancel trip
+                          </button>
+                        </div>
                       ) : null}
                     </div>
                   </article>
