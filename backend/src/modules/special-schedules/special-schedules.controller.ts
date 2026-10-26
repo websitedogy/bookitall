@@ -19,10 +19,22 @@ export class SpecialSchedulesController {
     return this.schedules.listGoodsTransport();
   }
 
+  @Public()
+  @Get('packers-movers')
+  listPackersMovers() {
+    return this.schedules.listPackersMovers();
+  }
+
   @Get('mine/goods-transport')
   @Roles(UserRole.PARTNER, UserRole.SUPER_ADMIN)
   listMine(@CurrentUser('id') userId: string) {
-    return this.schedules.listMine(userId);
+    return this.schedules.listMine(userId, 'goods-transport');
+  }
+
+  @Get('mine/packers-movers')
+  @Roles(UserRole.PARTNER, UserRole.SUPER_ADMIN)
+  listMinePackersMovers(@CurrentUser('id') userId: string) {
+    return this.schedules.listMine(userId, 'packers-movers');
   }
 
   @Post('goods-transport')
@@ -32,7 +44,17 @@ export class SpecialSchedulesController {
     @CurrentUser('role') role: string,
     @Body() dto: CreateGoodsTransportScheduleDto,
   ) {
-    return this.schedules.create(userId, role, dto);
+    return this.schedules.create(userId, role, dto, 'goods-transport');
+  }
+
+  @Post('packers-movers')
+  @Roles(UserRole.PARTNER, UserRole.SUPER_ADMIN)
+  createPackersMovers(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: string,
+    @Body() dto: CreateGoodsTransportScheduleDto,
+  ) {
+    return this.schedules.create(userId, role, dto, 'packers-movers');
   }
 
   @Patch(':id')

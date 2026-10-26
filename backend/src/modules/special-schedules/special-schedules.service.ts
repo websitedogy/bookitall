@@ -41,7 +41,15 @@ export class SpecialSchedulesService implements OnModuleInit {
   }
 
   async listGoodsTransport() {
-    if (!(await this.platformServices.isEnabled('goods-transport'))) return [];
+    return this.listPublicSchedules('goods-transport');
+  }
+
+  async listPackersMovers() {
+    return this.listPublicSchedules('packers-movers');
+  }
+
+  private async listPublicSchedules(category: 'goods-transport' | 'packers-movers') {
+    if (!(await this.platformServices.isEnabled(category))) return [];
     const rows = await this.goodsSchedules
       .createQueryBuilder('schedule')
       .innerJoinAndSelect('schedule.listing', 'listing')
@@ -51,6 +59,7 @@ export class SpecialSchedulesService implements OnModuleInit {
       .andWhere('listing.status = :listingStatus', {
         listingStatus: ListingStatus.ACCEPTED,
       })
+      .andWhere('listing.category = :category', { category })
       .andWhere('listing.deletedAt IS NULL')
       .andWhere('partner.status = :partnerStatus', {
         partnerStatus: UserStatus.ACTIVE,
@@ -82,31 +91,37 @@ export class SpecialSchedulesService implements OnModuleInit {
       .map((row) => this.goodsScheduleSummary(row));
   }
 
-  async listMine(partnerId: string) {
+  async listMine(
+    partnerId: string,
+    category: 'goods-transport' | 'packers-movers' = 'goods-transport',
+  ) {
     const rows = await this.goodsSchedules.find({
       where: { partnerId },
       relations: { listing: true },
       order: { departureAt: 'ASC' },
       take: 100,
     });
-    return rows.map((row) => this.goodsScheduleSummary(row));
+    return rows
+      .filter((row) => row.listing?.category === category)
+      .map((row) => this.goodsScheduleSummary(row));
   }
 
   async create(
     partnerId: string,
     role: string,
     dto: CreateGoodsTransportScheduleDto,
+    category: 'goods-transport' | 'packers-movers' = 'goods-transport',
   ) {
     if (!['PARTNER', 'SUPER_ADMIN'].includes(role)) {
       throw new ForbiddenException(
         'Only service partners can post special schedules.',
       );
     }
-    await this.platformServices.assertEnabled('goods-transport');
-    const listing = await this.findOwnedGoodsListing(partnerId, dto.listingId);
+    await this.platformServices.assertEnabled(category);
+    const listing = await this.findOwnedTransportListing(partnerId, dto.listingId, category);
     if (!listing)
       throw new NotFoundException(
-        'Choose one of your approved Goods Transport listings.',
+        `Choose one of your approved ${category === 'packers-movers' ? 'Packers & Movers' : 'Goods Transport'} listings.`,
       );
 
     const departureAt = new Date(dto.departureAt);
@@ -141,7 +156,6 @@ export class SpecialSchedulesService implements OnModuleInit {
     scheduleId: string,
     dto: UpdateGoodsTransportScheduleDto,
   ) {
-    await this.platformServices.assertEnabled('goods-transport');
     const schedule = await this.goodsSchedules.findOne({
       where: { id: scheduleId },
       relations: { listing: true },
@@ -157,12 +171,15 @@ export class SpecialSchedulesService implements OnModuleInit {
       throw new BadRequestException('This schedule cannot be edited while it has an active order.');
     }
 
-    const listing = await this.findOwnedGoodsListing(partnerId, dto.listingId);
+    const listing = await this.findOwnedTransportListing(partnerId, dto.listingId);
     if (!listing) {
       throw new NotFoundException(
-        'Choose one of your approved Goods Transport listings.',
+        'Choose one of your approved Goods Transport or Packers & Movers listings.',
       );
     }
+    await this.platformServices.assertEnabled(
+      listing.category as 'goods-transport' | 'packers-movers',
+    );
     const departureAt = new Date(dto.departureAt);
     if (Number.isNaN(departureAt.getTime()) || departureAt.getTime() <= Date.now()) {
       throw new BadRequestException('Departure must be a future date and time.');
@@ -263,7 +280,10 @@ export class SpecialSchedulesService implements OnModuleInit {
         const summary = this.goodsScheduleSummary(row);
         return {
           id: row.id,
-          service: 'Goods Transport',
+          service:
+            row.listing?.category === 'packers-movers'
+              ? 'Packers & Movers'
+              : 'Goods Transport',
           partnerName: summary.partnerName,
           partnerPhone: summary.mobileNumber,
           vehicle: summary.vehicle,
@@ -281,7 +301,11 @@ export class SpecialSchedulesService implements OnModuleInit {
     );
   }
 
-  private async findOwnedGoodsListing(partnerId: string, listingId: string) {
+  private async findOwnedTransportListing(
+    partnerId: string,
+    listingId: string,
+    category?: 'goods-transport' | 'packers-movers',
+  ) {
     const partner = await this.listings.manager.getRepository(User).findOne({
       where: { id: partnerId },
       select: { id: true, phone: true },
@@ -292,7 +316,9 @@ export class SpecialSchedulesService implements OnModuleInit {
       .createQueryBuilder('listing')
       .innerJoin(User, 'owner', 'owner.id = listing.userId')
       .where('listing.id = :listingId', { listingId })
-      .andWhere('listing.category = :category', { category: 'goods-transport' })
+      .andWhere('listing.category IN (:...categories)', {
+        categories: category ? [category] : ['goods-transport', 'packers-movers'],
+      })
       .andWhere('listing.status = :status', { status: ListingStatus.ACCEPTED })
       .andWhere('listing.deletedAt IS NULL')
       .andWhere(
@@ -308,6 +334,7 @@ export class SpecialSchedulesService implements OnModuleInit {
     return {
       id: schedule.id,
       listingId: schedule.listingId,
+      serviceCategory: listing?.category ?? 'goods-transport',
       vehicle: fields.vehicleType || listing?.title || 'Goods vehicle',
       vehicleNumber: fields.vehicleNumber ?? null,
       loadCapacity: fields.loadCapacity ?? null,

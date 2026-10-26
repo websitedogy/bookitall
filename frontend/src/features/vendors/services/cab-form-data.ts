@@ -8,9 +8,20 @@ export {
 
 export const CAB_PROVIDER_TYPES = ["Individual Driver", "Fleet Owner", "Travel Agency", "Company"] as const;
 
-export const CAB_VEHICLES = ["Hatchback", "Sedan", "SUV", "Premium SUV", "Tempo Traveller", "Auto"] as const;
+export const CAB_VEHICLES = [
+  "Auto",
+  "Car",
+  "Hatchback",
+  "Sedan",
+  "SUV",
+  "Premium SUV",
+  "Mini Bus",
+  "Bus",
+  "Van",
+  "Tempo Traveller",
+] as const;
 
-export const VEHICLE_CAPACITIES = ["3", "4", "5", "6", "7", "8", "12", "14", "17"] as const;
+export const VEHICLE_CAPACITIES = ["3", "4", "5", "6", "7", "8", "12", "14", "17", "20", "30", "40", "50"] as const;
 
 export const VEHICLE_AVAILABILITY = ["Available", "Limited", "On Request"] as const;
 

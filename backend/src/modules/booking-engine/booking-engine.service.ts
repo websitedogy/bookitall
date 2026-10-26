@@ -816,7 +816,6 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (scheduleType === 'goods-transport' && dto.type === BookingType.HOME_SERVICE) {
-      await this.platformServices.assertEnabled('goods-transport');
       const schedule = await this.goodsSchedules.findOne({
         where: { id: scheduleId },
         relations: { listing: true },
@@ -827,10 +826,12 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
         schedule.departureAt.getTime() <= Date.now() ||
         !schedule.listing ||
         schedule.listing.status !== ListingStatus.ACCEPTED ||
-        schedule.listing.deletedAt
+        schedule.listing.deletedAt ||
+        !['goods-transport', 'packers-movers'].includes(schedule.listing.category)
       ) {
         throw new NotFoundException('This goods transport schedule is no longer available.');
       }
+      await this.platformServices.assertEnabled(schedule.listing.category);
       const partner = await this.users.getOrFail(schedule.partnerId);
       if (partner.status !== UserStatus.ACTIVE) {
         throw new NotFoundException('This goods transport schedule is no longer available.');
@@ -849,10 +850,12 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
           specialScheduleId: schedule.id,
           specialScheduleType: 'goods-transport',
           listingId: schedule.listingId,
-          listingCategory: 'goods-transport',
+          listingCategory: schedule.listing.category,
           listingTitle: schedule.listing.title,
           vendorName: schedule.listing.title,
-          vehicleName: String(fields.vehicleType || schedule.listing.title),
+          vehicleName: String(
+            fields.vehicleType || fields.serviceType || schedule.listing.title,
+          ),
           vehicleNumber: fields.vehicleNumber ?? null,
           loadCapacity: fields.loadCapacity ?? null,
           pickupLabel: schedule.fromPlace,
@@ -947,10 +950,14 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       schedule.status !== 'OPEN' ||
       schedule.departureAt.getTime() <= Date.now() ||
       schedule.listing?.status !== ListingStatus.ACCEPTED ||
-      schedule.listing.deletedAt
+      schedule.listing.deletedAt ||
+      !['goods-transport', 'packers-movers'].includes(
+        schedule.listing.category,
+      )
     ) {
       throw new NotFoundException('This goods transport schedule is no longer available.');
     }
+    await this.platformServices.assertEnabled(schedule.listing.category);
     const existing = await this.bookings
       .createQueryBuilder('booking')
       .where("booking.details ->> 'specialScheduleType' = 'goods-transport'")
@@ -965,16 +972,22 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async hasApprovedCabListing(partnerId: string, vehicleId: string) {
-    const listing = await this.vendorListingRows.findOne({
-      where: {
-        userId: partnerId,
-        catalogId: vehicleId,
-        category: 'cabs',
+    const listing = await this.vendorListingRows
+      .createQueryBuilder('listing')
+      .select('listing.id')
+      .where('listing.userId = :partnerId', { partnerId })
+      .andWhere('listing.category IN (:...categories)', {
+        categories: ['cabs', 'public-transport'],
+      })
+      .andWhere('listing.status = :status', {
         status: ListingStatus.ACCEPTED,
-        deletedAt: IsNull(),
-      },
-      select: { id: true },
-    });
+      })
+      .andWhere('listing.deletedAt IS NULL')
+      .andWhere(
+        '(listing.catalogId = :vehicleId OR COALESCE((listing.fields ->> \'scheduleVehicleIds\')::jsonb, \'[]\'::jsonb) @> jsonb_build_array(CAST(:vehicleId AS text)))',
+        { vehicleId },
+      )
+      .getOne();
     return Boolean(listing);
   }
 
