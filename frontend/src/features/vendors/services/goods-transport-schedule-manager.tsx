@@ -41,14 +41,17 @@ function dateTime(value: string) {
 export function GoodsTransportScheduleManager({
   approvedListings,
   serviceCategory = "goods-transport",
+  activeTab,
+  onTabChange,
 }: {
   approvedListings: GoodsTransportListing[];
   serviceCategory?: "goods-transport" | "packers-movers";
+  activeTab: "form" | "history";
+  onTabChange: (tab: "form" | "history") => void;
 }) {
   const token = useAuth((state) => state.accessToken);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [editingId, setEditingId] = useState("");
-  const [activeTab, setActiveTab] = useState<"form" | "history">("form");
   const [listingId, setListingId] = useState("");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -132,7 +135,7 @@ export function GoodsTransportScheduleManager({
       setPrice("");
       setNote("");
       setEditingId("");
-      setActiveTab("history");
+      onTabChange("history");
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post this schedule.");
@@ -159,7 +162,7 @@ export function GoodsTransportScheduleManager({
     const date = new Date(schedule.departureAt);
     const pad = (value: number) => String(value).padStart(2, "0");
     setEditingId(schedule.id);
-    setActiveTab("form");
+    onTabChange("form");
     setListingId(schedule.listingId);
     setFromPlace(schedule.fromPlace);
     setToPlace(schedule.toPlace);
@@ -191,33 +194,6 @@ export function GoodsTransportScheduleManager({
           <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
         </div>
         <div className="grid gap-8 p-5 sm:p-8">
-          <div role="tablist" aria-label="Special schedule tabs" className="grid grid-cols-2 border-b border-[var(--border)]">
-            {([
-              ["form", editingId ? "Edit Schedule" : "Add Schedule"],
-              ["history", "history"],
-            ] as const).map(([tab, label]) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-                className={`-mb-px min-w-0 border-b-2 px-2 py-3 text-xs font-semibold transition sm:px-4 sm:text-sm ${
-                  activeTab === tab
-                    ? "border-[var(--primary)] text-[var(--primary)]"
-                    : "border-transparent text-[var(--ink-soft)]"
-                }`}
-              >
-                {label === "history" ? (
-                  <>
-                    <span className="sm:hidden">History ({schedules.length})</span>
-                    <span className="hidden sm:inline">Special Schedule History ({schedules.length})</span>
-                  </>
-                ) : label}
-              </button>
-            ))}
-          </div>
-
           {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
           {activeTab === "form" ? approvedListings.length ? (

@@ -22,6 +22,7 @@ export default function PartnerListingsPage() {
   const [activeService, setActiveService] = useState<
     "cabs" | "goods-transport" | "packers-movers"
   >("cabs");
+  const [activeScheduleTab, setActiveScheduleTab] = useState<"form" | "history">("form");
 
   useEffect(() => {
     if (!token) return;
@@ -89,6 +90,34 @@ export default function PartnerListingsPage() {
 
   return (
     <div>
+      {!loading && availableServices.length ? (
+        <div
+          role="tablist"
+          aria-label="Special schedule"
+          className="mb-6 grid grid-cols-2 border-b border-[var(--line)]"
+        >
+          {([
+            ["form", "Add Schedule"],
+            ["history", "History"],
+          ] as const).map(([tab, label]) => (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={activeScheduleTab === tab}
+              onClick={() => setActiveScheduleTab(tab)}
+              className={`-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                activeScheduleTab === tab
+                  ? "border-[var(--primary)] text-[var(--primary)]"
+                  : "border-transparent text-[var(--ink-soft)]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="mb-8 border-b border-[var(--line)] pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">My Services</p>
         <h1 className="serif mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Special Schedule</h1>
@@ -120,14 +149,26 @@ export default function PartnerListingsPage() {
       </div>
       ) : null}
 
-      {!loading && activeService === "cabs" && vehicles.length ? <CabSchedulesManager vehicles={vehicles} /> : null}
+      {!loading && activeService === "cabs" && vehicles.length ? (
+        <CabSchedulesManager
+          vehicles={vehicles}
+          activeTab={activeScheduleTab}
+          onTabChange={setActiveScheduleTab}
+        />
+      ) : null}
       {!loading && activeService === "goods-transport" && goodsListings.length ? (
-        <GoodsTransportScheduleManager approvedListings={goodsListings} />
+        <GoodsTransportScheduleManager
+          approvedListings={goodsListings}
+          activeTab={activeScheduleTab}
+          onTabChange={setActiveScheduleTab}
+        />
       ) : null}
       {!loading && activeService === "packers-movers" && packersListings.length ? (
         <GoodsTransportScheduleManager
           approvedListings={packersListings}
           serviceCategory="packers-movers"
+          activeTab={activeScheduleTab}
+          onTabChange={setActiveScheduleTab}
         />
       ) : null}
       {!loading && !availableServices.length && !error ? (

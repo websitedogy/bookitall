@@ -74,25 +74,27 @@ export function AppShell({
               <Link href="/" className="serif w-fit shrink-0 whitespace-nowrap text-xl leading-none text-[var(--ink)] sm:text-2xl">
                 Book It All
               </Link>
-              <nav
-                aria-label={`${title} navigation`}
-                className="col-span-2 -mx-4 flex min-w-0 items-center gap-1 overflow-x-auto border-t border-[var(--line)] px-3 pt-2 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-5 md:mx-0 md:col-span-1 md:overflow-visible md:border-0 md:px-0 md:pt-0"
-              >
-                {nav.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={pathname === item.href ? "page" : undefined}
-                    className={`shrink-0 rounded-full px-3 py-2 font-medium transition-colors sm:px-4 ${
-                      pathname === item.href
-                        ? "bg-[var(--primary-soft)] text-[var(--primary)]"
-                        : "text-[var(--ink-soft)] hover:bg-slate-50 hover:text-[var(--ink)]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
+              {nav.length ? (
+                <nav
+                  aria-label={`${title} navigation`}
+                  className="col-span-2 -mx-4 flex min-w-0 items-center gap-1 overflow-x-auto border-t border-[var(--line)] px-3 pt-2 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-5 md:mx-0 md:col-span-1 md:overflow-visible md:border-0 md:px-0 md:pt-0"
+                >
+                  {nav.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={pathname === item.href ? "page" : undefined}
+                      className={`shrink-0 rounded-full px-3 py-2 font-medium transition-colors sm:px-4 ${
+                        pathname === item.href
+                          ? "bg-[var(--primary-soft)] text-[var(--primary)]"
+                          : "text-[var(--ink-soft)] hover:bg-slate-50 hover:text-[var(--ink)]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              ) : null}
             </div>
             <div className="flex items-center justify-end text-sm">
               <span className="hidden max-w-48 truncate text-[var(--ink-soft)] sm:block">{user.fullName}</span>

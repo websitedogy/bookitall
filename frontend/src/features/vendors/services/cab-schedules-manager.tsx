@@ -36,12 +36,19 @@ function dateTime(value: string) {
   return new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
-export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
+export function CabSchedulesManager({
+  vehicles,
+  activeTab,
+  onTabChange,
+}: {
+  vehicles: Vehicle[];
+  activeTab: "form" | "history";
+  onTabChange: (tab: "form" | "history") => void;
+}) {
   const token = useAuth((state) => state.accessToken);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [requests, setRequests] = useState<TripRequest[]>([]);
   const [editingId, setEditingId] = useState("");
-  const [activeTab, setActiveTab] = useState<"form" | "history">("form");
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
@@ -133,7 +140,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
       setPricePerSeat("");
       setNote("");
       setEditingId("");
-      setActiveTab("history");
+      onTabChange("history");
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not post your trip.");
@@ -159,7 +166,7 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
     const date = new Date(schedule.departureAt);
     const pad = (value: number) => String(value).padStart(2, "0");
     setEditingId(schedule.id);
-    setActiveTab("form");
+    onTabChange("form");
     setVehicleId(schedule.vehicleId);
     setFromPlace(schedule.fromPlace);
     setToPlace(schedule.toPlace);
@@ -232,33 +239,6 @@ export function CabSchedulesManager({ vehicles }: { vehicles: Vehicle[] }) {
         </div>
 
         <div className="space-y-8 p-5 sm:p-8">
-          <div role="tablist" aria-label="Special schedule tabs" className="grid grid-cols-2 border-b border-[var(--border)]">
-            {([
-              ["form", editingId ? "Edit Schedule" : "Add Schedule"],
-              ["history", "history"],
-            ] as const).map(([tab, label]) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-                className={`-mb-px min-w-0 border-b-2 px-2 py-3 text-xs font-semibold transition sm:px-4 sm:text-sm ${
-                  activeTab === tab
-                    ? "border-[var(--primary)] text-[var(--primary)]"
-                    : "border-transparent text-[var(--ink-soft)]"
-                }`}
-              >
-                {label === "history" ? (
-                  <>
-                    <span className="sm:hidden">History ({schedules.length})</span>
-                    <span className="hidden sm:inline">Special Schedule History ({schedules.length})</span>
-                  </>
-                ) : label}
-              </button>
-            ))}
-          </div>
-
           {error ? (
             <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
