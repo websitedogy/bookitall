@@ -118,18 +118,13 @@ export default function PartnerListingsPage() {
         </div>
       ) : null}
 
-      <div className="mb-8 border-b border-[var(--line)] pb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">My Services</p>
-        <h1 className="serif mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Special Schedule</h1>
-      </div>
-
       {error ? <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
       {loading ? <p className="py-6 text-sm text-[var(--ink-soft)]">Checking approved services…</p> : null}
 
       {!loading && availableServices.length ? (
       <div role="tablist" aria-label="Special schedule service" className="flex gap-2 border-b border-[var(--line)]">
         {([
-          ...(vehicles.length ? ([["cabs", "Cabs & Public Transport"]] as const) : []),
+          ...(vehicles.length ? ([["cabs", "Passenger Vehicles"]] as const) : []),
           ...(goodsListings.length ? ([["goods-transport", "Goods Transport"]] as const) : []),
           ...(packersListings.length ? ([["packers-movers", "Packers & Movers"]] as const) : []),
         ] as const).map(([id, label]) => (

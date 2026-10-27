@@ -190,7 +190,6 @@ export function GoodsTransportScheduleManager({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
             {serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"}
           </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--ink)]">Special Schedule</h2>
           <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
         </div>
         <div className="grid gap-8 p-5 sm:p-8">

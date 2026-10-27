@@ -216,7 +216,6 @@ export function CabSchedulesManager({
                 <CarFront className="h-4 w-4" aria-hidden />
                 Share your route
               </span>
-              <h2 className="serif mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl">Special Schedule</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-soft)]">
                 Post an upcoming journey, offer spare seats, and manage traveller requests from one place.
               </p>
