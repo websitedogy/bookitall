@@ -189,6 +189,11 @@ export function GoodsTransportScheduleManager({
           {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
           {activeTab === "form" ? approvedListings.length ? (
+            <div className="rounded-2xl border border-[var(--border)] bg-slate-50/70 p-4 sm:p-6">
+            <div className="mb-5">
+              <h3 className="text-base font-semibold">{editingId ? "Edit schedule" : "Schedule details"}</h3>
+              <p className="mt-1 text-sm text-[var(--ink-soft)]">Enter the vehicle, route, and departure details.</p>
+            </div>
             <form onSubmit={(event) => void createSchedule(event)} className="grid gap-x-5 gap-y-4 md:grid-cols-2">
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Approved vehicle listing
@@ -241,6 +246,7 @@ export function GoodsTransportScheduleManager({
                 </button>
               ) : null}
             </form>
+            </div>
           ) : (
             <div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-sm text-[var(--ink-soft)]">
               {waiting
@@ -257,13 +263,14 @@ export function GoodsTransportScheduleManager({
           <div>
             {waiting ? <p className="mt-4 text-sm text-[var(--ink-soft)]">Loading schedules…</p> : null}
             <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
-              <table className="w-full min-w-[680px] divide-y divide-[var(--border)] text-left text-sm">
+              <table className="w-full min-w-[800px] divide-y divide-[var(--border)] text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
                   <tr>
                     <th scope="col" className="px-4 py-3">Route</th>
                     <th scope="col" className="px-4 py-3">Vehicle</th>
                     <th scope="col" className="px-4 py-3">Departure date &amp; time</th>
                     <th scope="col" className="px-4 py-3">Price</th>
+                    <th scope="col" className="px-4 py-3">Note</th>
                     <th scope="col" className="px-4 py-3">Status</th>
                     <th scope="col" className="px-4 py-3">Actions</th>
                   </tr>
@@ -277,6 +284,7 @@ export function GoodsTransportScheduleManager({
                         <td className="px-4 py-3 text-[var(--ink-soft)]">{schedule.vehicle}{schedule.vehicleNumber ? ` · ${schedule.vehicleNumber}` : ""}</td>
                         <td className="whitespace-nowrap px-4 py-3 text-[var(--ink-soft)]">{dateTime(schedule.departureAt)}</td>
                         <td className="whitespace-nowrap px-4 py-3 font-medium">{inr(Number(schedule.price))}</td>
+                        <td className="max-w-48 truncate px-4 py-3 text-[var(--ink-soft)]">{schedule.note || "—"}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${status === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
                             {status.toLowerCase()}
@@ -305,7 +313,7 @@ export function GoodsTransportScheduleManager({
                     );
                   })}
                   {!waiting && !schedules.length ? (
-                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted schedules will appear here.</td></tr>
+                    <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted schedules will appear here.</td></tr>
                   ) : null}
                 </tbody>
               </table>

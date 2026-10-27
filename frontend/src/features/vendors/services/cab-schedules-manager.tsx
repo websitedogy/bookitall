@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Armchair, ArrowRight, CalendarClock, Clock3, MapPin, Pencil, Users } from "lucide-react";
+import { Armchair, ArrowRight, CalendarClock, MapPin, Pencil } from "lucide-react";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
@@ -210,13 +210,13 @@ export function CabSchedulesManager({
 
           {activeTab === "form" ? (
           <div className="rounded-2xl border border-[var(--border)] bg-slate-50/70 p-5 sm:p-7">
-            <div className="mb-6 flex items-start gap-3">
+            <div className="mb-5 flex items-start gap-3">
               <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
                 <CalendarClock className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h3 className="text-lg font-semibold">{editingId ? "Edit your trip" : "Post a trip"}</h3>
-                <p className="mt-1 text-sm text-[var(--ink-soft)]">Add your route and travel details to let passengers reserve a seat.</p>
+                <h3 className="text-base font-semibold">{editingId ? "Edit schedule" : "Schedule details"}</h3>
+                <p className="mt-1 text-sm text-[var(--ink-soft)]">Enter the vehicle, route, and departure details.</p>
               </div>
             </div>
 
