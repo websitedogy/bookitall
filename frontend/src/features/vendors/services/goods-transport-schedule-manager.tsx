@@ -184,7 +184,7 @@ export function GoodsTransportScheduleManager({
   }
 
   return (
-    <section id={`${serviceCategory}-schedules`} className="mt-8 max-w-6xl">
+    <section id={`${serviceCategory}-schedules`} className="mt-4 max-w-6xl">
       <div className="rounded-3xl border border-[var(--border)] bg-white shadow-sm">
         <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">

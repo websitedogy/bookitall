@@ -94,7 +94,7 @@ export default function PartnerListingsPage() {
         <div
           role="tablist"
           aria-label="Special schedule"
-          className="mb-6 grid grid-cols-2 border-b border-[var(--line)]"
+          className="mb-2 grid grid-cols-2 border-b border-[var(--line)]"
         >
           {([
             ["form", "Add Schedule"],
@@ -124,7 +124,7 @@ export default function PartnerListingsPage() {
       {!loading && availableServices.length ? (
       <div role="tablist" aria-label="Special schedule service" className="flex gap-2 border-b border-[var(--line)]">
         {([
-          ...(vehicles.length ? ([["cabs", "Passenger Vehicles"]] as const) : []),
+          ...(vehicles.length ? ([["cabs", "Vehicles"]] as const) : []),
           ...(goodsListings.length ? ([["goods-transport", "Goods Transport"]] as const) : []),
           ...(packersListings.length ? ([["packers-movers", "Packers & Movers"]] as const) : []),
         ] as const).map(([id, label]) => (

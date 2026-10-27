@@ -207,7 +207,7 @@ export function CabSchedulesManager({
   }
 
   return (
-    <section id="scheduled-cab-trips" className="mx-auto mt-12 max-w-6xl scroll-mt-24">
+    <section id="scheduled-cab-trips" className="mx-auto mt-4 max-w-6xl scroll-mt-24">
       <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-[0_20px_55px_-42px_rgba(15,23,42,0.45)]">
         <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8 sm:py-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
