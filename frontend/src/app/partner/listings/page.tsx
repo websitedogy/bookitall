@@ -124,7 +124,7 @@ export default function PartnerListingsPage() {
       {!loading && availableServices.length ? (
       <div role="tablist" aria-label="Special schedule service" className="flex gap-2 border-b border-[var(--line)]">
         {([
-          ...(vehicles.length ? ([["cabs", "Vehicles"]] as const) : []),
+          ...(vehicles.length ? ([["cabs", "Passenger schedules"]] as const) : []),
           ...(goodsListings.length ? ([["goods-transport", "Goods Transport"]] as const) : []),
           ...(packersListings.length ? ([["packers-movers", "Packers & Movers"]] as const) : []),
         ] as const).map(([id, label]) => (
@@ -138,7 +138,7 @@ export default function PartnerListingsPage() {
               activeService === id ? "border-[var(--primary)] text-[var(--primary)]" : "border-transparent text-[var(--ink-soft)]"
             }`}
           >
-            {label}
+            {id === "cabs" ? <span className="sr-only">{label}</span> : label}
           </button>
         ))}
       </div>
