@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Armchair, ArrowRight, CalendarClock, CarFront, Clock3, MapPin, Users } from "lucide-react";
+import { Armchair, ArrowRight, CalendarClock, CarFront, Clock3, MapPin, Pencil, Users } from "lucide-react";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
@@ -314,8 +314,13 @@ export function CabSchedulesManager({
                   Trip note <span className="font-normal text-[var(--ink-soft)]">(optional)</span>
                   <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="Pickup details or luggage information" />
                 </label>
-                <button disabled={busy} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2">
-                  {busy ? "Please wait…" : editingId ? "Save Changes" : "Post Special Schedule"}
+                <button disabled={busy} className="inline-flex h-10 w-fit items-center justify-center gap-2 justify-self-start rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2">
+                  {busy ? "Please wait…" : editingId ? "Save Changes" : (
+                    <>
+                      <span className="sm:hidden">Post Schedule</span>
+                      <span className="hidden sm:inline">Post Special Schedule</span>
+                    </>
+                  )}
                   {!busy ? <ArrowRight className="h-4 w-4" aria-hidden /> : null}
                 </button>
                 {editingId ? (
@@ -367,8 +372,16 @@ export function CabSchedulesManager({
                       <span>{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} <span className="text-[var(--ink-soft)]">/ seat</span></span>
                       {statusOf(schedule) === "ACTIVE" ? (
                         <div className="flex gap-3">
-                          <button disabled={busy} onClick={() => editSchedule(schedule)} className="text-xs font-semibold text-[var(--primary)] hover:underline disabled:opacity-50">
-                            Edit
+                          <button
+                            type="button"
+                            aria-label="Edit schedule"
+                            title="Edit schedule"
+                            disabled={busy}
+                            onClick={() => editSchedule(schedule)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--primary)] transition hover:bg-[var(--primary-soft)] disabled:opacity-50 sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2 sm:py-1 sm:text-xs sm:font-semibold"
+                          >
+                            <Pencil className="h-4 w-4" aria-hidden />
+                            <span className="hidden sm:inline">Edit</span>
                           </button>
                           <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
                             Cancel trip
