@@ -163,9 +163,13 @@ export function VendorPostsFeed({ compact = false }: { compact?: boolean }) {
                       Special Schedule
                     </Link>
                   ) : null}
-                  <Link href={`/vendors/posts/${ad.id}/edit`} className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-3 text-xs font-semibold text-[var(--primary)] ring-1 ring-[var(--border)] transition hover:bg-[var(--primary-soft)]">
-                    <Pencil className="h-3.5 w-3.5" aria-hidden />
-                    Edit Service
+                  <Link
+                    href={`/vendors/posts/${ad.id}/edit`}
+                    aria-label="Edit service"
+                    title="Edit service"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--primary)] ring-1 ring-[var(--border)] transition hover:bg-[var(--primary-soft)]"
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden />
                   </Link>
                 </div>
               </li>
