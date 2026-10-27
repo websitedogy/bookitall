@@ -185,21 +185,14 @@ export function GoodsTransportScheduleManager({
 
   return (
     <section id={`${serviceCategory}-schedules`} className="mt-4 max-w-6xl">
-      <div className="rounded-3xl border border-[var(--border)] bg-white shadow-sm">
-        <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
-            {serviceCategory === "packers-movers" ? "Packers & Movers" : "Goods Transport"}
-          </p>
-          <p className="mt-1 text-sm text-[var(--ink-soft)]">Post an upcoming route that customers can book.</p>
-        </div>
-        <div className="grid gap-8 p-5 sm:p-8">
+      <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:p-6">
           {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
           {activeTab === "form" ? approvedListings.length ? (
-            <form onSubmit={(event) => void createSchedule(event)} className="grid gap-4 md:grid-cols-2">
+            <form onSubmit={(event) => void createSchedule(event)} className="grid gap-x-5 gap-y-4 md:grid-cols-2">
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Approved vehicle listing
-                <select required value={listingId} onChange={(event) => setListingId(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal">
+                <select required value={listingId} onChange={(event) => setListingId(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]">
                   {approvedListings.map((listing) => (
                     <option key={listing.id} value={listing.id}>
                       {[listing.vehicleType, listing.serviceType, listing.vehicleNumber, listing.title].filter(Boolean).join(" · ")}
@@ -209,29 +202,29 @@ export function GoodsTransportScheduleManager({
               </label>
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Departure date &amp; time
-                <input required type="datetime-local" min={minimumDeparture} value={departureAt} onChange={(event) => setDepartureAt(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal" />
+                <input required type="datetime-local" min={minimumDeparture} value={departureAt} onChange={(event) => setDepartureAt(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" />
               </label>
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Starting place
                 <span className="relative mt-2 block">
                   <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-soft)]" aria-hidden />
-                  <input required minLength={2} maxLength={160} value={fromPlace} onChange={(event) => setFromPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal" placeholder="e.g. Hyderabad" />
+                  <input required minLength={2} maxLength={160} value={fromPlace} onChange={(event) => setFromPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="e.g. Hyderabad" />
                 </span>
               </label>
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Destination
                 <span className="relative mt-2 block">
                   <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--primary)]" aria-hidden />
-                  <input required minLength={2} maxLength={160} value={toPlace} onChange={(event) => setToPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal" placeholder="e.g. Vijayawada" />
+                  <input required minLength={2} maxLength={160} value={toPlace} onChange={(event) => setToPlace(event.target.value)} className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="e.g. Vijayawada" />
                 </span>
               </label>
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Route price (₹)
-                <input required type="number" min="1" max="1000000" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal" />
+                <input required type="number" min="1" max="1000000" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" />
               </label>
               <label className="text-sm font-semibold text-[var(--ink)]">
                 Schedule note <span className="font-normal text-[var(--ink-soft)]">(optional)</span>
-                <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal" placeholder="Load or pickup details" />
+                <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 font-normal outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)]" placeholder="Load or pickup details" />
               </label>
               <button disabled={busy} className="inline-flex h-10 w-fit items-center justify-center gap-2 justify-self-start rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:opacity-60 md:col-span-2">
                 {busy ? "Please wait…" : editingId ? "Save Changes" : (
@@ -263,50 +256,62 @@ export function GoodsTransportScheduleManager({
 
           <div>
             {waiting ? <p className="mt-4 text-sm text-[var(--ink-soft)]">Loading schedules…</p> : null}
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {schedules.map((schedule) => (
-                <article key={schedule.id} className="rounded-xl border border-[var(--border)] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-[var(--ink)]">{schedule.fromPlace} <span aria-hidden>→</span> {schedule.toPlace}</p>
-                      <p className="mt-1 text-sm text-[var(--ink-soft)]">{dateTime(schedule.departureAt)}</p>
-                      <p className="mt-1 text-sm text-[var(--ink-soft)]">{schedule.vehicle}{schedule.vehicleNumber ? ` · ${schedule.vehicleNumber}` : ""}</p>
-                    </div>
-                    <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${statusOf(schedule) === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-                      {statusOf(schedule).toLowerCase()}
-                    </span>
-                  </div>
-                  <p className="mt-3 font-semibold text-[var(--primary)]">{inr(Number(schedule.price))}</p>
-                  {schedule.note ? <p className="mt-2 text-sm text-[var(--ink-soft)]">{schedule.note}</p> : null}
-                  {statusOf(schedule) === "ACTIVE" ? (
-                    <div className="mt-3 flex gap-4">
-                      <button
-                        type="button"
-                        aria-label="Edit schedule"
-                        title="Edit schedule"
-                        disabled={busy}
-                        onClick={() => editSchedule(schedule)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--primary)] transition hover:bg-[var(--primary-soft)] disabled:opacity-50 sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2 sm:py-1 sm:text-xs sm:font-semibold"
-                      >
-                        <Pencil className="h-4 w-4" aria-hidden />
-                        <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button type="button" disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
-                        Cancel schedule
-                      </button>
-                    </div>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
+              <table className="w-full min-w-[680px] divide-y divide-[var(--border)] text-left text-sm">
+                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                  <tr>
+                    <th scope="col" className="px-4 py-3">Route</th>
+                    <th scope="col" className="px-4 py-3">Vehicle</th>
+                    <th scope="col" className="px-4 py-3">Departure date &amp; time</th>
+                    <th scope="col" className="px-4 py-3">Price</th>
+                    <th scope="col" className="px-4 py-3">Status</th>
+                    <th scope="col" className="px-4 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)] bg-white">
+                  {schedules.map((schedule) => {
+                    const status = statusOf(schedule);
+                    return (
+                      <tr key={schedule.id} className="align-middle">
+                        <td className="px-4 py-3 font-medium text-[var(--ink)]">{schedule.fromPlace} <span className="text-[var(--ink-soft)]">→</span> {schedule.toPlace}</td>
+                        <td className="px-4 py-3 text-[var(--ink-soft)]">{schedule.vehicle}{schedule.vehicleNumber ? ` · ${schedule.vehicleNumber}` : ""}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-[var(--ink-soft)]">{dateTime(schedule.departureAt)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 font-medium">{inr(Number(schedule.price))}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${status === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                            {status.toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {status === "ACTIVE" ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                aria-label={`Edit schedule from ${schedule.fromPlace} to ${schedule.toPlace}`}
+                                title="Edit schedule"
+                                disabled={busy}
+                                onClick={() => editSchedule(schedule)}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--primary)] transition hover:bg-[var(--primary-soft)] disabled:opacity-50"
+                              >
+                                <Pencil className="h-4 w-4" aria-hidden />
+                              </button>
+                              <button type="button" disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="rounded-lg px-2 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50">
+                                Cancel
+                              </button>
+                            </div>
+                          ) : <span className="text-xs text-[var(--ink-soft)]">—</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {!waiting && !schedules.length ? (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted schedules will appear here.</td></tr>
                   ) : null}
-                </article>
-              ))}
-              {!waiting && !schedules.length ? (
-                <p className="text-sm text-[var(--ink-soft)]">
-                  Your posted Goods Transport schedules will appear here.
-                </p>
-              ) : null}
+                </tbody>
+              </table>
             </div>
           </div>
           )}
-        </div>
       </div>
     </section>
   );

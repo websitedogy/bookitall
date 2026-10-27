@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Armchair, ArrowRight, CalendarClock, CarFront, Clock3, MapPin, Pencil, Users } from "lucide-react";
+import { Armchair, ArrowRight, CalendarClock, Clock3, MapPin, Pencil, Users } from "lucide-react";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
@@ -84,14 +84,6 @@ export function CabSchedulesManager({
   }, [token]);
 
   const selectedVehicle = vehicles.find((vehicle) => vehicle.id === vehicleId) ?? vehicles[0];
-  const openSeats = schedules.reduce(
-    (total, schedule) =>
-      total +
-      (schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() > now
-        ? schedule.seatsRemaining
-        : 0),
-    0,
-  );
   const pendingRequests = requests.filter((request) => request.status === "PENDING").length;
   const statusOf = (schedule: Schedule) =>
     schedule.status === "ACTIVE" && new Date(schedule.departureAt).getTime() <= now
@@ -208,36 +200,8 @@ export function CabSchedulesManager({
 
   return (
     <section id="scheduled-cab-trips" className="mx-auto mt-4 max-w-6xl scroll-mt-24">
-      <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-[0_20px_55px_-42px_rgba(15,23,42,0.45)]">
-        <div className="border-b border-[var(--border)] bg-[#f1faf8] px-5 py-6 sm:px-8 sm:py-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--primary)]">
-                <CarFront className="h-4 w-4" aria-hidden />
-                Share your route
-              </span>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--ink-soft)]">
-                Post an upcoming journey, offer spare seats, and manage traveller requests from one place.
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2 sm:min-w-72 sm:gap-3">
-              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
-                <p className="text-xl font-bold text-[var(--ink)]">{schedules.length}</p>
-                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">Trips posted</p>
-              </div>
-              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
-                <p className="text-xl font-bold text-[var(--ink)]">{openSeats}</p>
-                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">Open seats</p>
-              </div>
-              <div className="rounded-xl border border-[var(--border)] bg-white px-2 py-3 text-center sm:px-3">
-                <p className="text-xl font-bold text-[var(--ink)]">{pendingRequests}</p>
-                <p className="mt-1 text-[11px] leading-tight text-[var(--ink-soft)]">New requests</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-8 p-5 sm:p-8">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
+        <div className="p-4 sm:p-6">
           {error ? (
             <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
@@ -340,66 +304,74 @@ export function CabSchedulesManager({
           </div>
           ) : (
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-[var(--border)] p-4 sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold">Your Special Schedules</h3>
-                  <p className="mt-1 text-sm text-[var(--ink-soft)]">Manage the journeys you have posted.</p>
+                  <h3 className="text-base font-semibold">Posted schedules</h3>
+                  <p className="mt-1 text-sm text-[var(--ink-soft)]">Edit a schedule before its departure time.</p>
                 </div>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>
               </div>
-              <div className="mt-5 grid gap-3">
-                {schedules.map((schedule) => (
-                  <article key={schedule.id} className="rounded-xl border border-[var(--border)] bg-white p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="flex min-w-0 items-center gap-2 font-semibold">
-                        <span className="truncate">{schedule.fromPlace}</span>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--primary)]" aria-hidden />
-                        <span className="truncate">{schedule.toPlace}</span>
-                      </p>
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                        statusOf(schedule) === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-                      }`}>
-                        {statusOf(schedule).toLowerCase()}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[var(--ink-soft)]">
-                      <span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" aria-hidden />{dateTime(schedule.departureAt)}</span>
-                      <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" aria-hidden />{schedule.seatsRemaining}/{schedule.seatsOffered} seats left</span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-sm">
-                      <span>{schedule.vehicle?.name ?? "Cab"} · {inr(schedule.pricePerSeat)} <span className="text-[var(--ink-soft)]">/ seat</span></span>
-                      {statusOf(schedule) === "ACTIVE" ? (
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            aria-label="Edit schedule"
-                            title="Edit schedule"
-                            disabled={busy}
-                            onClick={() => editSchedule(schedule)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--primary)] transition hover:bg-[var(--primary-soft)] disabled:opacity-50 sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2 sm:py-1 sm:text-xs sm:font-semibold"
-                          >
-                            <Pencil className="h-4 w-4" aria-hidden />
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
-                          <button disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50">
-                            Cancel trip
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  </article>
-                ))}
-                {!schedules.length ? (
-                  <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-[var(--ink-soft)]">
-                    Your posted special schedules will appear here.
-                  </p>
-                ) : null}
+              <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
+                <table className="w-full min-w-[760px] divide-y divide-[var(--border)] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                    <tr>
+                      <th scope="col" className="px-4 py-3">Route</th>
+                      <th scope="col" className="px-4 py-3">Vehicle</th>
+                      <th scope="col" className="px-4 py-3">Departure date &amp; time</th>
+                      <th scope="col" className="px-4 py-3">Seats</th>
+                      <th scope="col" className="px-4 py-3">Fare</th>
+                      <th scope="col" className="px-4 py-3">Status</th>
+                      <th scope="col" className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)] bg-white">
+                    {schedules.map((schedule) => {
+                      const status = statusOf(schedule);
+                      return (
+                        <tr key={schedule.id} className="align-middle">
+                          <td className="px-4 py-3 font-medium text-[var(--ink)]">{schedule.fromPlace} <span className="text-[var(--ink-soft)]">→</span> {schedule.toPlace}</td>
+                          <td className="px-4 py-3 text-[var(--ink-soft)]">{schedule.vehicle?.name ?? "Cab"}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-[var(--ink-soft)]">{dateTime(schedule.departureAt)}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-[var(--ink-soft)]">{schedule.seatsRemaining}/{schedule.seatsOffered} left</td>
+                          <td className="px-4 py-3 whitespace-nowrap font-medium">{inr(schedule.pricePerSeat)} <span className="font-normal text-[var(--ink-soft)]">/ seat</span></td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${status === "ACTIVE" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                              {status.toLowerCase()}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {status === "ACTIVE" ? (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  aria-label={`Edit schedule from ${schedule.fromPlace} to ${schedule.toPlace}`}
+                                  title="Edit schedule"
+                                  disabled={busy}
+                                  onClick={() => editSchedule(schedule)}
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--primary)] transition hover:bg-[var(--primary-soft)] disabled:opacity-50"
+                                >
+                                  <Pencil className="h-4 w-4" aria-hidden />
+                                </button>
+                                <button type="button" disabled={busy} onClick={() => void cancelSchedule(schedule.id)} className="rounded-lg px-2 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50">
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : <span className="text-xs text-[var(--ink-soft)]">—</span>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!schedules.length ? (
+                      <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-[var(--ink-soft)]">Your posted schedules will appear here.</td></tr>
+                    ) : null}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] p-5 sm:p-6">
+            <div className="rounded-2xl border border-[var(--border)] p-4 sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold">Seat requests</h3>
