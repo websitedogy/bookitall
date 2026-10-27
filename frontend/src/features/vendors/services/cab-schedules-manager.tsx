@@ -200,8 +200,8 @@ export function CabSchedulesManager({
 
   return (
     <section id="scheduled-cab-trips" className="mx-auto mt-4 max-w-6xl scroll-mt-24">
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
-        <div className="p-4 sm:p-6">
+      <div className={activeTab === "history" ? "" : "overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm"}>
+        <div className={activeTab === "history" ? "" : "p-4 sm:p-6"}>
           {error ? (
             <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
@@ -305,7 +305,7 @@ export function CabSchedulesManager({
           ) : (
 
           <div className="space-y-6">
-            <div className="rounded-2xl border border-[var(--border)] p-4 sm:p-6">
+            <div>
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-base font-semibold">Posted schedules</h3>
@@ -313,9 +313,9 @@ export function CabSchedulesManager({
                 </div>
                 <span className="rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">{schedules.length}</span>
               </div>
-              <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
+              <div className="mt-4 overflow-x-auto border-y border-[var(--border)]">
                 <table className="w-full min-w-[760px] divide-y divide-[var(--border)] text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                  <thead className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
                     <tr>
                       <th scope="col" className="px-4 py-3">Route</th>
                       <th scope="col" className="px-4 py-3">Vehicle</th>
@@ -326,7 +326,7 @@ export function CabSchedulesManager({
                       <th scope="col" className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)] bg-white">
+                  <tbody className="divide-y divide-[var(--border)]">
                     {schedules.map((schedule) => {
                       const status = statusOf(schedule);
                       return (
@@ -371,7 +371,7 @@ export function CabSchedulesManager({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] p-4 sm:p-6">
+            <div className="border-t border-[var(--border)] pt-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold">Seat requests</h3>

@@ -185,7 +185,7 @@ export function GoodsTransportScheduleManager({
 
   return (
     <section id={`${serviceCategory}-schedules`} className="mt-4 max-w-6xl">
-      <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:p-6">
+      <div className={activeTab === "history" ? "" : "rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:p-6"}>
           {error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
           {activeTab === "form" ? approvedListings.length ? (
@@ -262,9 +262,9 @@ export function GoodsTransportScheduleManager({
 
           <div>
             {waiting ? <p className="mt-4 text-sm text-[var(--ink-soft)]">Loading schedules…</p> : null}
-            <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)]">
+            <div className="mt-4 overflow-x-auto border-y border-[var(--border)]">
               <table className="w-full min-w-[800px] divide-y divide-[var(--border)] text-left text-sm">
-                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                <thead className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
                   <tr>
                     <th scope="col" className="px-4 py-3">Route</th>
                     <th scope="col" className="px-4 py-3">Vehicle</th>
@@ -275,7 +275,7 @@ export function GoodsTransportScheduleManager({
                     <th scope="col" className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)] bg-white">
+                <tbody className="divide-y divide-[var(--border)]">
                   {schedules.map((schedule) => {
                     const status = statusOf(schedule);
                     return (
