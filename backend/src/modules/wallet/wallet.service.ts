@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, MoreThan, Repository } from 'typeorm';
 import { BookingType } from '../../common/enums/booking.enum';
 import { VendorCreditService } from '../../common/enums/vendor-credit-service.enum';
 import { VendorCreditTransaction, Wallet, WalletTransaction } from './entities/wallet.entity';
@@ -491,13 +491,14 @@ export class WalletService implements OnModuleInit {
         order: { createdAt: 'DESC' },
         take: 100,
       }),
-      this.bookings
-        .createQueryBuilder('booking')
-        .where('(booking.partnerId = :userId OR booking.assigneeId = :userId)', { userId })
-        .andWhere('booking.vendorCreditsCharged > 0')
-        .orderBy('COALESCE(booking.completedAt, booking.updatedAt)', 'DESC')
-        .take(100)
-        .getMany(),
+      this.bookings.find({
+        where: [
+          { partnerId: userId, vendorCreditsCharged: MoreThan(0) },
+          { assigneeId: userId, vendorCreditsCharged: MoreThan(0) },
+        ],
+        order: { updatedAt: 'DESC' },
+        take: 100,
+      }),
       this.wallets.findOne({ where: { user: { id: userId } }, select: { creditPoints: true } }),
     ]);
     const bookingById = new Map(bookings.map((booking) => [booking.id, booking]));
@@ -547,7 +548,9 @@ export class WalletService implements OnModuleInit {
           bookingNumber: booking.bookingNumber,
           note: null,
           createdAt: booking.completedAt ?? booking.updatedAt,
-          listingTitle: booking.details.listingTitle ? String(booking.details.listingTitle) : undefined,
+          listingTitle: booking.details?.listingTitle
+            ? String(booking.details.listingTitle)
+            : undefined,
         })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
