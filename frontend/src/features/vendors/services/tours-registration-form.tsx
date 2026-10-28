@@ -91,6 +91,7 @@ export function ToursRegistrationForm() {
     if (!pickupPoint.trim()) return "Enter pickup point.";
     if (!dropPoint.trim()) return "Enter drop point.";
     if (!amount.trim()) return "Enter package amount.";
+    if (!duration) return "Select trip duration.";
     if (!food) return "Select food option.";
     if (!licenseStatus) return "Select license status.";
     if (licenseStatus === "Available" && !licenseFile) return "Upload the travel license.";
