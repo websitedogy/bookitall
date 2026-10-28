@@ -7,7 +7,7 @@ const tabPad = "pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 
 export function PublicMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isServices = isHomeServicesPath(pathname);
+  const isServices = isHomeServicesPath(pathname) || pathname === "/travel-services";
   const isAddServicePicker = pathname === "/vendors/services";
   const isAddServiceForm = pathname.startsWith("/vendors/services/");
   const isMyOrders = pathname.startsWith("/vendors/my-orders");

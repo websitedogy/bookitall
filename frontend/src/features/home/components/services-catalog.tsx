@@ -3,14 +3,44 @@
 import Link from "next/link";
 import { useVisibleServices } from "@/features/services/service-catalog-provider";
 import { CategoryArt } from "./category-art";
+import { useEffect, useState } from "react";
+import { LIVE_LOCATION_CHANGE_EVENT, readSavedLocation, type SavedLocation } from "@/shared/lib/geo";
+import { navbarPinLabel } from "@/shared/lib/format-address";
 
-export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { heading?: string }) {
-  const items = useVisibleServices();
+export function ServicesCatalog({
+  heading = "Home services in Hyderabad",
+  serviceIds,
+  locationAware = false,
+}: {
+  heading?: string;
+  serviceIds?: readonly string[];
+  locationAware?: boolean;
+}) {
+  const [location, setLocation] = useState<SavedLocation | null>(null);
+  const services = useVisibleServices();
+  const items = serviceIds ? services.filter((service) => serviceIds.includes(service.id)) : services;
+
+  useEffect(() => {
+    if (!locationAware) return;
+    const updateLocation = () => setLocation(readSavedLocation());
+    updateLocation();
+    window.addEventListener(LIVE_LOCATION_CHANGE_EVENT, updateLocation);
+    window.addEventListener("storage", updateLocation);
+    return () => {
+      window.removeEventListener(LIVE_LOCATION_CHANGE_EVENT, updateLocation);
+      window.removeEventListener("storage", updateLocation);
+    };
+  }, [locationAware]);
+
+  const pageHeading = locationAware
+    ? `${heading}${location ? ` in ${navbarPinLabel(location)}` : " near you"}`
+    : heading;
+
   return (
     <>
       <div className="flex h-[100dvh] flex-col overflow-hidden bg-white pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:hidden">
         <header className="flex h-11 shrink-0 items-center border-b border-[var(--border)] pl-12 pr-3">
-          <h1 className="text-[17px] font-semibold tracking-tight">{heading}</h1>
+          <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
         </header>
 
         <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 overflow-y-auto bg-white p-3">
@@ -38,7 +68,7 @@ export function ServicesCatalog({ heading = "Home services in Hyderabad" }: { he
 
       <div className="hidden bg-white md:block">
         <header className="flex h-11 items-center border-b border-[var(--border)] pl-12 pr-3">
-          <h1 className="text-[17px] font-semibold tracking-tight">{heading}</h1>
+          <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
         </header>
         <ul className="mt-6 grid grid-cols-4 gap-3.5 px-4 pb-8 lg:grid-cols-6">
           {items.map((service, index) => (

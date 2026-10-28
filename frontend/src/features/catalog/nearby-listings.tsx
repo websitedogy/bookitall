@@ -6,7 +6,7 @@ import { MapPin } from "lucide-react";
 import { API_URL } from "@/shared/lib/api";
 import { ListingThumb } from "@/shared/ui/listing-thumb";
 import { PriceLabel } from "@/shared/ui/price-label";
-import { getExactPosition, readSavedLocation } from "@/shared/lib/geo";
+import { getExactPosition, LIVE_LOCATION_CHANGE_EVENT, readSavedLocation } from "@/shared/lib/geo";
 import { WishlistButton } from "@/features/saved/wishlist-button";
 
 import type { PublicListingPost } from "@/shared/lib/catalog-fetch";
@@ -56,16 +56,30 @@ export function NearbyProfessionals({
   );
   const [stayTab, setStayTab] = useState<"hotel" | "homestay">("hotel");
   const [loading, setLoading] = useState(false);
+  const [locationVersion, setLocationVersion] = useState(0);
+
+  useEffect(() => {
+    const onLocationChange = () => setLocationVersion((version) => version + 1);
+    window.addEventListener(LIVE_LOCATION_CHANGE_EVENT, onLocationChange);
+    window.addEventListener("storage", onLocationChange);
+    return () => {
+      window.removeEventListener(LIVE_LOCATION_CHANGE_EVENT, onLocationChange);
+      window.removeEventListener("storage", onLocationChange);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       let lat = "";
       let lng = "";
+      let selectedCity = "";
       const saved = readSavedLocation();
       if (saved?.lat != null && saved.lng != null) {
         lat = String(saved.lat);
         lng = String(saved.lng);
+      } else if (saved?.line1) {
+        selectedCity = saved.line1;
       } else {
         try {
           const pos = await getExactPosition(12000);
@@ -78,7 +92,7 @@ export function NearbyProfessionals({
       const params = new URLSearchParams({ category });
       if (lat) params.set("lat", lat);
       if (lng) params.set("lng", lng);
-      if (city) params.set("city", city);
+      if (city || selectedCity) params.set("city", city || selectedCity);
       const res = await fetch(`${API_URL}/vendor-listings?${params.toString()}`, { cache: "no-store" });
       const json = (await res.json()) as { data?: PublicListingPost[] };
       if (!cancelled) {
@@ -96,7 +110,7 @@ export function NearbyProfessionals({
     return () => {
       cancelled = true;
     };
-  }, [category, city, initialAds.length, vehicleType]);
+  }, [category, city, initialAds.length, locationVersion, vehicleType]);
 
   if (loading) {
     return (

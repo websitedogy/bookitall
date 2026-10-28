@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const quickLinks = [
-  { label: "Home", href: "/" },
+  { label: "Home", href: "/#main-content" },
   { label: "About Us", href: "/about" },
   { label: "Services", href: "/services" },
   { label: "Contact Us", href: "/contact" },
@@ -14,7 +14,7 @@ const serviceLinks = [
   { label: "Hotels", href: "/hotels" },
   { label: "Tours", href: "/tours" },
   { label: "Home Services", href: "/home-services" },
-  { label: "Travel Services", href: "/services" },
+  { label: "Travel Services", href: "/travel-services" },
 ];
 
 const followLinks = ["Facebook", "Instagram", "YouTube", "LinkedIn"];

@@ -1,6 +1,7 @@
 import type { StreetAddress } from "@/shared/lib/format-address";
 
 export const LIVE_LOCATION_KEY = "bookitall-live-location";
+export const LIVE_LOCATION_CHANGE_EVENT = "bookitall-location-change";
 
 export type SavedLocation = StreetAddress & {
   lat?: number;
@@ -24,6 +25,7 @@ export function readSavedLocation(): SavedLocation | null {
 
 export function writeSavedLocation(place: SavedLocation) {
   window.localStorage.setItem(LIVE_LOCATION_KEY, JSON.stringify(place));
+  window.dispatchEvent(new Event(LIVE_LOCATION_CHANGE_EVENT));
 }
 
 export const RECENT_LOCATIONS_KEY = "bookitall-recent-locations";
