@@ -12,6 +12,7 @@ export default function TravelServicesPage() {
       heading="Travel services"
       serviceIds={["hotels", "tours", "public-transport"]}
       locationAware
+      showHeading={false}
     />
   );
 }

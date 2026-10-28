@@ -5,21 +5,32 @@ import { useRouter } from "next/navigation";
 import { api } from "@/shared/lib/api";
 import { useAuth } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
+import { defaultDate } from "@/features/cart/pricing";
 import type { Hotel } from "@/shared/types/catalog";
+
+function dateAfter(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00`);
+  value.setDate(value.getDate() + days);
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+}
 
 export function HotelBookingPanel({ hotel }: { hotel: Hotel }) {
   const token = useAuth((s) => s.accessToken);
   const router = useRouter();
   const rooms = hotel.roomTypes ?? [];
   const [roomTypeId, setRoomTypeId] = useState(rooms[0]?.id ?? "");
-  const [checkIn, setCheckIn] = useState("2026-09-12");
-  const [checkOut, setCheckOut] = useState("2026-09-14");
+  const [checkIn, setCheckIn] = useState(() => defaultDate(0));
+  const [checkOut, setCheckOut] = useState(() => defaultDate(1));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const selected = rooms.find((r) => r.id === roomTypeId);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      setError("Check-out must be after check-in.");
+      return;
+    }
     if (!token) {
       router.push("/login");
       return;
@@ -72,15 +83,21 @@ export function HotelBookingPanel({ hotel }: { hotel: Hotel }) {
             Check-in
             <input
               type="date"
+              min={defaultDate(0)}
               className="mt-1 w-full rounded-2xl border border-[var(--line)] px-3 py-3"
               value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
+              onChange={(e) => {
+                const nextCheckIn = e.target.value;
+                setCheckIn(nextCheckIn);
+                if (checkOut <= nextCheckIn) setCheckOut(dateAfter(nextCheckIn, 1));
+              }}
             />
           </label>
           <label className="block text-sm">
             Check-out
             <input
               type="date"
+              min={checkIn || defaultDate(0)}
               className="mt-1 w-full rounded-2xl border border-[var(--line)] px-3 py-3"
               value={checkOut}
               onChange={(e) => setCheckOut(e.target.value)}

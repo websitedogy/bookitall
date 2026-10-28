@@ -26,6 +26,9 @@ export class Tour extends SoftBaseEntity {
   @Column({ type: 'int' })
   durationDays!: number;
 
+  @Column({ type: 'int', nullable: true })
+  durationHours!: number | null;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   pricePerPerson!: string;
 

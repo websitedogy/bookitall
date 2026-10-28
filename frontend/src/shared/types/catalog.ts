@@ -31,6 +31,7 @@ export type Tour = {
   destination: string;
   city: string;
   durationDays: number;
+  durationHours?: number | null;
   pricePerPerson: string;
   averageRating: string;
   reviewCount: number;

@@ -11,10 +11,12 @@ export function ServicesCatalog({
   heading = "Home services in Hyderabad",
   serviceIds,
   locationAware = false,
+  showHeading = true,
 }: {
   heading?: string;
   serviceIds?: readonly string[];
   locationAware?: boolean;
+  showHeading?: boolean;
 }) {
   const [location, setLocation] = useState<SavedLocation | null>(null);
   const services = useVisibleServices();
@@ -39,9 +41,11 @@ export function ServicesCatalog({
   return (
     <>
       <div className="flex h-[100dvh] flex-col overflow-hidden bg-white pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:hidden">
-        <header className="flex h-11 shrink-0 items-center border-b border-[var(--border)] pl-12 pr-3">
-          <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
-        </header>
+        {showHeading ? (
+          <header className="flex h-11 shrink-0 items-center border-b border-[var(--border)] pl-12 pr-3">
+            <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
+          </header>
+        ) : null}
 
         <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 overflow-y-auto bg-white p-3">
           {items.map((service, index) => (
@@ -67,9 +71,11 @@ export function ServicesCatalog({
       </div>
 
       <div className="hidden bg-white md:block">
-        <header className="flex h-11 items-center border-b border-[var(--border)] pl-12 pr-3">
-          <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
-        </header>
+        {showHeading ? (
+          <header className="flex h-11 items-center border-b border-[var(--border)] pl-12 pr-3">
+            <h1 className="text-[17px] font-semibold tracking-tight">{pageHeading}</h1>
+          </header>
+        ) : null}
         <ul className="mt-6 grid grid-cols-4 gap-3.5 px-4 pb-8 lg:grid-cols-6">
           {items.map((service, index) => (
             <li key={service.id} className="min-w-0">

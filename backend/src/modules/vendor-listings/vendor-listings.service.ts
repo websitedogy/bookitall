@@ -763,7 +763,15 @@ export class VendorListingsService {
       fields.scheduleVehicleIds = JSON.stringify([vehicle.id]);
     }
     if (row.category === 'tours') {
-      const durationDays = Number(String(fields.duration || '').replace(/\D/g, '')) || 1;
+      const durationValue = String(fields.duration || fields.tripDuration || '');
+      const durationCount = Number(durationValue.replace(/\D/g, '')) || 1;
+      const isHourlyDuration = /hours?/i.test(durationValue);
+      const durationHours = isHourlyDuration ? durationCount : null;
+      const durationDays = isHourlyDuration
+        ? 1
+        : /weeks?/i.test(durationValue)
+          ? durationCount * 7
+          : durationCount;
       const groupSize = Number(String(fields.groupSize || fields.maxGroupSize || '').replace(/\D/g, '')) || 10;
       const tour = await this.tours.create(row.userId, {
         name: fields.packageName || fields.shopName || row.title,
@@ -771,6 +779,7 @@ export class VendorListingsService {
         destination: fields.destinations?.split(',')[0]?.trim() || city,
         city,
         durationDays,
+        durationHours,
         pricePerPerson: Number(fields.price || fields.priceFrom || 0),
         groupSize,
         coverImageUrl: row.photoUrls[0] || '/categories/tours.png',

@@ -20,6 +20,11 @@ export const TOUR_PACKAGES = [
 ] as const;
 
 export const TOUR_DURATIONS = [
+  "2 Hours",
+  "4 Hours",
+  "6 Hours",
+  "8 Hours",
+  "12 Hours",
   "1 Day",
   "2 Days",
   "3 Days",

@@ -4,13 +4,17 @@ import { TourBookingPanel } from "@/features/users/tours/components/tour-booking
 import { inr } from "@/shared/lib/format";
 
 export function TourDetailScreen({ tour }: { tour: Tour }) {
+  const duration = tour.durationHours
+    ? `${tour.durationHours} hour${tour.durationHours === 1 ? "" : "s"}`
+    : `${tour.durationDays} day${tour.durationDays === 1 ? "" : "s"}`;
+
   return (
     <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
       <article>
         <CoverImage src={tour.coverImageUrl} alt={tour.name} fallback="/banners/tours.webp" />
         <h1 className="serif mt-6 text-5xl">{tour.name}</h1>
         <p className="mt-3 text-lg leading-8">{tour.description}</p>
-        <p className="mt-4 font-medium">{inr(tour.pricePerPerson)} per person · {tour.durationDays} days</p>
+        <p className="mt-4 font-medium">{inr(tour.pricePerPerson)} per person · {duration}</p>
         <ul className="mt-8 space-y-2">
           {tour.itinerary.map((item) => (
             <li key={item} className="rounded-2xl bg-[var(--paper)] px-4 py-3">

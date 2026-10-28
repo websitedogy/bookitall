@@ -32,6 +32,10 @@ export class UpsertTourDto {
   @IsNumber()
   durationDays!: number;
 
+  @IsOptional()
+  @IsNumber()
+  durationHours?: number | null;
+
   @IsNumber()
   pricePerPerson!: number;
 
