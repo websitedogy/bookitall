@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import { DataSource, EntityManager, MoreThan, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { BookingType } from '../../common/enums/booking.enum';
 import { VendorCreditService } from '../../common/enums/vendor-credit-service.enum';
 import { VendorCreditTransaction, Wallet, WalletTransaction } from './entities/wallet.entity';
@@ -22,7 +22,6 @@ import { UserRole, UserStatus } from '../../common/enums/user-role.enum';
 import { VENDOR_LOW_CREDIT_THRESHOLD } from '../../common/constants/app.constants';
 import { VendorCreditPurchase } from './entities/vendor-credit-purchase.entity';
 import { VerifyVendorCreditPurchaseDto } from './dto/vendor-credit-purchase.dto';
-import { Booking } from '../booking-engine/entities/booking.entity';
 
 type RazorpayOrder = { id: string; amount: number; currency: string };
 type RazorpayPayment = {
@@ -45,7 +44,6 @@ export class WalletService implements OnModuleInit {
     @InjectRepository(VendorCreditPurchase) private readonly creditPurchases: Repository<VendorCreditPurchase>,
     @InjectRepository(VendorCreditTransaction)
     private readonly creditTransactions: Repository<VendorCreditTransaction>,
-    @InjectRepository(Booking) private readonly bookings: Repository<Booking>,
     private readonly dataSource: DataSource,
     private readonly config: ConfigService,
   ) {}
@@ -480,7 +478,7 @@ export class WalletService implements OnModuleInit {
 
   async creditsHistory(userId: string) {
     await this.ensureCreditSchema();
-    const [purchases, creditChanges, bookings, wallet] = await Promise.all([
+    const [purchases, creditChanges, wallet] = await Promise.all([
       this.creditPurchases.find({
         where: { userId, status: 'PAID' },
         order: { paidAt: 'DESC', createdAt: 'DESC' },
@@ -491,20 +489,8 @@ export class WalletService implements OnModuleInit {
         order: { createdAt: 'DESC' },
         take: 100,
       }),
-      this.bookings.find({
-        where: [
-          { partnerId: userId, vendorCreditsCharged: MoreThan(0) },
-          { assigneeId: userId, vendorCreditsCharged: MoreThan(0) },
-        ],
-        order: { updatedAt: 'DESC' },
-        take: 100,
-      }),
       this.wallets.findOne({ where: { user: { id: userId } }, select: { creditPoints: true } }),
     ]);
-    const bookingById = new Map(bookings.map((booking) => [booking.id, booking]));
-    const recordedBookingIds = new Set(
-      creditChanges.filter((row) => row.source === 'SERVICE' && row.bookingId).map((row) => row.bookingId),
-    );
     const data = [
       ...purchases.map((purchase) => ({
         id: purchase.id,
@@ -518,40 +504,18 @@ export class WalletService implements OnModuleInit {
         note: `Credit purchase · ${this.formatRupees(purchase.amountInPaise / 100)}`,
         createdAt: purchase.paidAt ?? purchase.createdAt,
       })),
-      ...creditChanges.map((row) => {
-        const booking = row.bookingId ? bookingById.get(row.bookingId) : undefined;
-        const details = booking?.details ?? {};
-        return {
-          id: row.id,
-          type: row.type,
-          source: row.source,
-          amount: row.amount,
-          balanceAfter: row.balanceAfter,
-          serviceType: row.serviceType,
-          serviceName: booking ? this.bookingServiceName(booking) : null,
-          bookingNumber: booking?.bookingNumber ?? null,
-          note: row.note,
-          createdAt: row.createdAt,
-          ...(details.listingTitle ? { listingTitle: String(details.listingTitle) } : {}),
-        };
-      }),
-      ...bookings
-        .filter((booking) => !recordedBookingIds.has(booking.id))
-        .map((booking) => ({
-          id: `booking-${booking.id}`,
-          type: 'DEBIT' as const,
-          source: 'SERVICE' as const,
-          amount: booking.vendorCreditsCharged,
-          balanceAfter: null,
-          serviceType: this.serviceTypeForBooking(booking.type, booking.details),
-          serviceName: this.bookingServiceName(booking),
-          bookingNumber: booking.bookingNumber,
-          note: null,
-          createdAt: booking.completedAt ?? booking.updatedAt,
-          listingTitle: booking.details?.listingTitle
-            ? String(booking.details.listingTitle)
-            : undefined,
-        })),
+      ...creditChanges.map((row) => ({
+        id: row.id,
+        type: row.type,
+        source: row.source,
+        amount: row.amount,
+        balanceAfter: row.balanceAfter,
+        serviceType: row.serviceType,
+        serviceName: null,
+        bookingNumber: null,
+        note: row.note,
+        createdAt: row.createdAt,
+      })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return { creditPoints: wallet?.creditPoints ?? 0, data };
@@ -566,18 +530,6 @@ export class WalletService implements OnModuleInit {
     const rawCategory = details.category ?? details.listingCategory;
     const category = typeof rawCategory === 'string' ? rawCategory.toLowerCase() : '';
     return Object.values(VendorCreditService).find((service) => service === category) ?? VendorCreditService.HOME_SERVICES;
-  }
-
-  private bookingServiceName(booking: Booking) {
-    const details = booking.details ?? {};
-    return String(
-      details.listingTitle ||
-        details.hotelName ||
-        details.tourName ||
-        details.serviceName ||
-        details.vehicleName ||
-        booking.type,
-    );
   }
 
   private formatRupees(amount: number) {
