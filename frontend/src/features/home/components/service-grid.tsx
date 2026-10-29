@@ -31,7 +31,7 @@ export function ServiceGrid({
   const items = useVisibleServices();
   if (!items.length) return null;
   return (
-    <section id="explore" className="bg-white px-4 py-6 md:px-6 md:py-9" aria-labelledby="services-heading">
+    <section id="explore" className="bg-white px-4 pb-0 pt-6 md:px-6 md:pb-0 md:pt-9" aria-labelledby="services-heading">
       <div className="mb-5">
         <h2 id="services-heading" className="text-[27px] font-bold leading-none tracking-tight text-[#102b4c] md:text-[36px]">
           {heading === "All services" ? (
