@@ -1,9 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useVisibleServices } from "@/features/services/service-catalog-provider";
 import { cn } from "@/shared/lib/cn";
 import { CategoryArt } from "./category-art";
+
+const SERVICE_ICON_FILES: Record<string, string> = {
+  hotels: "1f3e8",
+  tours: "1f9f3",
+  electrician: "1f4a1",
+  plumber: "1f6b0",
+  ac: "1f321",
+  cleaning: "1f9f9",
+  jobs: "1f4bc",
+  beautician: "1f484",
+  painting: "1f3a8",
+  carpenter: "1f528",
+  appliance: "1f9f0",
+  "public-transport": "1f695",
+  "goods-transport": "1f69a",
+  "packers-movers": "1f9f3",
+  "cloud-kitchen": "1f9fe",
+};
 
 export function ServiceGrid({
   heading = "All services",
@@ -32,14 +51,25 @@ export function ServiceGrid({
             <Link
               href={service.href}
               prefetch
-              className="group flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-slate-100 bg-slate-50/80 px-1 py-1.5 text-center shadow-[0_3px_10px_-8px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 md:min-h-0 md:rounded-2xl md:border-0 md:bg-transparent md:px-2 md:py-3 md:shadow-none md:transition md:hover:bg-[#f8fafc]"
+              className="group flex min-h-[4.5rem] flex-col items-center justify-center gap-1 px-1 py-1.5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 md:min-h-0 md:rounded-2xl md:px-2 md:py-3 md:transition md:hover:bg-[#f8fafc]"
             >
-              <CategoryArt
-                id={service.id}
-                size={featured ? 96 : 64}
-                priority={index < 4}
-                className={featured ? "h-16 w-16 object-contain md:h-20 md:w-20" : "h-10 w-10 object-contain sm:h-12 sm:w-12 md:h-16 md:w-16"}
-              />
+              {SERVICE_ICON_FILES[service.id] ? (
+                <Image
+                  src={`/emojis/3d/${SERVICE_ICON_FILES[service.id]}.png`}
+                  alt=""
+                  width={40}
+                  height={40}
+                  draggable={false}
+                  className={featured ? "h-16 w-16 object-contain md:h-20 md:w-20" : "h-8 w-8 object-contain sm:h-9 sm:w-9 md:h-16 md:w-16"}
+                />
+              ) : (
+                <CategoryArt
+                  id={service.id}
+                  size={featured ? 96 : 64}
+                  priority={index < 4}
+                  className={featured ? "h-16 w-16 object-contain md:h-20 md:w-20" : "h-8 w-8 object-contain sm:h-9 sm:w-9 md:h-16 md:w-16"}
+                />
+              )}
               <span
                 className={cn(
                   "w-full font-medium leading-snug text-[var(--text)]",
