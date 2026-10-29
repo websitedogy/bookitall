@@ -21,7 +21,7 @@ const followLinks = ["Facebook", "Instagram", "YouTube", "LinkedIn"];
 
 export function SiteFooter() {
   return (
-    <footer className="w-full bg-[#0f7d6e] text-white">
+    <footer className="w-full bg-[#102b4c] text-white">
       <div className="mx-auto max-w-7xl px-6 py-12 md:px-8 lg:px-10">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
