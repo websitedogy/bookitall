@@ -40,8 +40,6 @@ const tabs = [
 
 export function MobileTabBar() {
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
-
   if (
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
@@ -54,7 +52,7 @@ export function MobileTabBar() {
   return (
     <nav aria-label="App" className="app-tab-bar pointer-events-none fixed inset-x-0 bottom-0 z-[80] w-full max-w-[100%] md:bottom-5">
       <div className="pointer-events-auto border-t border-[var(--border)] bg-white md:mx-auto md:w-max md:rounded-full md:border md:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.45)]">
-        <ul className="grid grid-cols-5 px-0.5 pt-1.5 pb-[max(0.45rem,env(safe-area-inset-bottom))] md:flex md:items-end md:gap-1 md:px-3 md:py-1.5">
+        <ul className="grid grid-cols-5 px-1 pt-1.5 pb-[max(0.45rem,env(safe-area-inset-bottom))] md:flex md:items-end md:gap-1 md:px-3 md:py-1.5">
           {tabs.map((tab) => {
             const active = tab.match(pathname);
             const Icon = tab.icon;
@@ -65,31 +63,35 @@ export function MobileTabBar() {
                   prefetch
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex min-h-12 w-full min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[10px] font-medium leading-tight md:min-h-0 md:py-1 md:text-[11px]",
+                    "relative flex min-h-14 w-full min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 pt-1 text-center text-[10px] font-medium leading-tight md:min-h-0 md:py-1 md:text-[11px]",
                     tab.official ? "-mt-6 md:mt-0" : "",
-                    active
-                      ? isHomePage
-                        ? "text-[#f97316]"
-                        : "text-[var(--primary)]"
-                      : "text-[var(--text-muted)]",
+                    active ? "text-[#102b4c]" : "text-[#52647a]",
                   )}
                 >
                   {tab.official ? (
-                    <span className={`relative inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_22px_-8px_rgba(15,118,110,0.7)] ring-4 ring-white md:h-10 md:w-10 md:shadow-none md:ring-0 ${isHomePage ? "bg-[#f97316]" : "bg-[var(--primary)]"}`}>
+                    <span className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#f97316] text-white shadow-[0_8px_18px_-6px_rgba(249,115,22,0.7)] ring-4 ring-white md:h-10 md:w-10 md:shadow-none md:ring-0">
                       <Plus className="h-6 w-6 md:h-5 md:w-5" strokeWidth={2.4} aria-hidden />
                       <span className="sr-only">Register</span>
                     </span>
                   ) : Icon ? (
                     <span
                       className={cn(
-                        "inline-flex h-8 w-8 items-center justify-center rounded-full transition-transform md:h-8 md:w-8",
-                        active && "scale-110 bg-[var(--primary-soft)]",
+                        "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors md:h-8 md:w-8",
+                        active && "bg-[#102b4c] text-white",
                       )}
                     >
                       <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} aria-hidden />
                     </span>
                   ) : null}
-                  <span className={tab.official ? `mt-1 font-semibold ${isHomePage ? "text-[#f97316]" : "text-[var(--primary)]"}` : undefined}>{tab.label}</span>
+                  <span
+                    className={cn(
+                      "relative mt-0.5",
+                      tab.official && "font-semibold text-[#102b4c]",
+                      active && !tab.official && "font-semibold after:absolute after:-bottom-1 after:left-1/2 after:h-0.5 after:w-5 after:-translate-x-1/2 after:rounded-full after:bg-[#f97316] after:content-['']",
+                    )}
+                  >
+                    {tab.label}
+                  </span>
                 </Link>
               </li>
             );
