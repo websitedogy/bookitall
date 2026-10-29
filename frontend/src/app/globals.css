@@ -237,8 +237,10 @@ h3 {
   letter-spacing: 0;
 }
 
-a {
-  color: inherit;
+@layer base {
+  a {
+    color: inherit;
+  }
 }
 
 ::selection {
