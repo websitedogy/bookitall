@@ -39,7 +39,13 @@ function placeKey(place: StreetAddress) {
   return (place.full || place.line1).trim().toLowerCase();
 }
 
-export function LiveLocation({ homePage = false }: { homePage?: boolean }) {
+export function LiveLocation({
+  homePage = false,
+  mobileCompact = false,
+}: {
+  homePage?: boolean;
+  mobileCompact?: boolean;
+}) {
   const [place, setPlace] = useState<StreetAddress | null>(null);
   const [recent, setRecent] = useState<SavedLocation[]>([]);
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -150,7 +156,12 @@ export function LiveLocation({ homePage = false }: { homePage?: boolean }) {
   const popular = pickPopular(recent);
 
   return (
-    <div ref={rootRef} className="font-location relative ml-auto w-[min(50vw,13rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
+    <div
+      ref={rootRef}
+      className={`font-location relative ml-auto ${
+        mobileCompact ? "w-[min(40vw,13rem)]" : "w-[min(50vw,13rem)]"
+      } shrink-0 md:ml-0 md:w-[15.75rem]`}
+    >
       <label
         className={`flex h-10 w-full items-center gap-2 rounded-full border bg-white px-3 shadow-[0_2px_8px_rgba(15,23,42,0.06)] md:h-9 md:gap-2 md:px-3 ${
           homePage ? "border-orange-200" : "border-[#1e3a5f]/25"

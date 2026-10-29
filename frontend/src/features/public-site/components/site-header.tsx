@@ -46,7 +46,7 @@ export function SiteHeader() {
         >
           <Brand />
           <div className="ml-auto flex shrink-0 justify-end">
-            <LiveLocation homePage />
+            <LiveLocation homePage mobileCompact={!isHomePage} />
           </div>
         </div>
         <div className="-mx-4 flex items-center gap-2 bg-white px-4 pb-2.5">
