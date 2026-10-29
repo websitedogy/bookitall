@@ -8,7 +8,13 @@ import { api } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/cn";
 import { SUPPORT_UNREAD_EVENT } from "@/features/support/unread";
 
-export function HeaderSupport({ compact = false }: { compact?: boolean }) {
+export function HeaderSupport({
+  compact = false,
+  homePage = false,
+}: {
+  compact?: boolean;
+  homePage?: boolean;
+}) {
   const token = useAuth((s) => s.accessToken);
   const user = useAuth((s) => s.user);
   const [unread, setUnread] = useState(0);
@@ -43,7 +49,9 @@ export function HeaderSupport({ compact = false }: { compact?: boolean }) {
       href={user ? "/support/chat" : "/login?next=/support/chat"}
       aria-label={unread > 0 ? `Support, ${unread} new` : "Support"}
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-full text-[var(--primary)] hover:bg-[var(--primary-soft)]",
+        `relative inline-flex shrink-0 items-center justify-center rounded-full ${
+          homePage ? "text-[#fb923c] hover:bg-white/10" : "text-[var(--primary)] hover:bg-[var(--primary-soft)]"
+        }`,
         compact ? "h-10 w-10" : "h-10 w-10",
       )}
     >

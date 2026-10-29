@@ -40,6 +40,7 @@ const tabs = [
 
 export function MobileTabBar() {
   const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   if (
     pathname.startsWith("/login") ||
@@ -66,11 +67,15 @@ export function MobileTabBar() {
                   className={cn(
                     "flex min-h-12 w-full min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[10px] font-medium leading-tight md:min-h-0 md:py-1 md:text-[11px]",
                     tab.official ? "-mt-6 md:mt-0" : "",
-                    active ? "text-[var(--primary)]" : "text-[var(--text-muted)]",
+                    active
+                      ? isHomePage
+                        ? "text-[#f97316]"
+                        : "text-[var(--primary)]"
+                      : "text-[var(--text-muted)]",
                   )}
                 >
                   {tab.official ? (
-                    <span className="relative inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)] text-white shadow-[0_10px_22px_-8px_rgba(15,118,110,0.7)] ring-4 ring-white md:h-10 md:w-10 md:shadow-none md:ring-0">
+                    <span className={`relative inline-flex h-12 w-12 items-center justify-center rounded-full text-white shadow-[0_10px_22px_-8px_rgba(15,118,110,0.7)] ring-4 ring-white md:h-10 md:w-10 md:shadow-none md:ring-0 ${isHomePage ? "bg-[#f97316]" : "bg-[var(--primary)]"}`}>
                       <Plus className="h-6 w-6 md:h-5 md:w-5" strokeWidth={2.4} aria-hidden />
                       <span className="sr-only">Register</span>
                     </span>
@@ -84,7 +89,7 @@ export function MobileTabBar() {
                       <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 2} aria-hidden />
                     </span>
                   ) : null}
-                  <span className={tab.official ? "mt-1 font-semibold text-[var(--primary)]" : undefined}>{tab.label}</span>
+                  <span className={tab.official ? `mt-1 font-semibold ${isHomePage ? "text-[#f97316]" : "text-[var(--primary)]"}` : undefined}>{tab.label}</span>
                 </Link>
               </li>
             );

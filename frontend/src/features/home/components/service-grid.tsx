@@ -35,9 +35,12 @@ export function ServiceGrid({
   if (!items.length) return null;
   return (
     <section id="explore" className="bg-white px-4 py-4 md:px-6 md:py-7" aria-labelledby="services-heading">
-      <h2 id="services-heading" className="text-base font-semibold tracking-tight text-[var(--text)] md:text-lg">
-        {heading}
-      </h2>
+      <div className="flex items-center gap-2.5">
+        <span className="h-5 w-1 rounded-full bg-[#f97316]" aria-hidden />
+        <h2 id="services-heading" className="text-base font-semibold tracking-tight text-[#102b4c] md:text-lg">
+          {heading}
+        </h2>
+      </div>
       <ul
         className={cn(
           "mt-4 grid",

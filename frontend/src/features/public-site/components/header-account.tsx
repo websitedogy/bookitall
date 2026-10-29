@@ -19,7 +19,13 @@ function initialsFor(name: string) {
     .toUpperCase();
 }
 
-export function HeaderAccount({ compact = false }: { compact?: boolean }) {
+export function HeaderAccount({
+  compact = false,
+  homePage = false,
+}: {
+  compact?: boolean;
+  homePage?: boolean;
+}) {
   const router = useRouter();
   const user = useAuth((s) => s.user);
   const token = useAuth((s) => s.accessToken);
@@ -62,8 +68,16 @@ export function HeaderAccount({ compact = false }: { compact?: boolean }) {
       <Link
         href="/login?next=/"
         className={cn(
-          "inline-flex shrink-0 items-center justify-center text-[var(--text)]",
-          compact ? "h-9 w-9" : "h-8 gap-1.5 rounded-full px-2 text-[13px] font-medium text-[var(--text-muted)] hover:bg-[var(--background-blue)] hover:text-[var(--text)]",
+          `inline-flex shrink-0 items-center justify-center ${
+            homePage ? "text-white" : "text-[var(--text)]"
+          }`,
+          compact
+            ? "h-9 w-9"
+            : `h-8 gap-1.5 rounded-full px-2 text-[13px] font-medium ${
+                homePage
+                  ? "text-white/90 hover:bg-white/10 hover:text-white"
+                  : "text-[var(--text-muted)] hover:bg-[var(--background-blue)] hover:text-[var(--text)]"
+              }`,
         )}
         aria-label="Sign in"
       >
@@ -82,11 +96,13 @@ export function HeaderAccount({ compact = false }: { compact?: boolean }) {
         aria-label="Profile"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "inline-flex items-center justify-center rounded-full text-[var(--text)]",
+          `inline-flex items-center justify-center rounded-full ${
+            homePage ? "text-white" : "text-[var(--text)]"
+          }`,
           compact ? "h-9 w-9" : "h-8 w-8 hover:bg-[var(--background-blue)]",
         )}
       >
-        <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primary)] text-[11px] font-semibold text-white">
+        <span className={`relative inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold text-white ${homePage ? "bg-[#f97316]" : "bg-[var(--primary)]"}`}>
           {user.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={mediaUrl(user.avatarUrl)} alt="" className="h-full w-full rounded-full object-cover" />

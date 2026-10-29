@@ -76,7 +76,13 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
-export function HeaderSearch({ inputId = "header-search" }: { inputId?: string }) {
+export function HeaderSearch({
+  inputId = "header-search",
+  homePage = false,
+}: {
+  inputId?: string;
+  homePage?: boolean;
+}) {
   const router = useRouter();
   const { isEnabled } = useServiceCatalog();
   const listId = useId();
@@ -231,8 +237,17 @@ export function HeaderSearch({ inputId = "header-search" }: { inputId?: string }
       <label htmlFor={inputId} className="sr-only">
         Search hotels, tours, cabs and home services
       </label>
-      <div className="flex h-9 items-center rounded-full border border-[var(--border)] bg-[#f8fafc] px-3 md:bg-white">
-        <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden />
+      <div
+        className={`flex h-9 items-center rounded-full border px-3 ${
+          homePage
+            ? "border-orange-200 bg-white"
+            : "border-[var(--border)] bg-[#f8fafc] md:bg-white"
+        }`}
+      >
+        <Search
+          className={`h-4 w-4 shrink-0 ${homePage ? "text-[#f97316]" : "text-[var(--text-muted)]"}`}
+          aria-hidden
+        />
         <input
           id={inputId}
           value={query}

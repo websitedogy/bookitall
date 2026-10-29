@@ -126,7 +126,7 @@ export function HeroBanners() {
             onClick={() => setActive(index)}
             className={cn(
               "h-1.5 rounded-full transition-all",
-              index === active ? "w-6 bg-[var(--primary)]" : "w-1.5 bg-[var(--border)]",
+              index === active ? "w-6 bg-[#f97316]" : "w-1.5 bg-[var(--border)]",
             )}
           />
         ))}

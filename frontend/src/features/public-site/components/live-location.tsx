@@ -39,7 +39,7 @@ function placeKey(place: StreetAddress) {
   return (place.full || place.line1).trim().toLowerCase();
 }
 
-export function LiveLocation() {
+export function LiveLocation({ homePage = false }: { homePage?: boolean }) {
   const [place, setPlace] = useState<StreetAddress | null>(null);
   const [recent, setRecent] = useState<SavedLocation[]>([]);
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -151,8 +151,15 @@ export function LiveLocation() {
 
   return (
     <div ref={rootRef} className="font-location relative ml-auto w-[min(58vw,14rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
-      <label className="flex h-10 w-full items-center gap-2 rounded-full border border-[#1e3a5f]/25 bg-white px-3 shadow-[0_2px_8px_rgba(15,23,42,0.06)] md:h-9 md:gap-2 md:px-3">
-        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#2b7cff] md:h-4 md:w-4" aria-hidden />
+      <label
+        className={`flex h-10 w-full items-center gap-2 rounded-full border bg-white px-3 shadow-[0_2px_8px_rgba(15,23,42,0.06)] md:h-9 md:gap-2 md:px-3 ${
+          homePage ? "border-orange-200" : "border-[#1e3a5f]/25"
+        }`}
+      >
+        <MapPin
+          className={`h-3.5 w-3.5 shrink-0 md:h-4 md:w-4 ${homePage ? "text-[#f97316]" : "text-[#2b7cff]"}`}
+          aria-hidden
+        />
         <input
           ref={inputRef}
           value={open ? query : label}
@@ -169,7 +176,11 @@ export function LiveLocation() {
           aria-haspopup="listbox"
           aria-label="Search location"
           suppressHydrationWarning
-          className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#2563eb] outline-none placeholder:font-normal placeholder:text-[#93c5fd] md:text-[13px]"
+          className={`min-w-0 flex-1 bg-transparent text-[13px] font-medium outline-none placeholder:font-normal md:text-[13px] ${
+            homePage
+              ? "text-[#102b4c] placeholder:text-slate-400"
+              : "text-[#2563eb] placeholder:text-[#93c5fd]"
+          }`}
         />
         <button
           type="button"

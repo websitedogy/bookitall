@@ -30,7 +30,9 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`z-40 border-b border-[var(--border)] bg-white ${hideOnMobile ? "max-md:hidden" : ""}`}
+      className={`z-40 border-b ${
+        isHomePage ? "border-[#193b60] bg-[#102b4c]" : "border-[var(--border)] bg-white"
+      } ${hideOnMobile ? "max-md:hidden" : ""}`}
     >
       <a
         href="#main-content"
@@ -47,37 +49,41 @@ export function SiteHeader() {
         >
           <Brand homePage={isHomePage} />
           <div className="ml-auto flex shrink-0 justify-end">
-            <LiveLocation />
+            <LiveLocation homePage={isHomePage} />
           </div>
         </div>
-        <div className="flex items-center gap-2 pb-2.5">
-          <HeaderSearch inputId="header-search-mobile" />
+        <div className={`flex items-center gap-2 pb-2.5 ${isHomePage ? "bg-white" : ""}`}>
+          <HeaderSearch inputId="header-search-mobile" homePage={isHomePage} />
           <Link
             href="/saved"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-rose-500 hover:bg-rose-50"
+            className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-orange-50 ${
+              isHomePage ? "text-[#f97316]" : "text-rose-500"
+            }`}
             aria-label="Likes"
           >
             <Heart className="h-7 w-7" strokeWidth={2.1} aria-hidden />
           </Link>
-          <HeaderSupport compact />
-          <HeaderAccount compact />
+          <HeaderSupport compact homePage={isHomePage} />
+          <HeaderAccount compact homePage={isHomePage} />
         </div>
       </div>
 
       <div className="mx-auto hidden h-16 max-w-7xl items-center gap-5 px-8 md:flex">
-        <Brand />
+        <Brand homePage={isHomePage} />
         <div className="ml-auto flex min-w-0 items-center gap-2.5">
-          <HeaderSearch inputId="header-search-desktop" />
-          <LiveLocation />
+          <HeaderSearch inputId="header-search-desktop" homePage={isHomePage} />
+          <LiveLocation homePage={isHomePage} />
           <Link
             href="/saved"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-rose-500 hover:bg-rose-50"
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 ${
+              isHomePage ? "text-[#fb923c]" : "text-rose-500"
+            }`}
             aria-label="Likes"
           >
             <Heart className="h-6 w-6" strokeWidth={2.1} aria-hidden />
           </Link>
-          <HeaderSupport />
-          <HeaderAccount />
+          <HeaderSupport homePage={isHomePage} />
+          <HeaderAccount homePage={isHomePage} />
         </div>
       </div>
     </header>
