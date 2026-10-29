@@ -67,16 +67,6 @@ export function SiteFooter() {
                   bookitallinfo@gmail.com
                 </a>
               </li>
-              <li>
-                <a href="tel:+919848905979" className="transition-colors hover:text-white">
-                  98489 05979
-                </a>
-              </li>
-              <li>
-                <Link href="/contact" className="transition-colors hover:text-white">
-                  Ambedkar Centre, Bhadrachalam, Telangana 507111
-                </Link>
-              </li>
             </ul>
           </div>
 
