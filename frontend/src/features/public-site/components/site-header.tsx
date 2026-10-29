@@ -17,9 +17,9 @@ function Brand() {
         alt="Book It All"
         width={1254}
         height={1254}
-        sizes="48px"
+        sizes="(max-width: 768px) 56px, 64px"
         priority
-        className="block h-10 w-10 rounded-lg object-contain md:h-12 md:w-12"
+        className="block h-14 w-14 rounded-xl bg-white object-contain shadow-[0_2px_8px_rgba(0,0,0,0.18)] ring-1 ring-white/40 md:h-16 md:w-16"
       />
     </Link>
   );
