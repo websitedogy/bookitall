@@ -71,10 +71,10 @@ export function ServiceGrid({
                   alt={service.name}
                   width={1254}
                   height={1254}
-                  sizes="(max-width: 639px) 46vw, (max-width: 1023px) 30vw, 23vw"
+                  sizes="(max-width: 639px) 40vw, (max-width: 1023px) 29vw, 21vw"
                   priority={index < 4}
                   draggable={false}
-                  className="h-auto w-full"
+                  className="mx-auto h-auto w-[88%]"
                 />
               ) : (
                 <>
