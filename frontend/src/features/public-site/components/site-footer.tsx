@@ -22,7 +22,7 @@ const followLinks = ["Facebook", "Instagram", "YouTube", "LinkedIn"];
 export function SiteFooter() {
   return (
     <footer className="w-full bg-[#102b4c] text-white">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:px-8 lg:px-10">
+      <div className="mx-auto max-w-7xl px-6 pb-12 pt-0 md:px-8 md:py-12 lg:px-10">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
             <Link href="/" className="text-2xl font-semibold tracking-[-0.04em] text-white">
