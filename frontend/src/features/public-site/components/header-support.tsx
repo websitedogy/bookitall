@@ -55,7 +55,13 @@ export function HeaderSupport({
         compact ? "h-10 w-10" : "h-10 w-10",
       )}
     >
-      <Headphones className={compact ? "h-5 w-5" : "h-[1.15rem] w-[1.15rem]"} strokeWidth={2} aria-hidden />
+      <Headphones
+        className={`${compact ? "h-5 w-5" : "h-[1.15rem] w-[1.15rem]"} ${
+          homePage ? "text-[#fb923c]" : ""
+        }`}
+        strokeWidth={2}
+        aria-hidden
+      />
       {unread > 0 ? (
         <span className="absolute right-1 top-1 inline-flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold leading-none text-white">
           {unread > 9 ? "9+" : unread}

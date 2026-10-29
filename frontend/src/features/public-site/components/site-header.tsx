@@ -61,7 +61,11 @@ export function SiteHeader() {
             }`}
             aria-label="Likes"
           >
-            <Heart className="h-7 w-7" strokeWidth={2.1} aria-hidden />
+            <Heart
+              className={`h-7 w-7 ${isHomePage ? "text-[#f97316]" : ""}`}
+              strokeWidth={2.1}
+              aria-hidden
+            />
           </Link>
           <HeaderSupport compact homePage={isHomePage} />
           <HeaderAccount compact homePage={isHomePage} />
@@ -80,7 +84,11 @@ export function SiteHeader() {
             }`}
             aria-label="Likes"
           >
-            <Heart className="h-6 w-6" strokeWidth={2.1} aria-hidden />
+            <Heart
+              className={`h-6 w-6 ${isHomePage ? "text-[#fb923c]" : ""}`}
+              strokeWidth={2.1}
+              aria-hidden
+            />
           </Link>
           <HeaderSupport homePage={isHomePage} />
           <HeaderAccount homePage={isHomePage} />

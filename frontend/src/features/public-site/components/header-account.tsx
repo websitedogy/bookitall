@@ -81,7 +81,11 @@ export function HeaderAccount({
         )}
         aria-label="Sign in"
       >
-        <CircleUser className={compact ? "h-5 w-5" : "h-4 w-4"} strokeWidth={1.8} aria-hidden />
+        <CircleUser
+          className={`${compact ? "h-5 w-5" : "h-4 w-4"} ${homePage ? "text-white" : ""}`}
+          strokeWidth={1.8}
+          aria-hidden
+        />
         {compact ? null : <span>Sign in</span>}
       </Link>
     );
