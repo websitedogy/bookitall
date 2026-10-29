@@ -17,9 +17,9 @@ function Brand() {
         alt="Book It All"
         width={820}
         height={130}
-        sizes="(max-width: 768px) 30vw, 160px"
+        sizes="(max-width: 768px) 32vw, 160px"
         priority
-        className="block h-auto w-[min(30vw,8rem)] rounded-md object-contain md:w-40"
+        className="block h-auto w-[min(32vw,8.5rem)] rounded-md object-contain md:w-40"
       />
     </Link>
   );
@@ -30,7 +30,7 @@ export function SiteHeader() {
   const isHomePage = pathname === "/";
 
   return (
-    <header className="z-40 border-b border-[#193b60] bg-[#102b4c]">
+    <header className="z-40 border-b border-[#193b60] bg-[#102b4c] shadow-sm">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2"
@@ -40,7 +40,7 @@ export function SiteHeader() {
 
       <div className="mx-auto max-w-6xl px-4 md:hidden">
         <div
-          className={`flex min-h-12 items-center justify-between gap-3 py-1 ${
+          className={`flex min-h-14 items-center justify-between gap-2 py-1 ${
             isHomePage ? "" : "pl-8"
           }`}
         >
