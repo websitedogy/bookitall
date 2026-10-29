@@ -69,7 +69,11 @@ export function HeaderAccount({
         href="/login?next=/"
         className={cn(
           `inline-flex shrink-0 items-center justify-center ${
-            homePage ? "text-white" : "text-[var(--text)]"
+            compact
+              ? "text-[var(--primary)] md:text-white"
+              : homePage
+                ? "text-white"
+                : "text-[var(--text)]"
           }`,
           compact
             ? "h-10 w-10"
@@ -82,7 +86,11 @@ export function HeaderAccount({
         aria-label="Sign in"
       >
         <CircleUser
-          className={`${compact ? "h-5 w-5" : "h-4 w-4"} ${homePage ? "text-white" : ""}`}
+          className={
+            compact
+              ? "h-5 w-5 text-[var(--primary)] md:text-white"
+              : `h-4 w-4 ${homePage ? "text-white" : ""}`
+          }
           strokeWidth={1.8}
           aria-hidden
         />
@@ -101,7 +109,11 @@ export function HeaderAccount({
         onClick={() => setOpen((value) => !value)}
         className={cn(
           `inline-flex items-center justify-center rounded-full ${
-            homePage ? "text-white" : "text-[var(--text)]"
+            compact
+              ? "text-[var(--primary)] md:text-white"
+              : homePage
+                ? "text-white"
+                : "text-[var(--text)]"
           }`,
           compact ? "h-10 w-10" : "h-8 w-8 hover:bg-[var(--background-blue)]",
         )}

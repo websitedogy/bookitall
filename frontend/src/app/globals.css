@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #0f766e;
-  --primary-hover: #0b5f59;
+  --primary: #102b4c;
+  --primary-hover: #0b1f38;
   --primary-foreground: #ffffff;
-  --primary-soft: #e7f6f3;
-  --secondary: #134e4a;
-  --secondary-soft: #ecfdf8;
-  --accent: #0f766e;
+  --primary-soft: #eaf1f8;
+  --secondary: #193b60;
+  --secondary-soft: #eff5fb;
+  --accent: #f97316;
   --accent-foreground: #ffffff;
   --background: #ffffff;
   --background-blue: #f8fafc;
@@ -19,17 +19,17 @@
   --success: #0f766e;
   --warning: #b45309;
   --error: #b91c1c;
-  --ring: #0f766e;
-  --shadow-soft: 0 12px 32px -20px rgba(15, 23, 42, 0.18);
-  --studio: #f2f6f4;
-  --studio-ink: #12241f;
-  --studio-muted: #5b6e68;
-  --studio-line: #d5e0db;
-  --studio-shadow: 0 20px 44px -28px rgba(18, 36, 31, 0.32);
-  --auth-ink: #12241f;
-  --auth-ivory: #f6f1e8;
-  --auth-brass: #c4a36a;
-  --auth-line: #ddd4c6;
+  --ring: #102b4c;
+  --shadow-soft: 0 12px 32px -20px rgba(16, 43, 76, 0.18);
+  --studio: #f4f7fb;
+  --studio-ink: #102b4c;
+  --studio-muted: #53657a;
+  --studio-line: #d8e1eb;
+  --studio-shadow: 0 20px 44px -28px rgba(16, 43, 76, 0.32);
+  --auth-ink: #102b4c;
+  --auth-ivory: #f8fafc;
+  --auth-brass: #f97316;
+  --auth-line: #d8e1eb;
 
   --ink: var(--text);
   --ink-soft: var(--text-muted);
@@ -149,11 +149,11 @@
 @keyframes route-arrive {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.15);
+    box-shadow: 0 0 0 0 rgba(16, 43, 76, 0.15);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(15, 118, 110, 0);
+    box-shadow: 0 0 0 8px rgba(16, 43, 76, 0);
     transform: scale(1.08);
   }
 }
