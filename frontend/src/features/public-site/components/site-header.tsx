@@ -8,10 +8,14 @@ import { HeaderSearch } from "./header-search";
 import { HeaderSupport } from "./header-support";
 import { LiveLocation } from "./live-location";
 
-function Brand() {
+function Brand({ homePage = false }: { homePage?: boolean }) {
   return (
     <Link href="/" className="min-w-0 shrink-0">
-      <span className="block truncate text-[17px] font-semibold tracking-tight text-[var(--primary)] md:text-[18px]">
+      <span
+        className={`block truncate text-[17px] font-semibold tracking-tight md:text-[18px] ${
+          homePage ? "text-white" : "text-[var(--primary)]"
+        }`}
+      >
         Book It All
       </span>
     </Link>
@@ -21,6 +25,7 @@ function Brand() {
 export function SiteHeader() {
   const pathname = usePathname();
   const isAuth = pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isHomePage = pathname === "/";
   const hideOnMobile = pathname !== "/" && !isAuth;
 
   return (
@@ -34,9 +39,13 @@ export function SiteHeader() {
         Skip to content
       </a>
 
-      <div className={`mx-auto max-w-6xl md:hidden ${pathname === "/" || isAuth ? "px-4" : "pl-12 pr-4"}`}>
-        <div className="flex min-h-12 items-center justify-between gap-3 py-1">
-          <Brand />
+      <div className={`mx-auto max-w-6xl md:hidden ${isHomePage || isAuth ? "px-4" : "pl-12 pr-4"}`}>
+        <div
+          className={`flex min-h-12 items-center justify-between gap-3 py-1 ${
+            isHomePage ? "-mx-4 bg-[#102b4c] px-4" : ""
+          }`}
+        >
+          <Brand homePage={isHomePage} />
           <div className="ml-auto flex shrink-0 justify-end">
             <LiveLocation />
           </div>
