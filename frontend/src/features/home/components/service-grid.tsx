@@ -6,22 +6,22 @@ import { useVisibleServices } from "@/features/services/service-catalog-provider
 import { cn } from "@/shared/lib/cn";
 import { CategoryArt } from "./category-art";
 
-const SERVICE_ICON_FILES: Record<string, string> = {
-  hotels: "1f3e8",
-  tours: "1f9f3",
-  electrician: "1f4a1",
-  plumber: "1f6b0",
-  ac: "1f321",
-  cleaning: "1f9f9",
-  jobs: "1f4bc",
-  beautician: "1f484",
-  painting: "1f3a8",
-  carpenter: "1f528",
-  appliance: "1f9f0",
-  "public-transport": "1f695",
-  "goods-transport": "1f69a",
-  "packers-movers": "1f9f3",
-  "cloud-kitchen": "1f9fe",
+const SERVICE_ART: Record<string, string> = {
+  hotels: "/categories/hotels.png",
+  tours: "/categories/tours.png",
+  electrician: "/categories/electrician.png",
+  plumber: "/categories/plumber.png",
+  ac: "/categories/ac.png",
+  cleaning: "/categories/cleaning.png",
+  jobs: "/categories/jobs.png",
+  beautician: "/categories/beautician.png",
+  painting: "/categories/painting.png",
+  carpenter: "/categories/carpenter.png",
+  appliance: "/categories/appliance.png",
+  "public-transport": "/categories/cabs.png",
+  "goods-transport": "/categories/goods-transport.svg",
+  "packers-movers": "/categories/movers.png",
+  "cloud-kitchen": "/categories/cloud-kitchen.svg",
 };
 
 export function ServiceGrid({
@@ -56,14 +56,18 @@ export function ServiceGrid({
               prefetch
               className="group flex min-h-[4.5rem] flex-col items-center justify-center gap-1 px-1 py-1.5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 md:min-h-0 md:rounded-2xl md:px-2 md:py-3 md:transition md:hover:bg-[#f8fafc]"
             >
-              {SERVICE_ICON_FILES[service.id] ? (
+              {SERVICE_ART[service.id] ? (
                 <Image
-                  src={`/emojis/3d/${SERVICE_ICON_FILES[service.id]}.png`}
+                  src={SERVICE_ART[service.id]}
                   alt=""
                   width={40}
                   height={40}
                   draggable={false}
-                  className={featured ? "h-16 w-16 object-contain md:h-20 md:w-20" : "h-8 w-8 object-contain sm:h-9 sm:w-9 md:h-16 md:w-16"}
+                  className={
+                    featured
+                      ? "h-16 w-16 object-contain md:h-20 md:w-20"
+                      : "h-10 w-10 object-contain sm:h-12 sm:w-12 md:h-16 md:w-16"
+                  }
                 />
               ) : (
                 <CategoryArt
