@@ -74,7 +74,7 @@ export function ServiceGrid({
                   sizes="(max-width: 639px) 40vw, (max-width: 1023px) 29vw, 21vw"
                   priority={index < 4}
                   draggable={false}
-                  className="mx-auto h-auto w-[55%]"
+                  className="mx-auto h-auto w-[55%] md:w-[50%]"
                 />
               ) : (
                 <>
