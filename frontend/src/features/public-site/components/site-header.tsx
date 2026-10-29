@@ -17,9 +17,10 @@ function Brand() {
         alt="Book It All"
         width={1254}
         height={1254}
-        sizes="(max-width: 768px) 56px, 64px"
+        sizes="(max-width: 768px) 64px, 72px"
         priority
-        className="block h-14 w-14 rounded-xl bg-white object-contain shadow-[0_2px_8px_rgba(0,0,0,0.18)] ring-1 ring-white/40 md:h-16 md:w-16"
+        unoptimized
+        className="block h-16 w-16 rounded-xl bg-white object-contain shadow-[0_2px_8px_rgba(0,0,0,0.18)] ring-1 ring-white/40 md:h-[4.5rem] md:w-[4.5rem]"
       />
     </Link>
   );
@@ -40,7 +41,7 @@ export function SiteHeader() {
 
       <div className="mx-auto max-w-6xl px-4 md:hidden">
         <div
-          className={`flex min-h-14 items-center justify-between gap-2 py-1 ${
+          className={`flex min-h-16 items-center justify-between gap-2 py-1 ${
             isHomePage ? "" : "pl-8"
           }`}
         >
