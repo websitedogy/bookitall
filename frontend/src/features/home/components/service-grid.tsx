@@ -71,14 +71,14 @@ export function ServiceGrid({
                     height={200}
                     priority={index < 4}
                     draggable={false}
-                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+                    className="h-full w-full scale-[1.35] object-contain transition-transform duration-300 group-hover:scale-[1.42]"
                   />
                 ) : (
                   <CategoryArt
                     id={service.id}
                     size={200}
                     priority={index < 4}
-                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+                    className="h-full w-full scale-[1.35] object-contain transition-transform duration-300 group-hover:scale-[1.42]"
                   />
                 )}
               </span>
