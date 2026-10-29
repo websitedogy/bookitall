@@ -150,7 +150,7 @@ export function LiveLocation({ homePage = false }: { homePage?: boolean }) {
   const popular = pickPopular(recent);
 
   return (
-    <div ref={rootRef} className="font-location relative ml-auto w-[min(58vw,14rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
+    <div ref={rootRef} className="font-location relative ml-auto w-[min(56vw,14rem)] shrink-0 md:ml-0 md:w-[15.75rem]">
       <label
         className={`flex h-10 w-full items-center gap-2 rounded-full border bg-white px-3 shadow-[0_2px_8px_rgba(15,23,42,0.06)] md:h-9 md:gap-2 md:px-3 ${
           homePage ? "border-orange-200" : "border-[#1e3a5f]/25"

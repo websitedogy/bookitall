@@ -238,7 +238,7 @@ export function HeaderSearch({
         Search hotels, tours, cabs and home services
       </label>
       <div
-        className={`flex h-9 items-center rounded-full border px-3 ${
+        className={`flex h-10 items-center rounded-full border px-3 md:h-9 ${
           homePage
             ? "border-orange-200 bg-white"
             : "border-[var(--border)] bg-[#f8fafc] md:bg-white"

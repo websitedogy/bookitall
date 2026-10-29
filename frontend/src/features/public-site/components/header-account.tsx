@@ -72,7 +72,7 @@ export function HeaderAccount({
             homePage ? "text-white" : "text-[var(--text)]"
           }`,
           compact
-            ? "h-9 w-9"
+            ? "h-10 w-10"
             : `h-8 gap-1.5 rounded-full px-2 text-[13px] font-medium ${
                 homePage
                   ? "text-white/90 hover:bg-white/10 hover:text-white"
@@ -103,7 +103,7 @@ export function HeaderAccount({
           `inline-flex items-center justify-center rounded-full ${
             homePage ? "text-white" : "text-[var(--text)]"
           }`,
-          compact ? "h-9 w-9" : "h-8 w-8 hover:bg-[var(--background-blue)]",
+          compact ? "h-10 w-10" : "h-8 w-8 hover:bg-[var(--background-blue)]",
         )}
       >
         <span className={`relative inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold text-white ${homePage ? "bg-[#f97316]" : "bg-[var(--primary)]"}`}>
