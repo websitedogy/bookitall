@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Heart } from "lucide-react";
 import { HeaderAccount } from "./header-account";
@@ -8,16 +9,18 @@ import { HeaderSearch } from "./header-search";
 import { HeaderSupport } from "./header-support";
 import { LiveLocation } from "./live-location";
 
-function Brand({ homePage = false }: { homePage?: boolean }) {
+function Brand() {
   return (
-    <Link href="/" className="min-w-0 shrink-0">
-      <span
-        className={`block truncate text-[17px] font-semibold tracking-tight md:text-[18px] ${
-          homePage ? "text-white" : "text-[var(--primary)]"
-        }`}
-      >
-        Book It All
-      </span>
+    <Link href="/" aria-label="Book It All home" className="min-w-0 shrink-0">
+      <Image
+        src="/brand/bookitall.png"
+        alt="Book It All"
+        width={820}
+        height={130}
+        sizes="(max-width: 768px) 30vw, 160px"
+        priority
+        className="block h-auto w-[min(30vw,8rem)] rounded-md object-contain md:w-40"
+      />
     </Link>
   );
 }
@@ -41,7 +44,7 @@ export function SiteHeader() {
             isHomePage ? "" : "pl-8"
           }`}
         >
-          <Brand homePage />
+          <Brand />
           <div className="ml-auto flex shrink-0 justify-end">
             <LiveLocation homePage />
           </div>
@@ -65,7 +68,7 @@ export function SiteHeader() {
       </div>
 
       <div className="mx-auto hidden h-16 max-w-7xl items-center gap-5 px-8 md:flex">
-        <Brand homePage />
+        <Brand />
         <div className="ml-auto flex min-w-0 items-center gap-2.5">
           <HeaderSearch inputId="header-search-desktop" homePage />
           <LiveLocation homePage />
