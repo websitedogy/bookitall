@@ -13,13 +13,13 @@ function Brand() {
   return (
     <Link href="/" aria-label="Book It All home" className="min-w-0 shrink-0">
       <Image
-        src="/brand/bookitall.png"
+        src="/brand/bookitall.jpeg"
         alt="Book It All"
-        width={820}
-        height={130}
-        sizes="(max-width: 768px) 32vw, 160px"
+        width={1254}
+        height={1254}
+        sizes="48px"
         priority
-        className="block h-auto w-[min(32vw,8.5rem)] rounded-md object-contain md:w-40"
+        className="block h-10 w-10 rounded-lg object-contain md:h-12 md:w-12"
       />
     </Link>
   );
