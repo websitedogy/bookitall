@@ -1,4 +1,4 @@
-const CACHE = "bookitall-shell-v5";
+const CACHE = "bookitall-shell-v6";
 const OFFLINE_URL = "/offline.html";
 
 let ringToken = 0;

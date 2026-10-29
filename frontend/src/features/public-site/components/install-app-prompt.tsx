@@ -126,7 +126,7 @@ export function InstallAppPrompt() {
     <div className="sticky top-0 z-50 border-b border-[var(--primary)]/20 bg-[#0f4f4a] text-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-3 py-2 md:gap-4 md:px-8 md:py-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon.svg" alt="" className="h-10 w-10 shrink-0 rounded-lg md:h-11 md:w-11" />
+        <img src="/brand/app.jpeg" alt="" className="h-10 w-10 shrink-0 rounded-lg md:h-11 md:w-11" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold leading-tight md:text-sm">Install Book It All</p>
           <p className="mt-0.5 truncate text-[11px] leading-tight text-white/70 md:text-xs">
