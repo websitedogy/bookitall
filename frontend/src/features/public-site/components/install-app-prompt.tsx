@@ -15,18 +15,12 @@ declare global {
   }
 }
 
-const INSTALLED_KEY = "bookitall-pwa-installed";
 const DISMISS_KEY = "bookitall-pwa-dismissed";
 
 function alreadyInstalled() {
   if (typeof window === "undefined") return true;
   if (window.matchMedia("(display-mode: standalone)").matches) return true;
-  if ((navigator as Navigator & { standalone?: boolean }).standalone) return true;
-  try {
-    return localStorage.getItem(INSTALLED_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
 function isIosDevice() {
@@ -59,15 +53,11 @@ export function InstallAppPrompt() {
 
     const onPrompt = (event: Event) => {
       const next = event as DeferredPrompt;
+      next.preventDefault();
       window.__biaDeferredPrompt = next;
       show(next);
     };
     const onInstalled = () => {
-      try {
-        localStorage.setItem(INSTALLED_KEY, "1");
-      } catch {
-        // ignore
-      }
       window.__biaDeferredPrompt = null;
       setPromptEvent(null);
       setOpen(false);
@@ -110,11 +100,6 @@ export function InstallAppPrompt() {
       window.__biaDeferredPrompt = null;
       setPromptEvent(null);
       if (choice.outcome === "accepted") {
-        try {
-          localStorage.setItem(INSTALLED_KEY, "1");
-        } catch {
-          // ignore
-        }
         setOpen(false);
       }
       return;
@@ -123,7 +108,7 @@ export function InstallAppPrompt() {
   }
 
   return (
-    <div className="sticky top-0 z-50 border-b border-[var(--primary)]/20 bg-[#0f4f4a] text-white">
+    <div className="border-b border-[var(--primary)]/20 bg-[#0f4f4a] text-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-3 py-2 md:gap-4 md:px-8 md:py-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/app.jpeg" alt="" className="h-10 w-10 shrink-0 rounded-lg md:h-11 md:w-11" />
