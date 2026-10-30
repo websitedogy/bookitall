@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Heart } from "lucide-react";
 import { HeaderAccount } from "./header-account";
@@ -11,17 +10,12 @@ import { LiveLocation } from "./live-location";
 
 function Brand() {
   return (
-    <Link href="/" aria-label="Book It All home" className="min-w-0 shrink-0">
-      <Image
-        src="/brand/bookitall.jpeg"
-        alt="Book It All"
-        width={1254}
-        height={1254}
-        sizes="(max-width: 768px) 64px, 72px"
-        priority
-        unoptimized
-        className="block h-16 w-16 rounded-xl bg-white object-contain shadow-[0_2px_8px_rgba(0,0,0,0.18)] ring-1 ring-white/40 md:h-[4.5rem] md:w-[4.5rem]"
-      />
+    <Link
+      href="/"
+      aria-label="Book It All home"
+      className="min-w-0 shrink-0 text-[1.55rem] font-extrabold tracking-[-0.065em] text-white transition-opacity hover:opacity-90 md:text-[1.75rem]"
+    >
+      Book <span className="text-[#fb923c]">It All</span>
     </Link>
   );
 }
