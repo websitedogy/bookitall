@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/shared/lib/api";
-import { useAuth } from "@/features/auth/store";
+import { useAuth, useAuthHydrated } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
 
 type TripSchedule = {
@@ -32,6 +32,7 @@ function dateTime(value: string) {
 }
 
 export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { partnerId?: string; vendor?: string; embedded?: boolean }) {
+  const authReady = useAuthHydrated();
   const token = useAuth((state) => state.accessToken);
   const user = useAuth((state) => state.user);
   const router = useRouter();
@@ -73,8 +74,13 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
   }, [schedulesApiPath, token, user?.role]);
 
   async function requestSeats(trip: TripSchedule) {
-    if (!token || user?.role !== "CUSTOMER") {
+    if (!authReady) return;
+    if (!token) {
       router.push(`/login?next=${encodeURIComponent(schedulePath)}`);
+      return;
+    }
+    if (user?.role !== "CUSTOMER") {
+      setError("Only customer accounts can book scheduled cab trips.");
       return;
     }
     const seatsRequested = seatCounts[trip.id] ?? 1;
@@ -151,11 +157,17 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
                 ) : (
                   <button
                     type="button"
-                    disabled={trip.seatsRemaining < 1 || busyId === trip.id}
+                    disabled={!authReady || trip.seatsRemaining < 1 || busyId === trip.id}
                     onClick={() => void requestSeats(trip)}
                     className="rounded-full bg-[#0f7d6e] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                   >
-                    {busyId === trip.id ? "Booking…" : token ? "Book seats" : "Sign in to book"}
+                    {busyId === trip.id
+                      ? "Booking…"
+                      : !authReady
+                        ? "Checking sign-in…"
+                        : token
+                          ? "Book seats"
+                          : "Sign in to book"}
                   </button>
                 )}
               </div>

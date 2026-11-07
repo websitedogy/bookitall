@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/shared/lib/api";
-import { useAuth } from "@/features/auth/store";
+import { useAuth, useAuthHydrated } from "@/features/auth/store";
 import { inr } from "@/shared/lib/format";
 
 type GoodsTransportSchedule = {
@@ -30,6 +30,7 @@ export function GoodsTransportSpecialSchedules({
 }: {
   serviceCategory?: "goods-transport" | "packers-movers";
 }) {
+  const authReady = useAuthHydrated();
   const token = useAuth((state) => state.accessToken);
   const user = useAuth((state) => state.user);
   const router = useRouter();
@@ -66,8 +67,13 @@ export function GoodsTransportSpecialSchedules({
   );
 
   async function bookSchedule(schedule: GoodsTransportSchedule) {
-    if (!token || user?.role !== "CUSTOMER") {
+    if (!authReady) return;
+    if (!token) {
       router.push(`/login?next=${encodeURIComponent(serviceCategory === "packers-movers" ? "/packers-movers" : "/goods-transport")}`);
+      return;
+    }
+    if (user?.role !== "CUSTOMER") {
+      setError("Only customer accounts can book special schedules.");
       return;
     }
     setBusyId(schedule.id);
@@ -129,11 +135,11 @@ export function GoodsTransportSpecialSchedules({
               {schedule.note ? <p className="mt-3 text-sm text-[var(--text-muted)]">{schedule.note}</p> : null}
               <button
                 type="button"
-                disabled={busyId === schedule.id}
+                disabled={!authReady || busyId === schedule.id}
                 onClick={() => void bookSchedule(schedule)}
                 className="mt-4 inline-flex rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {busyId === schedule.id ? "Booking…" : "Book this schedule"}
+                {busyId === schedule.id ? "Booking…" : !authReady ? "Checking sign-in…" : "Book this schedule"}
               </button>
             </article>
           ))}
