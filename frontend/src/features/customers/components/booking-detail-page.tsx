@@ -130,6 +130,7 @@ export function BookingDetailPage({ id }: { id: string }) {
     : String(
         booking.details?.listingTitle || booking.details?.hotelName || booking.details?.tourName || booking.details?.serviceName || booking.type,
       );
+  const isSpecialSchedule = Boolean(booking.details?.specialScheduleId);
   const unpaid = booking.payment?.status === "PENDING" || booking.payment?.status === "FAILED" || !booking.payment;
   const canPay = unpaid && !["CANCELLED", "REFUNDED", "COMPLETED"].includes(booking.status) && booking.status === "AWAITING_PAYMENT";
   const canCancel = ["AWAITING_PAYMENT", "PENDING", "CONFIRMED", "ASSIGNED"].includes(booking.status) && booking.customerId === userId;
@@ -210,7 +211,10 @@ export function BookingDetailPage({ id }: { id: string }) {
           {booking.payment?.status ? (
             <Row
               label="Payment"
-              value={[booking.payment.method, booking.payment.status].filter(Boolean).join(" · ")}
+              value={[
+                booking.payment.method === "CASH" && isSpecialSchedule ? "Cash on delivery" : booking.payment.method,
+                booking.payment.status,
+              ].filter(Boolean).join(" · ")}
             />
           ) : null}
         </dl>
@@ -230,7 +234,13 @@ export function BookingDetailPage({ id }: { id: string }) {
                       : "bg-white text-slate-600 ring-[var(--border)]",
                   )}
                 >
-                  {method === "NET_BANKING" ? "Net banking" : method === "CASH" ? "Pay later" : method}
+                  {method === "NET_BANKING"
+                    ? "Net banking"
+                    : method === "CASH"
+                      ? isSpecialSchedule
+                        ? "Cash on delivery"
+                        : "Pay later"
+                      : method}
                 </button>
               ))}
             </div>
@@ -241,7 +251,13 @@ export function BookingDetailPage({ id }: { id: string }) {
               onClick={() => void pay()}
               className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] text-sm font-semibold text-white disabled:opacity-60"
             >
-              {busy ? "Paying…" : draft.method === "CASH" ? "Confirm pay later" : `Pay ${inr(booking.total)}`}
+              {busy
+                ? "Paying…"
+                : draft.method === "CASH"
+                  ? isSpecialSchedule
+                    ? "Confirm cash on delivery"
+                    : "Confirm pay later"
+                  : `Pay ${inr(booking.total)}`}
             </button>
           </div>
         ) : null}
