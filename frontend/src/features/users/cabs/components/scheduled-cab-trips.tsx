@@ -79,10 +79,6 @@ export function ScheduledCabTrips({ partnerId, vendor, embedded = false }: { par
       router.push(`/login?next=${encodeURIComponent(schedulePath)}`);
       return;
     }
-    if (user?.role !== "CUSTOMER") {
-      setError("Only customer accounts can book scheduled cab trips.");
-      return;
-    }
     const seatsRequested = seatCounts[trip.id] ?? 1;
     setBusyId(trip.id);
     setError("");

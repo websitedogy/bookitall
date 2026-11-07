@@ -95,12 +95,6 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
     const resolved = await this.resolveDto(dto);
     let priced = await this.priceBooking(resolved);
     const specialScheduleId = String(resolved.details?.specialScheduleId ?? '');
-    if (specialScheduleId) {
-      const customer = await this.users.getOrFail(customerId);
-      if (customer.role !== UserRole.CUSTOMER) {
-        throw new ForbiddenException('Only customers can book a special schedule.');
-      }
-    }
     if (!specialScheduleId) {
       await this.assertNoOpenDuplicate(customerId, priced.partnerId);
     }
@@ -894,6 +888,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       ) {
         throw new NotFoundException('This scheduled cab trip is no longer available.');
       }
+      if (schedule.partnerId === customerId) {
+        throw new ForbiddenException('You cannot book a schedule you offered.');
+      }
       const duplicate = await this.bookings
         .createQueryBuilder('booking')
         .where('booking.customerId = :customerId', { customerId })
@@ -956,6 +953,9 @@ export class BookingEngineService implements OnModuleInit, OnModuleDestroy {
       )
     ) {
       throw new NotFoundException('This goods transport schedule is no longer available.');
+    }
+    if (schedule.partnerId === customerId) {
+      throw new ForbiddenException('You cannot book a schedule you offered.');
     }
     await this.platformServices.assertEnabled(schedule.listing.category);
     const existing = await this.bookings

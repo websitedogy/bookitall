@@ -32,7 +32,6 @@ export function GoodsTransportSpecialSchedules({
 }) {
   const authReady = useAuthHydrated();
   const token = useAuth((state) => state.accessToken);
-  const user = useAuth((state) => state.user);
   const router = useRouter();
   const [schedules, setSchedules] = useState<GoodsTransportSchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,10 +69,6 @@ export function GoodsTransportSpecialSchedules({
     if (!authReady) return;
     if (!token) {
       router.push(`/login?next=${encodeURIComponent(serviceCategory === "packers-movers" ? "/packers-movers" : "/goods-transport")}`);
-      return;
-    }
-    if (user?.role !== "CUSTOMER") {
-      setError("Only customer accounts can book special schedules.");
       return;
     }
     setBusyId(schedule.id);
